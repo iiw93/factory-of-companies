@@ -1,0 +1,98 @@
+{
+  "states": [
+    "received",
+    "validated",
+    "rejected",
+    "accepted",
+    "requires_approval",
+    "approved",
+    "routed",
+    "planned",
+    "executing",
+    "completed",
+    "failed",
+    "cancelled"
+  ],
+  "allowed_transitions": [
+    {
+      "from": "received",
+      "to": "validated"
+    },
+    {
+      "from": "received",
+      "to": "rejected"
+    },
+    {
+      "from": "validated",
+      "to": "accepted"
+    },
+    {
+      "from": "validated",
+      "to": "rejected"
+    },
+    {
+      "from": "accepted",
+      "to": "requires_approval"
+    },
+    {
+      "from": "accepted",
+      "to": "routed"
+    },
+    {
+      "from": "accepted",
+      "to": "cancelled"
+    },
+    {
+      "from": "requires_approval",
+      "to": "approved"
+    },
+    {
+      "from": "requires_approval",
+      "to": "cancelled"
+    },
+    {
+      "from": "approved",
+      "to": "routed"
+    },
+    {
+      "from": "routed",
+      "to": "planned"
+    },
+    {
+      "from": "routed",
+      "to": "failed"
+    },
+    {
+      "from": "planned",
+      "to": "executing"
+    },
+    {
+      "from": "planned",
+      "to": "failed"
+    },
+    {
+      "from": "executing",
+      "to": "completed"
+    },
+    {
+      "from": "executing",
+      "to": "failed"
+    }
+  ],
+  "forbidden_transitions": [
+    {
+      "from": "received",
+      "to": "executing"
+    },
+    {
+      "from": "accepted",
+      "to": "completed"
+    }
+  ],
+  "terminal_states": [
+    "rejected",
+    "completed",
+    "failed",
+    "cancelled"
+  ]
+}

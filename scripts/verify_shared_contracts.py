@@ -9,6 +9,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 COMMAND_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "command.schema.json"
 RESPONSE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "response.schema.json"
+COMMAND_STATE_RULES_PATH = REPO_ROOT / "packages" / "shared-contracts" / "command-state-rules.json"
 
 EXPECTED_COMMAND_REQUIRED = [
     "command_id",
@@ -55,6 +56,42 @@ EXPECTED_INTENT_ENUM = [
     "ask_question",
 ]
 
+EXPECTED_COMMAND_STATES = [
+    "received",
+    "validated",
+    "rejected",
+    "accepted",
+    "requires_approval",
+    "approved",
+    "routed",
+    "planned",
+    "executing",
+    "completed",
+    "failed",
+    "cancelled",
+]
+
+EXPECTED_ALLOWED_TRANSITIONS = [
+    ("received", "validated"),
+    ("received", "rejected"),
+    ("validated", "accepted"),
+    ("validated", "rejected"),
+    ("accepted", "requires_approval"),
+    ("accepted", "routed"),
+    ("requires_approval", "approved"),
+    ("requires_approval", "cancelled"),
+    ("approved", "routed"),
+    ("routed", "planned"),
+    ("planned", "executing"),
+    ("executing", "completed"),
+    ("executing", "failed"),
+]
+
+EXPECTED_FORBIDDEN_TRANSITIONS = [
+    ("received", "executing"),
+    ("accepted", "completed"),
+]
+
 
 def load_json_file(path):
     if not path.exists():
@@ -99,6 +136,75 @@ def ensure_enum_contains(schema_name, schema, property_name, expected_values):
     for value in expected_values:
         if value not in enum_values:
             errors.append(f"{schema_name}: missing enum value '{value}' in '{property_name}'")
+
+    return errors
+
+
+def ensure_string_list(rules_name, rules, property_name):
+    values = rules.get(property_name)
+    if not isinstance(values, list):
+        return None, [f"{rules_name}: '{property_name}' must be a list"]
+
+    invalid_values = [value for value in values if not isinstance(value, str)]
+    if invalid_values:
+        return None, [f"{rules_name}: '{property_name}' must contain only strings"]
+
+    return values, []
+
+
+def collect_transition_pairs(rules_name, rules, property_name):
+    transitions = rules.get(property_name)
+    if not isinstance(transitions, list):
+        return None, [f"{rules_name}: '{property_name}' must be a list"]
+
+    errors = []
+    pairs = set()
+
+    for index, transition in enumerate(transitions):
+        label = f"{rules_name}: '{property_name}[{index}]'"
+
+        if not isinstance(transition, dict):
+            errors.append(f"{label} must be an object")
+            continue
+
+        source_state = transition.get("from")
+        target_state = transition.get("to")
+
+        if not isinstance(source_state, str) or not source_state:
+            errors.append(f"{label}.from must be a non-empty string")
+        if not isinstance(target_state, str) or not target_state:
+            errors.append(f"{label}.to must be a non-empty string")
+
+        if isinstance(source_state, str) and source_state and isinstance(target_state, str) and target_state:
+            pairs.add((source_state, target_state))
+
+    return pairs, errors
+
+
+def ensure_states_contain(rules_name, states, expected_states):
+    errors = []
+    for state in expected_states:
+        if state not in states:
+            errors.append(f"{rules_name}: missing required state '{state}'")
+    return errors
+
+
+def ensure_transitions_contain(rules_name, transition_name, pairs, expected_pairs):
+    errors = []
+    for source_state, target_state in expected_pairs:
+        if (source_state, target_state) not in pairs:
+            errors.append(
+                f"{rules_name}: missing transition '{source_state} -> {target_state}' in '{transition_name}'"
+            )
+    return errors
+
+
+def ensure_terminal_states_declared(rules_name, states, terminal_states):
+    errors = []
+
+    for state in terminal_states:
+        if state not in states:
+            errors.append(f"{rules_name}: terminal state '{state}' must also exist in 'states'")
 
     return errors
 
@@ -157,6 +263,78 @@ def main():
             )
         )
 
+    state_rules, state_rules_load_errors = load_json_file(COMMAND_STATE_RULES_PATH)
+    errors.extend(state_rules_load_errors)
+    if not state_rules_load_errors:
+        checks.append(f"OK: {COMMAND_STATE_RULES_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {COMMAND_STATE_RULES_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+
+        states, state_errors = ensure_string_list(
+            "command-state-rules.json",
+            state_rules,
+            "states",
+        )
+        errors.extend(state_errors)
+
+        terminal_states, terminal_state_errors = ensure_string_list(
+            "command-state-rules.json",
+            state_rules,
+            "terminal_states",
+        )
+        errors.extend(terminal_state_errors)
+
+        allowed_transitions, allowed_transition_errors = collect_transition_pairs(
+            "command-state-rules.json",
+            state_rules,
+            "allowed_transitions",
+        )
+        errors.extend(allowed_transition_errors)
+
+        forbidden_transitions, forbidden_transition_errors = collect_transition_pairs(
+            "command-state-rules.json",
+            state_rules,
+            "forbidden_transitions",
+        )
+        errors.extend(forbidden_transition_errors)
+
+        if states is not None:
+            errors.extend(
+                ensure_states_contain(
+                    "command-state-rules.json",
+                    states,
+                    EXPECTED_COMMAND_STATES,
+                )
+            )
+
+        if terminal_states is not None and states is not None:
+            errors.extend(
+                ensure_terminal_states_declared(
+                    "command-state-rules.json",
+                    states,
+                    terminal_states,
+                )
+            )
+
+        if allowed_transitions is not None:
+            errors.extend(
+                ensure_transitions_contain(
+                    "command-state-rules.json",
+                    "allowed_transitions",
+                    allowed_transitions,
+                    EXPECTED_ALLOWED_TRANSITIONS,
+                )
+            )
+
+        if forbidden_transitions is not None:
+            errors.extend(
+                ensure_transitions_contain(
+                    "command-state-rules.json",
+                    "forbidden_transitions",
+                    forbidden_transitions,
+                    EXPECTED_FORBIDDEN_TRANSITIONS,
+                )
+            )
+
     if errors:
         print("Shared contracts verification: FAILED")
         for error in errors:
@@ -166,7 +344,7 @@ def main():
     print("Shared contracts verification: PASSED")
     for check in checks:
         print(f"- {check}")
-    print("- OK: required fields and target enums match the current shared contract expectations")
+    print("- OK: required fields, target enums, and command state rules match the current shared contract expectations")
     return 0
 
 
