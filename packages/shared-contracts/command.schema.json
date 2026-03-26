@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Bridge Command Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "command_id",
+    "channel",
+    "user_id",
+    "intent",
+    "message",
+    "created_at"
+  ],
+  "properties": {
+    "command_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "channel": {
+      "type": "string",
+      "enum": [
+        "telegram",
+        "dashboard"
+      ]
+    },
+    "user_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "company_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "intent": {
+      "type": "string",
+      "enum": [
+        "create_project",
+        "update_project",
+        "request_status",
+        "approve_action",
+        "reject_action",
+        "ask_question"
+      ]
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1
+    },
+    "attachments": {
+      "type": "array"
+    },
+    "priority": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approval_required": {
+      "type": "boolean"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "metadata": {
+      "type": "object"
+    }
+  }
+}
