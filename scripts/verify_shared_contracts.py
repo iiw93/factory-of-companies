@@ -16,6 +16,7 @@ SESSION_CONTEXT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "ses
 PROJECT_CONTEXT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "project-context.schema.json"
 COMPANY_CONTEXT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "company-context.schema.json"
 OWNER_IDENTITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "owner-identity.schema.json"
+ARTIFACT_REFERENCE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "artifact-reference.schema.json"
 APPROVAL_ACTION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "approval-action.schema.json"
 EXECUTION_REQUEST_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-request.schema.json"
 EXECUTION_RESULT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-result.schema.json"
@@ -90,6 +91,14 @@ EXPECTED_OWNER_IDENTITY_REQUIRED = [
     "identity_type",
     "created_at",
     "primary_channel",
+]
+
+EXPECTED_ARTIFACT_REFERENCE_REQUIRED = [
+    "artifact_id",
+    "artifact_name",
+    "artifact_type",
+    "artifact_uri",
+    "created_at",
 ]
 
 EXPECTED_APPROVAL_ACTION_REQUIRED = [
@@ -201,6 +210,16 @@ EXPECTED_PRIMARY_CHANNEL_ENUM = [
     "telegram",
     "dashboard",
     "system",
+]
+
+EXPECTED_ARTIFACT_TYPES = [
+    "document",
+    "schema",
+    "script",
+    "repository",
+    "report",
+    "binary",
+    "other",
 ]
 
 EXPECTED_APPROVAL_DECISION_ENUM = [
@@ -829,6 +848,14 @@ def main():
             ensure_string_min_length(
                 "traceability-envelope.schema.json",
                 traceability_schema,
+                "trace_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "traceability-envelope.schema.json",
+                traceability_schema,
                 "company_id",
                 1,
             )
@@ -1439,6 +1466,135 @@ def main():
             )
         )
 
+    artifact_reference_schema, artifact_reference_load_errors = load_json_file(ARTIFACT_REFERENCE_SCHEMA_PATH)
+    errors.extend(artifact_reference_load_errors)
+    if not artifact_reference_load_errors:
+        checks.append(f"OK: {ARTIFACT_REFERENCE_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {ARTIFACT_REFERENCE_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "artifact-reference.schema.json",
+                artifact_reference_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "artifact-reference.schema.json",
+                artifact_reference_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "artifact-reference.schema.json",
+                artifact_reference_schema,
+                EXPECTED_ARTIFACT_REFERENCE_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "artifact-reference.schema.json",
+                artifact_reference_schema,
+                [
+                    "trace_id",
+                    "project_id",
+                    "company_id",
+                    "produced_by_execution_result_id",
+                    "artifact_note",
+                ],
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "artifact-reference.schema.json",
+                artifact_reference_schema,
+                "artifact_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "artifact-reference.schema.json",
+                artifact_reference_schema,
+                "artifact_name",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "artifact-reference.schema.json",
+                artifact_reference_schema,
+                "artifact_uri",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "artifact-reference.schema.json",
+                artifact_reference_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "artifact-reference.schema.json",
+                artifact_reference_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "artifact-reference.schema.json",
+                artifact_reference_schema,
+                "trace_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "artifact-reference.schema.json",
+                artifact_reference_schema,
+                "project_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "artifact-reference.schema.json",
+                artifact_reference_schema,
+                "company_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "artifact-reference.schema.json",
+                artifact_reference_schema,
+                "produced_by_execution_result_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "artifact-reference.schema.json",
+                artifact_reference_schema,
+                "artifact_note",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "artifact-reference.schema.json",
+                artifact_reference_schema,
+                "artifact_type",
+                EXPECTED_ARTIFACT_TYPES,
+            )
+        )
+
     approval_action_schema, approval_action_load_errors = load_json_file(APPROVAL_ACTION_SCHEMA_PATH)
     errors.extend(approval_action_load_errors)
     if not approval_action_load_errors:
@@ -1787,6 +1943,14 @@ def main():
                 "execution-result.schema.json",
                 execution_result_schema,
                 EXPECTED_EXECUTION_RESULT_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "execution-result.schema.json",
+                execution_result_schema,
+                "execution_result_id",
+                1,
             )
         )
         errors.extend(
@@ -2159,7 +2323,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, approval action contract, execution request contract, priority contract, budget hint contract, timeout policy contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, approval action contract, execution request contract, priority contract, budget hint contract, timeout policy contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
     )
     return 0
 
