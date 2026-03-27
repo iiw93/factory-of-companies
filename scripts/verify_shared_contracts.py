@@ -25,6 +25,7 @@ APPROVAL_ACTION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "app
 EXECUTION_REQUEST_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-request.schema.json"
 EXECUTION_RESULT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-result.schema.json"
 RELEASE_DECISION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "release-decision.schema.json"
+DELIVERY_PACKAGE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "delivery-package.schema.json"
 ORCHESTRATION_HANDOFF_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "orchestration-handoff.schema.json"
 AGENT_ROLE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "agent-role.schema.json"
 ACTION_TYPE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "action-type.schema.json"
@@ -182,6 +183,13 @@ EXPECTED_RELEASE_DECISION_REQUIRED = [
     "release_decision_id",
     "decision_name",
     "release_status",
+    "created_at",
+]
+
+EXPECTED_DELIVERY_PACKAGE_REQUIRED = [
+    "delivery_package_id",
+    "package_name",
+    "package_status",
     "created_at",
 ]
 
@@ -374,6 +382,14 @@ EXPECTED_RELEASE_SCOPE_ENUM = [
     "artifact",
     "project",
     "bundle",
+]
+
+EXPECTED_DELIVERY_PACKAGE_STATUS_ENUM = [
+    "draft",
+    "assembled",
+    "approved",
+    "published",
+    "archived",
 ]
 
 EXPECTED_HANDOFF_STATUS_ENUM = [
@@ -3011,14 +3027,119 @@ def main():
             )
         )
 
+    delivery_package_schema, delivery_package_load_errors = load_json_file(DELIVERY_PACKAGE_SCHEMA_PATH)
+    errors.extend(delivery_package_load_errors)
+    if not delivery_package_load_errors:
+        checks.append(f"OK: {DELIVERY_PACKAGE_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {DELIVERY_PACKAGE_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "delivery-package.schema.json",
+                delivery_package_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "delivery-package.schema.json",
+                delivery_package_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "delivery-package.schema.json",
+                delivery_package_schema,
+                EXPECTED_DELIVERY_PACKAGE_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "delivery-package.schema.json",
+                delivery_package_schema,
+                [
+                    "project_id",
+                    "trace_id",
+                    "artifact_ids",
+                    "linked_evidence_bundle_id",
+                    "linked_release_decision_id",
+                    "linked_execution_result_id",
+                    "package_uri",
+                    "package_note",
+                ],
+            )
+        )
+        for property_name in [
+            "delivery_package_id",
+            "package_name",
+            "project_id",
+            "trace_id",
+            "linked_evidence_bundle_id",
+            "linked_release_decision_id",
+            "linked_execution_result_id",
+            "package_uri",
+            "package_note",
+        ]:
+            errors.extend(
+                ensure_string_min_length(
+                    "delivery-package.schema.json",
+                    delivery_package_schema,
+                    property_name,
+                    1,
+                )
+            )
+        errors.extend(
+            ensure_property_type(
+                "delivery-package.schema.json",
+                delivery_package_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "delivery-package.schema.json",
+                delivery_package_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_array_items_type(
+                "delivery-package.schema.json",
+                delivery_package_schema,
+                "artifact_ids",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_array_items_min_length(
+                "delivery-package.schema.json",
+                delivery_package_schema,
+                "artifact_ids",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "delivery-package.schema.json",
+                delivery_package_schema,
+                "package_status",
+                EXPECTED_DELIVERY_PACKAGE_STATUS_ENUM,
+            )
+        )
+
     identifier_checks = [
         ("quality-gate.schema.json", quality_gate_schema, quality_gate_load_errors, "quality_gate_id"),
         ("evidence-bundle.schema.json", evidence_bundle_schema, evidence_bundle_load_errors, "evidence_bundle_id"),
         ("execution-result.schema.json", execution_result_schema, execution_result_load_errors, "execution_result_id"),
+        ("release-decision.schema.json", release_decision_schema, release_decision_load_errors, "release_decision_id"),
         ("governance-decision.schema.json", governance_decision_schema, governance_decision_load_errors, "governance_decision_id"),
         ("artifact-reference.schema.json", artifact_reference_schema, artifact_reference_load_errors, "artifact_id"),
         ("traceability-envelope.schema.json", traceability_schema, traceability_load_errors, "trace_id"),
         ("project-context.schema.json", project_context_schema, project_context_load_errors, "project_id"),
+        ("delivery-package.schema.json", delivery_package_schema, delivery_package_load_errors, "delivery_package_id"),
     ]
 
     for schema_name, schema, load_errors, identifier_name in identifier_checks:
@@ -3380,7 +3501,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, priority contract, budget hint contract, timeout policy contract, execution result contract, release decision contract, agent role contract, and action type contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, priority contract, budget hint contract, timeout policy contract, execution result contract, release decision contract, delivery package contract, agent role contract, and action type contract match the current shared contract expectations"
     )
     return 0
 

@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Delivery Package Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "delivery_package_id",
+    "package_name",
+    "package_status",
+    "created_at"
+  ],
+  "properties": {
+    "delivery_package_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "package_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "package_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "assembled",
+        "approved",
+        "published",
+        "archived"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "linked_evidence_bundle_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_release_decision_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_execution_result_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "package_uri": {
+      "type": "string",
+      "minLength": 1
+    },
+    "package_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
