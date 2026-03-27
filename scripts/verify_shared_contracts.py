@@ -30,6 +30,7 @@ DEPLOYMENT_TARGET_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "d
 ORCHESTRATION_HANDOFF_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "orchestration-handoff.schema.json"
 AGENT_ROLE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "agent-role.schema.json"
 ACTION_TYPE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "action-type.schema.json"
+RUNTIME_CAPABILITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "runtime-capability.schema.json"
 BUDGET_HINT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "budget-hint.schema.json"
 PRIORITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "priority.schema.json"
 TIMEOUT_POLICY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "timeout-policy.schema.json"
@@ -226,6 +227,14 @@ EXPECTED_ACTION_TYPE_REQUIRED = [
     "action_name",
     "action_type",
     "description",
+]
+
+EXPECTED_RUNTIME_CAPABILITY_REQUIRED = [
+    "capability_id",
+    "capability_name",
+    "capability_status",
+    "created_at",
+    "role_type",
 ]
 
 EXPECTED_BUDGET_HINT_REQUIRED = [
@@ -454,6 +463,13 @@ EXPECTED_ACTION_TYPES = [
     "run_checks",
     "deploy_service",
     "update_documentation",
+]
+
+EXPECTED_RUNTIME_CAPABILITY_STATUS_ENUM = [
+    "available",
+    "limited",
+    "unavailable",
+    "deprecated",
 ]
 
 EXPECTED_BUDGET_UNITS = [
@@ -3265,6 +3281,127 @@ def main():
             )
         )
 
+    runtime_capability_schema, runtime_capability_load_errors = load_json_file(RUNTIME_CAPABILITY_SCHEMA_PATH)
+    errors.extend(runtime_capability_load_errors)
+    if not runtime_capability_load_errors:
+        checks.append(f"OK: {RUNTIME_CAPABILITY_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {RUNTIME_CAPABILITY_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "runtime-capability.schema.json",
+                runtime_capability_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "runtime-capability.schema.json",
+                runtime_capability_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "runtime-capability.schema.json",
+                runtime_capability_schema,
+                EXPECTED_RUNTIME_CAPABILITY_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "runtime-capability.schema.json",
+                runtime_capability_schema,
+                [
+                    "deployment_target_id",
+                    "supported_action_types",
+                    "supports_local_execution",
+                    "supports_remote_execution",
+                    "supports_file_artifacts",
+                    "supports_deployment",
+                    "supports_validation",
+                    "capability_note",
+                ],
+            )
+        )
+        for property_name in [
+            "capability_id",
+            "capability_name",
+            "deployment_target_id",
+            "capability_note",
+        ]:
+            errors.extend(
+                ensure_string_min_length(
+                    "runtime-capability.schema.json",
+                    runtime_capability_schema,
+                    property_name,
+                    1,
+                )
+            )
+        errors.extend(
+            ensure_property_type(
+                "runtime-capability.schema.json",
+                runtime_capability_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "runtime-capability.schema.json",
+                runtime_capability_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "runtime-capability.schema.json",
+                runtime_capability_schema,
+                "capability_status",
+                EXPECTED_RUNTIME_CAPABILITY_STATUS_ENUM,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "runtime-capability.schema.json",
+                runtime_capability_schema,
+                "role_type",
+                EXPECTED_AGENT_ROLE_TYPES,
+            )
+        )
+        errors.extend(
+            ensure_array_items_type(
+                "runtime-capability.schema.json",
+                runtime_capability_schema,
+                "supported_action_types",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_array_items_min_length(
+                "runtime-capability.schema.json",
+                runtime_capability_schema,
+                "supported_action_types",
+                1,
+            )
+        )
+        for property_name in [
+            "supports_local_execution",
+            "supports_remote_execution",
+            "supports_file_artifacts",
+            "supports_deployment",
+            "supports_validation",
+        ]:
+            errors.extend(
+                ensure_property_type(
+                    "runtime-capability.schema.json",
+                    runtime_capability_schema,
+                    property_name,
+                    "boolean",
+                )
+            )
+
     identifier_checks = [
         ("quality-gate.schema.json", quality_gate_schema, quality_gate_load_errors, "quality_gate_id"),
         ("evidence-bundle.schema.json", evidence_bundle_schema, evidence_bundle_load_errors, "evidence_bundle_id"),
@@ -3277,6 +3414,8 @@ def main():
         ("company-context.schema.json", company_context_schema, company_context_load_errors, "company_id"),
         ("delivery-package.schema.json", delivery_package_schema, delivery_package_load_errors, "delivery_package_id"),
         ("deployment-target.schema.json", deployment_target_schema, deployment_target_load_errors, "deployment_target_id"),
+        ("orchestration-handoff.schema.json", orchestration_handoff_schema, orchestration_handoff_load_errors, "target_role"),
+        ("runtime-capability.schema.json", runtime_capability_schema, runtime_capability_load_errors, "capability_id"),
     ]
 
     for schema_name, schema, load_errors, identifier_name in identifier_checks:
@@ -3361,6 +3500,15 @@ def main():
                 "string",
             )
         )
+        role_type_identifier_errors = ensure_property_type(
+            "agent-role.schema.json",
+            agent_role_schema,
+            "role_type",
+            "string",
+        )
+        errors.extend(role_type_identifier_errors)
+        if not role_type_identifier_errors:
+            checks.append("OK: agent-role.schema.json uses role_type")
         if not traceability_load_errors and not project_context_load_errors and not artifact_reference_load_errors:
             checks.append(
                 "OK: trace_id, project_id, artifact_id, and role_type remain explicitly defined in their source contracts"
@@ -3439,6 +3587,15 @@ def main():
                 "string",
             )
         )
+        action_type_identifier_errors = ensure_property_type(
+            "action-type.schema.json",
+            action_type_schema,
+            "action_type",
+            "string",
+        )
+        errors.extend(action_type_identifier_errors)
+        if not action_type_identifier_errors:
+            checks.append("OK: action-type.schema.json uses action_type")
 
     execution_request_doc, execution_request_doc_errors = load_text_file(EXECUTION_REQUEST_DOC_PATH)
     errors.extend(execution_request_doc_errors)
@@ -3638,7 +3795,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, priority contract, budget hint contract, timeout policy contract, execution result contract, release decision contract, delivery package contract, deployment target contract, agent role contract, and action type contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, priority contract, budget hint contract, timeout policy contract, execution result contract, release decision contract, delivery package contract, deployment target contract, agent role contract, action type contract, and runtime capability contract match the current shared contract expectations"
     )
     return 0
 

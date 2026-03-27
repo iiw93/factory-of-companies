@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Runtime Capability Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "capability_id",
+    "capability_name",
+    "capability_status",
+    "created_at",
+    "role_type"
+  ],
+  "properties": {
+    "capability_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capability_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capability_status": {
+      "type": "string",
+      "enum": [
+        "available",
+        "limited",
+        "unavailable",
+        "deprecated"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deployment_target_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "role_type": {
+      "type": "string",
+      "enum": [
+        "ceo_agent",
+        "planner_agent",
+        "architect_agent",
+        "repo_generator_agent",
+        "developer_agent",
+        "qa_agent",
+        "devops_agent",
+        "documentation_agent"
+      ]
+    },
+    "supported_action_types": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "supports_local_execution": {
+      "type": "boolean"
+    },
+    "supports_remote_execution": {
+      "type": "boolean"
+    },
+    "supports_file_artifacts": {
+      "type": "boolean"
+    },
+    "supports_deployment": {
+      "type": "boolean"
+    },
+    "supports_validation": {
+      "type": "boolean"
+    },
+    "capability_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
