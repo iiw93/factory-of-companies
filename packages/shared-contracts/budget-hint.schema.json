@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Budget Hint Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "budget_hint_id",
+    "trace_id",
+    "command_id",
+    "budget_amount",
+    "budget_unit",
+    "created_at",
+    "scope"
+  ],
+  "properties": {
+    "budget_hint_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "command_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "budget_amount": {
+      "type": "number",
+      "minimum": 0
+    },
+    "budget_unit": {
+      "type": "string",
+      "enum": [
+        "usd",
+        "credits",
+        "tokens",
+        "seconds"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "scope": {
+      "type": "string",
+      "enum": [
+        "request",
+        "session",
+        "project"
+      ]
+    },
+    "note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

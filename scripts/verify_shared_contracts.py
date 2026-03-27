@@ -17,6 +17,7 @@ EXECUTION_REQUEST_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "e
 EXECUTION_RESULT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-result.schema.json"
 AGENT_ROLE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "agent-role.schema.json"
 ACTION_TYPE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "action-type.schema.json"
+BUDGET_HINT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "budget-hint.schema.json"
 EXECUTION_REQUEST_DOC_PATH = REPO_ROOT / "docs" / "specs" / "execution-request-contract.md"
 AGENT_ROLE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "agent-role-contract.md"
 ACTION_TYPE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "action-type-contract.md"
@@ -97,6 +98,16 @@ EXPECTED_ACTION_TYPE_REQUIRED = [
     "description",
 ]
 
+EXPECTED_BUDGET_HINT_REQUIRED = [
+    "budget_hint_id",
+    "trace_id",
+    "command_id",
+    "budget_amount",
+    "budget_unit",
+    "created_at",
+    "scope",
+]
+
 EXPECTED_CHANNEL_ENUM = [
     "telegram",
     "dashboard",
@@ -141,6 +152,19 @@ EXPECTED_ACTION_TYPES = [
     "run_checks",
     "deploy_service",
     "update_documentation",
+]
+
+EXPECTED_BUDGET_UNITS = [
+    "usd",
+    "credits",
+    "tokens",
+    "seconds",
+]
+
+EXPECTED_BUDGET_SCOPES = [
+    "request",
+    "session",
+    "project",
 ]
 
 EXPECTED_STATUS_ENUM = [
@@ -270,6 +294,19 @@ def ensure_property_type(schema_name, schema, property_name, expected_type):
     property_type = property_schema.get("type")
     if property_type != expected_type:
         return [f"{schema_name}: '{property_name}.type' must be '{expected_type}'"]
+
+    return []
+
+
+def ensure_property_defined(schema_name, schema, property_name):
+    properties = schema.get("properties")
+
+    if not isinstance(properties, dict):
+        return [f"{schema_name}: 'properties' must be an object"]
+
+    property_schema = properties.get(property_name)
+    if not isinstance(property_schema, dict):
+        return [f"{schema_name}: missing property definition for '{property_name}'"]
 
     return []
 
@@ -669,11 +706,54 @@ def main():
             )
         )
         errors.extend(
+            ensure_property_defined(
+                "execution-request.schema.json",
+                execution_request_schema,
+                "budget_hint",
+            )
+        )
+        errors.extend(
             ensure_enum_matches(
                 "execution-request.schema.json",
                 execution_request_schema,
                 "priority",
                 EXPECTED_EXECUTION_PRIORITY_ENUM,
+            )
+        )
+
+    budget_hint_schema, budget_hint_load_errors = load_json_file(BUDGET_HINT_SCHEMA_PATH)
+    errors.extend(budget_hint_load_errors)
+    if not budget_hint_load_errors:
+        checks.append(f"OK: {BUDGET_HINT_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {BUDGET_HINT_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_schema_type(
+                "budget-hint.schema.json",
+                budget_hint_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "budget-hint.schema.json",
+                budget_hint_schema,
+                EXPECTED_BUDGET_HINT_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "budget-hint.schema.json",
+                budget_hint_schema,
+                "budget_unit",
+                EXPECTED_BUDGET_UNITS,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "budget-hint.schema.json",
+                budget_hint_schema,
+                "scope",
+                EXPECTED_BUDGET_SCOPES,
             )
         )
 
@@ -940,7 +1020,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, approval action contract, execution request contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, approval action contract, execution request contract, budget hint contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
     )
     return 0
 
