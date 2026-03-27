@@ -15,6 +15,7 @@ TRACEABILITY_ENVELOPE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" 
 SESSION_CONTEXT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "session-context.schema.json"
 PROJECT_CONTEXT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "project-context.schema.json"
 COMPANY_CONTEXT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "company-context.schema.json"
+OWNER_IDENTITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "owner-identity.schema.json"
 APPROVAL_ACTION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "approval-action.schema.json"
 EXECUTION_REQUEST_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-request.schema.json"
 EXECUTION_RESULT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-result.schema.json"
@@ -81,6 +82,14 @@ EXPECTED_COMPANY_CONTEXT_REQUIRED = [
     "company_status",
     "created_at",
     "owner_user_id",
+]
+
+EXPECTED_OWNER_IDENTITY_REQUIRED = [
+    "user_id",
+    "display_name",
+    "identity_type",
+    "created_at",
+    "primary_channel",
 ]
 
 EXPECTED_APPROVAL_ACTION_REQUIRED = [
@@ -180,6 +189,18 @@ EXPECTED_COMPANY_STATUS_ENUM = [
     "active",
     "paused",
     "archived",
+]
+
+EXPECTED_IDENTITY_TYPE_ENUM = [
+    "human_owner",
+    "human_operator",
+    "service_account",
+]
+
+EXPECTED_PRIMARY_CHANNEL_ENUM = [
+    "telegram",
+    "dashboard",
+    "system",
 ]
 
 EXPECTED_APPROVAL_DECISION_ENUM = [
@@ -1272,6 +1293,152 @@ def main():
             )
         )
 
+    owner_identity_schema, owner_identity_load_errors = load_json_file(OWNER_IDENTITY_SCHEMA_PATH)
+    errors.extend(owner_identity_load_errors)
+    if not owner_identity_load_errors:
+        checks.append(f"OK: {OWNER_IDENTITY_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {OWNER_IDENTITY_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "owner-identity.schema.json",
+                owner_identity_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "owner-identity.schema.json",
+                owner_identity_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "owner-identity.schema.json",
+                owner_identity_schema,
+                EXPECTED_OWNER_IDENTITY_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "owner-identity.schema.json",
+                owner_identity_schema,
+                [
+                    "updated_at",
+                    "telegram_user_id",
+                    "dashboard_user_id",
+                    "default_company_id",
+                    "default_project_id",
+                    "identity_note",
+                ],
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "owner-identity.schema.json",
+                owner_identity_schema,
+                "user_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "owner-identity.schema.json",
+                owner_identity_schema,
+                "display_name",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "owner-identity.schema.json",
+                owner_identity_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "owner-identity.schema.json",
+                owner_identity_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "owner-identity.schema.json",
+                owner_identity_schema,
+                "updated_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "owner-identity.schema.json",
+                owner_identity_schema,
+                "updated_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "owner-identity.schema.json",
+                owner_identity_schema,
+                "telegram_user_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "owner-identity.schema.json",
+                owner_identity_schema,
+                "dashboard_user_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "owner-identity.schema.json",
+                owner_identity_schema,
+                "default_company_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "owner-identity.schema.json",
+                owner_identity_schema,
+                "default_project_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "owner-identity.schema.json",
+                owner_identity_schema,
+                "identity_note",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "owner-identity.schema.json",
+                owner_identity_schema,
+                "identity_type",
+                EXPECTED_IDENTITY_TYPE_ENUM,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "owner-identity.schema.json",
+                owner_identity_schema,
+                "primary_channel",
+                EXPECTED_PRIMARY_CHANNEL_ENUM,
+            )
+        )
+
     approval_action_schema, approval_action_load_errors = load_json_file(APPROVAL_ACTION_SCHEMA_PATH)
     errors.extend(approval_action_load_errors)
     if not approval_action_load_errors:
@@ -1297,6 +1464,14 @@ def main():
                 approval_action_schema,
                 "decision",
                 EXPECTED_APPROVAL_DECISION_ENUM,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "approval-action.schema.json",
+                approval_action_schema,
+                "user_id",
+                1,
             )
         )
 
@@ -1984,7 +2159,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, approval action contract, execution request contract, priority contract, budget hint contract, timeout policy contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, approval action contract, execution request contract, priority contract, budget hint contract, timeout policy contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
     )
     return 0
 

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Owner Identity Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "user_id",
+    "display_name",
+    "identity_type",
+    "created_at",
+    "primary_channel"
+  ],
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "identity_type": {
+      "type": "string",
+      "enum": [
+        "human_owner",
+        "human_operator",
+        "service_account"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "primary_channel": {
+      "type": "string",
+      "enum": [
+        "telegram",
+        "dashboard",
+        "system"
+      ]
+    },
+    "telegram_user_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dashboard_user_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "default_company_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "default_project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "identity_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
