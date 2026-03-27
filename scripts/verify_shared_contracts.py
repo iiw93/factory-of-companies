@@ -17,6 +17,7 @@ PROJECT_CONTEXT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "pro
 COMPANY_CONTEXT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "company-context.schema.json"
 OWNER_IDENTITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "owner-identity.schema.json"
 ARTIFACT_REFERENCE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "artifact-reference.schema.json"
+PLANNING_ARTIFACT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "planning-artifact.schema.json"
 GOVERNANCE_DECISION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "governance-decision.schema.json"
 APPROVAL_ACTION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "approval-action.schema.json"
 EXECUTION_REQUEST_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-request.schema.json"
@@ -101,6 +102,19 @@ EXPECTED_ARTIFACT_REFERENCE_REQUIRED = [
     "artifact_type",
     "artifact_uri",
     "created_at",
+]
+
+EXPECTED_PLANNING_ARTIFACT_REQUIRED = [
+    "planning_artifact_id",
+    "artifact_id",
+    "project_id",
+    "trace_id",
+    "planning_type",
+    "source_role",
+    "created_at",
+    "planning_status",
+    "planning_horizon",
+    "artifact_uri",
 ]
 
 EXPECTED_GOVERNANCE_DECISION_REQUIRED = [
@@ -244,6 +258,28 @@ EXPECTED_ARTIFACT_TYPES = [
     "report",
     "binary",
     "other",
+]
+
+EXPECTED_PLANNING_TYPES = [
+    "request_analysis",
+    "work_plan",
+    "architecture_plan",
+    "execution_plan",
+    "release_plan",
+]
+
+EXPECTED_PLANNING_STATUS_ENUM = [
+    "draft",
+    "active",
+    "superseded",
+    "archived",
+]
+
+EXPECTED_PLANNING_HORIZONS = [
+    "immediate",
+    "short_term",
+    "mid_term",
+    "long_term",
 ]
 
 EXPECTED_GOVERNANCE_DECISION_TYPES = [
@@ -880,6 +916,13 @@ def main():
             ensure_property_defined(
                 "traceability-envelope.schema.json",
                 traceability_schema,
+                "trace_id",
+            )
+        )
+        errors.extend(
+            ensure_property_defined(
+                "traceability-envelope.schema.json",
+                traceability_schema,
                 "company_id",
             )
         )
@@ -1117,6 +1160,13 @@ def main():
                 "project-context.schema.json",
                 project_context_schema,
                 EXPECTED_PROJECT_CONTEXT_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_property_defined(
+                "project-context.schema.json",
+                project_context_schema,
+                "project_id",
             )
         )
         errors.extend(
@@ -1645,6 +1695,137 @@ def main():
                 artifact_reference_schema,
                 "artifact_type",
                 EXPECTED_ARTIFACT_TYPES,
+            )
+        )
+
+    planning_artifact_schema, planning_artifact_load_errors = load_json_file(PLANNING_ARTIFACT_SCHEMA_PATH)
+    errors.extend(planning_artifact_load_errors)
+    if not planning_artifact_load_errors:
+        checks.append(f"OK: {PLANNING_ARTIFACT_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {PLANNING_ARTIFACT_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "planning-artifact.schema.json",
+                planning_artifact_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "planning-artifact.schema.json",
+                planning_artifact_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "planning-artifact.schema.json",
+                planning_artifact_schema,
+                EXPECTED_PLANNING_ARTIFACT_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "planning-artifact.schema.json",
+                planning_artifact_schema,
+                ["planning_note"],
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "planning-artifact.schema.json",
+                planning_artifact_schema,
+                "planning_artifact_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "planning-artifact.schema.json",
+                planning_artifact_schema,
+                "artifact_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "planning-artifact.schema.json",
+                planning_artifact_schema,
+                "project_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "planning-artifact.schema.json",
+                planning_artifact_schema,
+                "trace_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "planning-artifact.schema.json",
+                planning_artifact_schema,
+                "source_role",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "planning-artifact.schema.json",
+                planning_artifact_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "planning-artifact.schema.json",
+                planning_artifact_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "planning-artifact.schema.json",
+                planning_artifact_schema,
+                "artifact_uri",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "planning-artifact.schema.json",
+                planning_artifact_schema,
+                "planning_note",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "planning-artifact.schema.json",
+                planning_artifact_schema,
+                "planning_type",
+                EXPECTED_PLANNING_TYPES,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "planning-artifact.schema.json",
+                planning_artifact_schema,
+                "planning_status",
+                EXPECTED_PLANNING_STATUS_ENUM,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "planning-artifact.schema.json",
+                planning_artifact_schema,
+                "planning_horizon",
+                EXPECTED_PLANNING_HORIZONS,
             )
         )
 
@@ -2472,6 +2653,10 @@ def main():
                 "string",
             )
         )
+        if not traceability_load_errors and not project_context_load_errors and not artifact_reference_load_errors:
+            checks.append(
+                "OK: trace_id, project_id, artifact_id, and role_type remain explicitly defined in their source contracts"
+            )
 
     action_type_schema, action_type_load_errors = load_json_file(ACTION_TYPE_SCHEMA_PATH)
     errors.extend(action_type_load_errors)
@@ -2745,7 +2930,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, priority contract, budget hint contract, timeout policy contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, priority contract, budget hint contract, timeout policy contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
     )
     return 0
 

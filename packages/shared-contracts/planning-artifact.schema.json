@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Planning Artifact Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "planning_artifact_id",
+    "artifact_id",
+    "project_id",
+    "trace_id",
+    "planning_type",
+    "source_role",
+    "created_at",
+    "planning_status",
+    "planning_horizon",
+    "artifact_uri"
+  ],
+  "properties": {
+    "planning_artifact_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "planning_type": {
+      "type": "string",
+      "enum": [
+        "request_analysis",
+        "work_plan",
+        "architecture_plan",
+        "execution_plan",
+        "release_plan"
+      ]
+    },
+    "source_role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "planning_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "superseded",
+        "archived"
+      ]
+    },
+    "planning_horizon": {
+      "type": "string",
+      "enum": [
+        "immediate",
+        "short_term",
+        "mid_term",
+        "long_term"
+      ]
+    },
+    "artifact_uri": {
+      "type": "string",
+      "minLength": 1
+    },
+    "planning_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
