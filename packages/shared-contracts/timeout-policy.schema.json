@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Timeout Policy Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "timeout_policy_id",
+    "trace_id",
+    "command_id",
+    "timeout_seconds",
+    "created_at",
+    "scope",
+    "timeout_strategy"
+  ],
+  "properties": {
+    "timeout_policy_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "command_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timeout_seconds": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "scope": {
+      "type": "string",
+      "enum": [
+        "request",
+        "session",
+        "project"
+      ]
+    },
+    "timeout_strategy": {
+      "type": "string",
+      "enum": [
+        "fail",
+        "cancel",
+        "escalate",
+        "mark_timed_out"
+      ]
+    },
+    "note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

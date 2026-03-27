@@ -19,10 +19,13 @@ AGENT_ROLE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "agent-ro
 ACTION_TYPE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "action-type.schema.json"
 BUDGET_HINT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "budget-hint.schema.json"
 PRIORITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "priority.schema.json"
+TIMEOUT_POLICY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "timeout-policy.schema.json"
 EXECUTION_REQUEST_DOC_PATH = REPO_ROOT / "docs" / "specs" / "execution-request-contract.md"
 AGENT_ROLE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "agent-role-contract.md"
 ACTION_TYPE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "action-type-contract.md"
 PRIORITY_DOC_PATH = REPO_ROOT / "docs" / "specs" / "priority-contract.md"
+BUDGET_HINT_DOC_PATH = REPO_ROOT / "docs" / "specs" / "budget-hint-contract.md"
+TIMEOUT_POLICY_DOC_PATH = REPO_ROOT / "docs" / "specs" / "timeout-policy-contract.md"
 
 EXPECTED_COMMAND_REQUIRED = [
     "command_id",
@@ -117,6 +120,16 @@ EXPECTED_PRIORITY_REQUIRED = [
     "description",
 ]
 
+EXPECTED_TIMEOUT_POLICY_REQUIRED = [
+    "timeout_policy_id",
+    "trace_id",
+    "command_id",
+    "timeout_seconds",
+    "created_at",
+    "scope",
+    "timeout_strategy",
+]
+
 EXPECTED_CHANNEL_ENUM = [
     "telegram",
     "dashboard",
@@ -174,6 +187,19 @@ EXPECTED_BUDGET_SCOPES = [
     "request",
     "session",
     "project",
+]
+
+EXPECTED_TIMEOUT_POLICY_SCOPES = [
+    "request",
+    "session",
+    "project",
+]
+
+EXPECTED_TIMEOUT_STRATEGIES = [
+    "fail",
+    "cancel",
+    "escalate",
+    "mark_timed_out",
 ]
 
 EXPECTED_STATUS_ENUM = [
@@ -331,6 +357,40 @@ def ensure_string_min_length(schema_name, schema, property_name, expected_minimu
 
     if min_length != expected_minimum:
         return [f"{schema_name}: '{property_name}.minLength' must be {expected_minimum}"]
+
+    return []
+
+
+def ensure_numeric_minimum(schema_name, schema, property_name, expected_minimum):
+    properties = schema.get("properties")
+
+    if not isinstance(properties, dict):
+        return [f"{schema_name}: 'properties' must be an object"]
+
+    property_schema = properties.get(property_name)
+    if not isinstance(property_schema, dict):
+        return [f"{schema_name}: missing property definition for '{property_name}'"]
+
+    minimum = property_schema.get("minimum")
+    if minimum != expected_minimum:
+        return [f"{schema_name}: '{property_name}.minimum' must be {expected_minimum}"]
+
+    return []
+
+
+def ensure_property_format(schema_name, schema, property_name, expected_format):
+    properties = schema.get("properties")
+
+    if not isinstance(properties, dict):
+        return [f"{schema_name}: 'properties' must be an object"]
+
+    property_schema = properties.get(property_name)
+    if not isinstance(property_schema, dict):
+        return [f"{schema_name}: missing property definition for '{property_name}'"]
+
+    property_format = property_schema.get("format")
+    if property_format != expected_format:
+        return [f"{schema_name}: '{property_name}.format' must be '{expected_format}'"]
 
     return []
 
@@ -828,6 +888,29 @@ def main():
             ensure_property_defined(
                 "execution-request.schema.json",
                 execution_request_schema,
+                "timeout_seconds",
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "execution-request.schema.json",
+                execution_request_schema,
+                "timeout_seconds",
+                "integer",
+            )
+        )
+        errors.extend(
+            ensure_numeric_minimum(
+                "execution-request.schema.json",
+                execution_request_schema,
+                "timeout_seconds",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_property_defined(
+                "execution-request.schema.json",
+                execution_request_schema,
                 "budget_hint",
             )
         )
@@ -886,6 +969,105 @@ def main():
                 EXPECTED_BUDGET_SCOPES,
             )
         )
+        errors.extend(
+            ensure_property_format(
+                "budget-hint.schema.json",
+                budget_hint_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+
+    timeout_policy_schema, timeout_policy_load_errors = load_json_file(TIMEOUT_POLICY_SCHEMA_PATH)
+    errors.extend(timeout_policy_load_errors)
+    if not timeout_policy_load_errors:
+        checks.append(f"OK: {TIMEOUT_POLICY_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {TIMEOUT_POLICY_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_schema_type(
+                "timeout-policy.schema.json",
+                timeout_policy_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "timeout-policy.schema.json",
+                timeout_policy_schema,
+                EXPECTED_TIMEOUT_POLICY_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "timeout-policy.schema.json",
+                timeout_policy_schema,
+                "timeout_policy_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "timeout-policy.schema.json",
+                timeout_policy_schema,
+                "trace_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "timeout-policy.schema.json",
+                timeout_policy_schema,
+                "command_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "timeout-policy.schema.json",
+                timeout_policy_schema,
+                "timeout_seconds",
+                "integer",
+            )
+        )
+        errors.extend(
+            ensure_numeric_minimum(
+                "timeout-policy.schema.json",
+                timeout_policy_schema,
+                "timeout_seconds",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "timeout-policy.schema.json",
+                timeout_policy_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "timeout-policy.schema.json",
+                timeout_policy_schema,
+                ["note"],
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "timeout-policy.schema.json",
+                timeout_policy_schema,
+                "scope",
+                EXPECTED_TIMEOUT_POLICY_SCOPES,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "timeout-policy.schema.json",
+                timeout_policy_schema,
+                "timeout_strategy",
+                EXPECTED_TIMEOUT_STRATEGIES,
+            )
+        )
 
     execution_result_schema, execution_result_load_errors = load_json_file(EXECUTION_RESULT_SCHEMA_PATH)
     errors.extend(execution_result_load_errors)
@@ -918,6 +1100,14 @@ def main():
                 execution_result_schema,
                 "outcome",
                 EXPECTED_EXECUTION_OUTCOME_ENUM,
+            )
+        )
+        errors.extend(
+            ensure_enum_contains(
+                "execution-result.schema.json",
+                execution_result_schema,
+                "outcome",
+                ["timed_out"],
             )
         )
 
@@ -1170,6 +1360,79 @@ def main():
             )
         )
 
+    budget_hint_doc, budget_hint_doc_errors = load_text_file(BUDGET_HINT_DOC_PATH)
+    errors.extend(budget_hint_doc_errors)
+    if not budget_hint_doc_errors:
+        checks.append(f"OK: {BUDGET_HINT_DOC_PATH.relative_to(REPO_ROOT)} exists")
+        errors.extend(
+            ensure_doc_contains(
+                "budget-hint-contract.md",
+                budget_hint_doc,
+                [
+                    "`execution-request.budget_hint`",
+                    "advisory budget signal",
+                    "не является budget enforcement runtime.",
+                    "не является accounting system.",
+                ],
+            )
+        )
+        errors.extend(
+            ensure_doc_mentions_values(
+                "budget-hint-contract.md",
+                budget_hint_doc,
+                EXPECTED_BUDGET_SCOPES,
+                "scope",
+            )
+        )
+        errors.extend(
+            ensure_doc_mentions_values(
+                "budget-hint-contract.md",
+                budget_hint_doc,
+                EXPECTED_BUDGET_UNITS,
+                "budget unit",
+            )
+        )
+
+    timeout_policy_doc, timeout_policy_doc_errors = load_text_file(TIMEOUT_POLICY_DOC_PATH)
+    errors.extend(timeout_policy_doc_errors)
+    if not timeout_policy_doc_errors:
+        checks.append(f"OK: {TIMEOUT_POLICY_DOC_PATH.relative_to(REPO_ROOT)} exists")
+        errors.extend(
+            ensure_doc_contains(
+                "timeout-policy-contract.md",
+                timeout_policy_doc,
+                [
+                    "`execution-request.timeout_seconds`",
+                    "`trace_id`",
+                    "`command_id`",
+                    "advisory ограничения по времени",
+                    "не является runtime worker timeout handler.",
+                    "не является scheduler.",
+                    "не является queue engine.",
+                    "не является orchestration runtime.",
+                    "advisory planning",
+                    "execution-request guidance",
+                    "future linkage with execution_result.outcome = timed_out",
+                ],
+            )
+        )
+        errors.extend(
+            ensure_doc_mentions_values(
+                "timeout-policy-contract.md",
+                timeout_policy_doc,
+                EXPECTED_TIMEOUT_POLICY_SCOPES,
+                "scope",
+            )
+        )
+        errors.extend(
+            ensure_doc_mentions_values(
+                "timeout-policy-contract.md",
+                timeout_policy_doc,
+                EXPECTED_TIMEOUT_STRATEGIES,
+                "timeout strategy",
+            )
+        )
+
     if errors:
         print("Shared contracts verification: FAILED")
         for error in errors:
@@ -1180,7 +1443,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, approval action contract, execution request contract, priority contract, budget hint contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, approval action contract, execution request contract, priority contract, budget hint contract, timeout policy contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
     )
     return 0
 
