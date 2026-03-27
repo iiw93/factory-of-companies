@@ -18,6 +18,7 @@ COMPANY_CONTEXT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "com
 OWNER_IDENTITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "owner-identity.schema.json"
 ARTIFACT_REFERENCE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "artifact-reference.schema.json"
 PLANNING_ARTIFACT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "planning-artifact.schema.json"
+QUALITY_GATE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "quality-gate.schema.json"
 GOVERNANCE_DECISION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "governance-decision.schema.json"
 APPROVAL_ACTION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "approval-action.schema.json"
 EXECUTION_REQUEST_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-request.schema.json"
@@ -115,6 +116,14 @@ EXPECTED_PLANNING_ARTIFACT_REQUIRED = [
     "planning_status",
     "planning_horizon",
     "artifact_uri",
+]
+
+EXPECTED_QUALITY_GATE_REQUIRED = [
+    "quality_gate_id",
+    "gate_name",
+    "gate_type",
+    "gate_status",
+    "created_at",
 ]
 
 EXPECTED_GOVERNANCE_DECISION_REQUIRED = [
@@ -280,6 +289,21 @@ EXPECTED_PLANNING_HORIZONS = [
     "short_term",
     "mid_term",
     "long_term",
+]
+
+EXPECTED_QUALITY_GATE_TYPES = [
+    "requirement_check",
+    "schema_check",
+    "quality_check",
+    "acceptance_check",
+    "release_check",
+]
+
+EXPECTED_QUALITY_GATE_STATUS_ENUM = [
+    "pending",
+    "passed",
+    "failed",
+    "waived",
 ]
 
 EXPECTED_GOVERNANCE_DECISION_TYPES = [
@@ -1829,6 +1853,153 @@ def main():
             )
         )
 
+    quality_gate_schema, quality_gate_load_errors = load_json_file(QUALITY_GATE_SCHEMA_PATH)
+    errors.extend(quality_gate_load_errors)
+    if not quality_gate_load_errors:
+        checks.append(f"OK: {QUALITY_GATE_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {QUALITY_GATE_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "quality-gate.schema.json",
+                quality_gate_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "quality-gate.schema.json",
+                quality_gate_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "quality-gate.schema.json",
+                quality_gate_schema,
+                EXPECTED_QUALITY_GATE_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "quality-gate.schema.json",
+                quality_gate_schema,
+                [
+                    "trace_id",
+                    "project_id",
+                    "artifact_id",
+                    "execution_result_id",
+                    "linked_governance_decision_id",
+                    "evidence_uri",
+                    "gate_note",
+                ],
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "quality-gate.schema.json",
+                quality_gate_schema,
+                "quality_gate_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "quality-gate.schema.json",
+                quality_gate_schema,
+                "gate_name",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "quality-gate.schema.json",
+                quality_gate_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "quality-gate.schema.json",
+                quality_gate_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "quality-gate.schema.json",
+                quality_gate_schema,
+                "trace_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "quality-gate.schema.json",
+                quality_gate_schema,
+                "project_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "quality-gate.schema.json",
+                quality_gate_schema,
+                "artifact_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "quality-gate.schema.json",
+                quality_gate_schema,
+                "execution_result_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "quality-gate.schema.json",
+                quality_gate_schema,
+                "linked_governance_decision_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "quality-gate.schema.json",
+                quality_gate_schema,
+                "evidence_uri",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "quality-gate.schema.json",
+                quality_gate_schema,
+                "gate_note",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "quality-gate.schema.json",
+                quality_gate_schema,
+                "gate_type",
+                EXPECTED_QUALITY_GATE_TYPES,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "quality-gate.schema.json",
+                quality_gate_schema,
+                "gate_status",
+                EXPECTED_QUALITY_GATE_STATUS_ENUM,
+            )
+        )
+
     governance_decision_schema, governance_decision_load_errors = load_json_file(GOVERNANCE_DECISION_SCHEMA_PATH)
     errors.extend(governance_decision_load_errors)
     if not governance_decision_load_errors:
@@ -2528,6 +2699,13 @@ def main():
         checks.append(f"OK: {EXECUTION_RESULT_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
         checks.append(f"OK: {EXECUTION_RESULT_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
         errors.extend(
+            ensure_property_defined(
+                "execution-result.schema.json",
+                execution_result_schema,
+                "execution_result_id",
+            )
+        )
+        errors.extend(
             ensure_required_fields(
                 "execution-result.schema.json",
                 execution_result_schema,
@@ -2930,7 +3108,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, priority contract, budget hint contract, timeout policy contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, priority contract, budget hint contract, timeout policy contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
     )
     return 0
 

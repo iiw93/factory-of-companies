@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Quality Gate Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "quality_gate_id",
+    "gate_name",
+    "gate_type",
+    "gate_status",
+    "created_at"
+  ],
+  "properties": {
+    "quality_gate_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "gate_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "gate_type": {
+      "type": "string",
+      "enum": [
+        "requirement_check",
+        "schema_check",
+        "quality_check",
+        "acceptance_check",
+        "release_check"
+      ]
+    },
+    "gate_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "passed",
+        "failed",
+        "waived"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_result_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_governance_decision_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_uri": {
+      "type": "string",
+      "minLength": 1
+    },
+    "gate_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
+
