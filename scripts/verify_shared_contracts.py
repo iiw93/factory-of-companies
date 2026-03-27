@@ -11,6 +11,7 @@ COMMAND_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "command.sch
 RESPONSE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "response.schema.json"
 COMMAND_STATE_RULES_PATH = REPO_ROOT / "packages" / "shared-contracts" / "command-state-rules.json"
 TRACEABILITY_ENVELOPE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "traceability-envelope.schema.json"
+APPROVAL_ACTION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "approval-action.schema.json"
 
 EXPECTED_COMMAND_REQUIRED = [
     "command_id",
@@ -41,9 +42,24 @@ EXPECTED_TRACEABILITY_REQUIRED = [
     "current_state",
 ]
 
+EXPECTED_APPROVAL_ACTION_REQUIRED = [
+    "approval_action_id",
+    "trace_id",
+    "command_id",
+    "user_id",
+    "session_id",
+    "decision",
+    "created_at",
+]
+
 EXPECTED_CHANNEL_ENUM = [
     "telegram",
     "dashboard",
+]
+
+EXPECTED_APPROVAL_DECISION_ENUM = [
+    "approve",
+    "reject",
 ]
 
 EXPECTED_STATUS_ENUM = [
@@ -416,6 +432,34 @@ def main():
                 )
             )
 
+    approval_action_schema, approval_action_load_errors = load_json_file(APPROVAL_ACTION_SCHEMA_PATH)
+    errors.extend(approval_action_load_errors)
+    if not approval_action_load_errors:
+        checks.append(f"OK: {APPROVAL_ACTION_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {APPROVAL_ACTION_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_required_fields(
+                "approval-action.schema.json",
+                approval_action_schema,
+                EXPECTED_APPROVAL_ACTION_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "approval-action.schema.json",
+                approval_action_schema,
+                ["reason", "comment"],
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "approval-action.schema.json",
+                approval_action_schema,
+                "decision",
+                EXPECTED_APPROVAL_DECISION_ENUM,
+            )
+        )
+
     if errors:
         print("Shared contracts verification: FAILED")
         for error in errors:
@@ -426,7 +470,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, and traceability envelope match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, and approval action contract match the current shared contract expectations"
     )
     return 0
 
