@@ -17,6 +17,7 @@ PROJECT_CONTEXT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "pro
 COMPANY_CONTEXT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "company-context.schema.json"
 OWNER_IDENTITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "owner-identity.schema.json"
 ARTIFACT_REFERENCE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "artifact-reference.schema.json"
+GOVERNANCE_DECISION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "governance-decision.schema.json"
 APPROVAL_ACTION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "approval-action.schema.json"
 EXECUTION_REQUEST_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-request.schema.json"
 EXECUTION_RESULT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-result.schema.json"
@@ -98,6 +99,16 @@ EXPECTED_ARTIFACT_REFERENCE_REQUIRED = [
     "artifact_name",
     "artifact_type",
     "artifact_uri",
+    "created_at",
+]
+
+EXPECTED_GOVERNANCE_DECISION_REQUIRED = [
+    "governance_decision_id",
+    "trace_id",
+    "command_id",
+    "user_id",
+    "decision_type",
+    "decision_scope",
     "created_at",
 ]
 
@@ -220,6 +231,20 @@ EXPECTED_ARTIFACT_TYPES = [
     "report",
     "binary",
     "other",
+]
+
+EXPECTED_GOVERNANCE_DECISION_TYPES = [
+    "allow",
+    "deny",
+    "escalate",
+    "defer",
+]
+
+EXPECTED_GOVERNANCE_DECISION_SCOPES = [
+    "request",
+    "session",
+    "project",
+    "company",
 ]
 
 EXPECTED_APPROVAL_DECISION_ENUM = [
@@ -1595,6 +1620,160 @@ def main():
             )
         )
 
+    governance_decision_schema, governance_decision_load_errors = load_json_file(GOVERNANCE_DECISION_SCHEMA_PATH)
+    errors.extend(governance_decision_load_errors)
+    if not governance_decision_load_errors:
+        checks.append(f"OK: {GOVERNANCE_DECISION_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {GOVERNANCE_DECISION_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "governance-decision.schema.json",
+                governance_decision_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "governance-decision.schema.json",
+                governance_decision_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "governance-decision.schema.json",
+                governance_decision_schema,
+                EXPECTED_GOVERNANCE_DECISION_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "governance-decision.schema.json",
+                governance_decision_schema,
+                [
+                    "execution_request_id",
+                    "rationale",
+                    "linked_approval_action_id",
+                    "linked_budget_hint_id",
+                    "linked_timeout_policy_id",
+                    "decision_note",
+                ],
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "governance-decision.schema.json",
+                governance_decision_schema,
+                "governance_decision_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "governance-decision.schema.json",
+                governance_decision_schema,
+                "trace_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "governance-decision.schema.json",
+                governance_decision_schema,
+                "command_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "governance-decision.schema.json",
+                governance_decision_schema,
+                "execution_request_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "governance-decision.schema.json",
+                governance_decision_schema,
+                "user_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "governance-decision.schema.json",
+                governance_decision_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "governance-decision.schema.json",
+                governance_decision_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "governance-decision.schema.json",
+                governance_decision_schema,
+                "rationale",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "governance-decision.schema.json",
+                governance_decision_schema,
+                "linked_approval_action_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "governance-decision.schema.json",
+                governance_decision_schema,
+                "linked_budget_hint_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "governance-decision.schema.json",
+                governance_decision_schema,
+                "linked_timeout_policy_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "governance-decision.schema.json",
+                governance_decision_schema,
+                "decision_note",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "governance-decision.schema.json",
+                governance_decision_schema,
+                "decision_type",
+                EXPECTED_GOVERNANCE_DECISION_TYPES,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "governance-decision.schema.json",
+                governance_decision_schema,
+                "decision_scope",
+                EXPECTED_GOVERNANCE_DECISION_SCOPES,
+            )
+        )
+
     approval_action_schema, approval_action_load_errors = load_json_file(APPROVAL_ACTION_SCHEMA_PATH)
     errors.extend(approval_action_load_errors)
     if not approval_action_load_errors:
@@ -1620,6 +1799,14 @@ def main():
                 approval_action_schema,
                 "decision",
                 EXPECTED_APPROVAL_DECISION_ENUM,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "approval-action.schema.json",
+                approval_action_schema,
+                "approval_action_id",
+                1,
             )
         )
         errors.extend(
@@ -1708,6 +1895,14 @@ def main():
                 "execution-request.schema.json",
                 execution_request_schema,
                 EXPECTED_EXECUTION_REQUEST_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "execution-request.schema.json",
+                execution_request_schema,
+                "execution_request_id",
+                1,
             )
         )
         errors.extend(
@@ -1815,6 +2010,14 @@ def main():
                 "budget-hint.schema.json",
                 budget_hint_schema,
                 EXPECTED_BUDGET_HINT_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "budget-hint.schema.json",
+                budget_hint_schema,
+                "budget_hint_id",
+                1,
             )
         )
         errors.extend(
@@ -2323,7 +2526,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, approval action contract, execution request contract, priority contract, budget hint contract, timeout policy contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, governance decision contract, approval action contract, execution request contract, priority contract, budget hint contract, timeout policy contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
     )
     return 0
 

@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Governance Decision Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "governance_decision_id",
+    "trace_id",
+    "command_id",
+    "user_id",
+    "decision_type",
+    "decision_scope",
+    "created_at"
+  ],
+  "properties": {
+    "governance_decision_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "command_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "user_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decision_type": {
+      "type": "string",
+      "enum": [
+        "allow",
+        "deny",
+        "escalate",
+        "defer"
+      ]
+    },
+    "decision_scope": {
+      "type": "string",
+      "enum": [
+        "request",
+        "session",
+        "project",
+        "company"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_approval_action_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_budget_hint_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_timeout_policy_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decision_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
