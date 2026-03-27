@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Evidence Bundle Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "evidence_bundle_id",
+    "bundle_name",
+    "bundle_status",
+    "created_at"
+  ],
+  "properties": {
+    "evidence_bundle_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "bundle_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "bundle_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "collected",
+        "reviewed",
+        "accepted",
+        "rejected"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_quality_gate_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_execution_result_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_governance_decision_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "evidence_summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "bundle_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

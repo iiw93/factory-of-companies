@@ -19,6 +19,7 @@ OWNER_IDENTITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "owne
 ARTIFACT_REFERENCE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "artifact-reference.schema.json"
 PLANNING_ARTIFACT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "planning-artifact.schema.json"
 QUALITY_GATE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "quality-gate.schema.json"
+EVIDENCE_BUNDLE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "evidence-bundle.schema.json"
 GOVERNANCE_DECISION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "governance-decision.schema.json"
 APPROVAL_ACTION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "approval-action.schema.json"
 EXECUTION_REQUEST_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-request.schema.json"
@@ -123,6 +124,13 @@ EXPECTED_QUALITY_GATE_REQUIRED = [
     "gate_name",
     "gate_type",
     "gate_status",
+    "created_at",
+]
+
+EXPECTED_EVIDENCE_BUNDLE_REQUIRED = [
+    "evidence_bundle_id",
+    "bundle_name",
+    "bundle_status",
     "created_at",
 ]
 
@@ -304,6 +312,14 @@ EXPECTED_QUALITY_GATE_STATUS_ENUM = [
     "passed",
     "failed",
     "waived",
+]
+
+EXPECTED_EVIDENCE_BUNDLE_STATUS_ENUM = [
+    "draft",
+    "collected",
+    "reviewed",
+    "accepted",
+    "rejected",
 ]
 
 EXPECTED_GOVERNANCE_DECISION_TYPES = [
@@ -612,6 +628,30 @@ def ensure_array_items_type(schema_name, schema, property_name, expected_type):
         return [f"{schema_name}: '{property_name}.items.type' must be '{expected_type}'"]
 
     return []
+
+
+def ensure_array_items_min_length(schema_name, schema, property_name, expected_minimum):
+    errors = ensure_array_items_type(schema_name, schema, property_name, "string")
+    if errors:
+        return errors
+
+    properties = schema.get("properties")
+    property_schema = properties.get(property_name)
+    items_schema = property_schema.get("items")
+    min_length = items_schema.get("minLength")
+
+    if min_length != expected_minimum:
+        return [f"{schema_name}: '{property_name}.items.minLength' must be {expected_minimum}"]
+
+    return []
+
+
+def ensure_schema_uses_identifier(schema_name, schema, identifier_name):
+    errors = ensure_property_defined(schema_name, schema, identifier_name)
+    if errors:
+        return errors
+
+    return ensure_string_min_length(schema_name, schema, identifier_name, 1)
 
 
 def ensure_enum_contains(schema_name, schema, property_name, expected_values):
@@ -2000,6 +2040,101 @@ def main():
             )
         )
 
+    evidence_bundle_schema, evidence_bundle_load_errors = load_json_file(EVIDENCE_BUNDLE_SCHEMA_PATH)
+    errors.extend(evidence_bundle_load_errors)
+    if not evidence_bundle_load_errors:
+        checks.append(f"OK: {EVIDENCE_BUNDLE_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {EVIDENCE_BUNDLE_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "evidence-bundle.schema.json",
+                evidence_bundle_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "evidence-bundle.schema.json",
+                evidence_bundle_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "evidence-bundle.schema.json",
+                evidence_bundle_schema,
+                EXPECTED_EVIDENCE_BUNDLE_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "evidence-bundle.schema.json",
+                evidence_bundle_schema,
+                [
+                    "trace_id",
+                    "project_id",
+                    "linked_quality_gate_id",
+                    "linked_execution_result_id",
+                    "linked_governance_decision_id",
+                    "artifact_ids",
+                    "evidence_summary",
+                    "bundle_note",
+                ],
+            )
+        )
+        for property_name in [
+            "evidence_bundle_id",
+            "bundle_name",
+            "trace_id",
+            "project_id",
+            "linked_quality_gate_id",
+            "linked_execution_result_id",
+            "linked_governance_decision_id",
+            "evidence_summary",
+            "bundle_note",
+        ]:
+            errors.extend(
+                ensure_string_min_length(
+                    "evidence-bundle.schema.json",
+                    evidence_bundle_schema,
+                    property_name,
+                    1,
+                )
+            )
+        errors.extend(
+            ensure_property_type(
+                "evidence-bundle.schema.json",
+                evidence_bundle_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "evidence-bundle.schema.json",
+                evidence_bundle_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_array_items_min_length(
+                "evidence-bundle.schema.json",
+                evidence_bundle_schema,
+                "artifact_ids",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "evidence-bundle.schema.json",
+                evidence_bundle_schema,
+                "bundle_status",
+                EXPECTED_EVIDENCE_BUNDLE_STATUS_ENUM,
+            )
+        )
+
     governance_decision_schema, governance_decision_load_errors = load_json_file(GOVERNANCE_DECISION_SCHEMA_PATH)
     errors.extend(governance_decision_load_errors)
     if not governance_decision_load_errors:
@@ -2758,6 +2893,24 @@ def main():
             )
         )
 
+    identifier_checks = [
+        ("quality-gate.schema.json", quality_gate_schema, quality_gate_load_errors, "quality_gate_id"),
+        ("execution-result.schema.json", execution_result_schema, execution_result_load_errors, "execution_result_id"),
+        ("governance-decision.schema.json", governance_decision_schema, governance_decision_load_errors, "governance_decision_id"),
+        ("artifact-reference.schema.json", artifact_reference_schema, artifact_reference_load_errors, "artifact_id"),
+        ("traceability-envelope.schema.json", traceability_schema, traceability_load_errors, "trace_id"),
+        ("project-context.schema.json", project_context_schema, project_context_load_errors, "project_id"),
+    ]
+
+    for schema_name, schema, load_errors, identifier_name in identifier_checks:
+        if load_errors:
+            continue
+
+        identifier_errors = ensure_schema_uses_identifier(schema_name, schema, identifier_name)
+        errors.extend(identifier_errors)
+        if not identifier_errors:
+            checks.append(f"OK: {schema_name} uses {identifier_name}")
+
     agent_role_schema, agent_role_load_errors = load_json_file(AGENT_ROLE_SCHEMA_PATH)
     errors.extend(agent_role_load_errors)
     if not agent_role_load_errors:
@@ -3108,7 +3261,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, priority contract, budget hint contract, timeout policy contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, priority contract, budget hint contract, timeout policy contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
     )
     return 0
 
