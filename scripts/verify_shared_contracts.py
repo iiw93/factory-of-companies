@@ -32,6 +32,7 @@ AGENT_ROLE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "agent-ro
 ACTION_TYPE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "action-type.schema.json"
 RUNTIME_CAPABILITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "runtime-capability.schema.json"
 TOOL_INVOCATION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "tool-invocation.schema.json"
+KNOWLEDGE_SOURCE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "knowledge-source.schema.json"
 BUDGET_HINT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "budget-hint.schema.json"
 PRIORITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "priority.schema.json"
 TIMEOUT_POLICY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "timeout-policy.schema.json"
@@ -136,6 +137,14 @@ EXPECTED_EVIDENCE_BUNDLE_REQUIRED = [
     "evidence_bundle_id",
     "bundle_name",
     "bundle_status",
+    "created_at",
+]
+
+EXPECTED_KNOWLEDGE_SOURCE_REQUIRED = [
+    "knowledge_source_id",
+    "source_name",
+    "source_type",
+    "source_status",
     "created_at",
 ]
 
@@ -496,6 +505,22 @@ EXPECTED_INVOCATION_STATUS_ENUM = [
     "succeeded",
     "failed",
     "cancelled",
+]
+
+EXPECTED_KNOWLEDGE_SOURCE_TYPES = [
+    "document",
+    "repository",
+    "file",
+    "web_resource",
+    "note",
+    "other",
+]
+
+EXPECTED_KNOWLEDGE_SOURCE_STATUS_ENUM = [
+    "draft",
+    "available",
+    "stale",
+    "archived",
 ]
 
 EXPECTED_BUDGET_UNITS = [
@@ -3526,6 +3551,100 @@ def main():
             )
         )
 
+    knowledge_source_schema, knowledge_source_load_errors = load_json_file(KNOWLEDGE_SOURCE_SCHEMA_PATH)
+    errors.extend(knowledge_source_load_errors)
+    if not knowledge_source_load_errors:
+        checks.append(f"OK: {KNOWLEDGE_SOURCE_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {KNOWLEDGE_SOURCE_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "knowledge-source.schema.json",
+                knowledge_source_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "knowledge-source.schema.json",
+                knowledge_source_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "knowledge-source.schema.json",
+                knowledge_source_schema,
+                EXPECTED_KNOWLEDGE_SOURCE_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "knowledge-source.schema.json",
+                knowledge_source_schema,
+                [
+                    "artifact_id",
+                    "trace_id",
+                    "project_id",
+                    "linked_tool_invocation_id",
+                    "linked_evidence_bundle_id",
+                    "source_uri",
+                    "source_note",
+                ],
+            )
+        )
+        for property_name in [
+            "knowledge_source_id",
+            "source_name",
+            "artifact_id",
+            "trace_id",
+            "project_id",
+            "linked_tool_invocation_id",
+            "linked_evidence_bundle_id",
+            "source_uri",
+            "source_note",
+        ]:
+            errors.extend(
+                ensure_string_min_length(
+                    "knowledge-source.schema.json",
+                    knowledge_source_schema,
+                    property_name,
+                    1,
+                )
+            )
+        errors.extend(
+            ensure_property_type(
+                "knowledge-source.schema.json",
+                knowledge_source_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "knowledge-source.schema.json",
+                knowledge_source_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "knowledge-source.schema.json",
+                knowledge_source_schema,
+                "source_type",
+                EXPECTED_KNOWLEDGE_SOURCE_TYPES,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "knowledge-source.schema.json",
+                knowledge_source_schema,
+                "source_status",
+                EXPECTED_KNOWLEDGE_SOURCE_STATUS_ENUM,
+            )
+        )
+
     identifier_checks = [
         ("quality-gate.schema.json", quality_gate_schema, quality_gate_load_errors, "quality_gate_id"),
         ("evidence-bundle.schema.json", evidence_bundle_schema, evidence_bundle_load_errors, "evidence_bundle_id"),
@@ -3542,6 +3661,7 @@ def main():
         ("orchestration-handoff.schema.json", orchestration_handoff_schema, orchestration_handoff_load_errors, "handoff_id"),
         ("runtime-capability.schema.json", runtime_capability_schema, runtime_capability_load_errors, "capability_id"),
         ("tool-invocation.schema.json", tool_invocation_schema, tool_invocation_load_errors, "tool_invocation_id"),
+        ("knowledge-source.schema.json", knowledge_source_schema, knowledge_source_load_errors, "knowledge_source_id"),
     ]
 
     for schema_name, schema, load_errors, identifier_name in identifier_checks:
@@ -3921,7 +4041,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, priority contract, budget hint contract, timeout policy contract, execution result contract, release decision contract, delivery package contract, deployment target contract, agent role contract, action type contract, runtime capability contract, and tool invocation contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, priority contract, budget hint contract, timeout policy contract, execution result contract, release decision contract, delivery package contract, deployment target contract, agent role contract, action type contract, runtime capability contract, tool invocation contract, and knowledge source contract match the current shared contract expectations"
     )
     return 0
 

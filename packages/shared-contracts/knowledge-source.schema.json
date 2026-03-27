@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Knowledge Source Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "knowledge_source_id",
+    "source_name",
+    "source_type",
+    "source_status",
+    "created_at"
+  ],
+  "properties": {
+    "knowledge_source_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "document",
+        "repository",
+        "file",
+        "web_resource",
+        "note",
+        "other"
+      ]
+    },
+    "source_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "available",
+        "stale",
+        "archived"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "artifact_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_tool_invocation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_evidence_bundle_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_uri": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
