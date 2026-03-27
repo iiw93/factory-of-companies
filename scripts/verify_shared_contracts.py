@@ -10,6 +10,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 COMMAND_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "command.schema.json"
 RESPONSE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "response.schema.json"
 COMMAND_STATE_RULES_PATH = REPO_ROOT / "packages" / "shared-contracts" / "command-state-rules.json"
+TRACEABILITY_ENVELOPE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "traceability-envelope.schema.json"
 
 EXPECTED_COMMAND_REQUIRED = [
     "command_id",
@@ -28,6 +29,16 @@ EXPECTED_RESPONSE_REQUIRED = [
     "status",
     "message",
     "created_at",
+]
+
+EXPECTED_TRACEABILITY_REQUIRED = [
+    "trace_id",
+    "command_id",
+    "session_id",
+    "user_id",
+    "channel",
+    "created_at",
+    "current_state",
 ]
 
 EXPECTED_CHANNEL_ENUM = [
@@ -118,6 +129,20 @@ def ensure_required_fields(schema_name, schema, expected_fields):
     return errors
 
 
+def ensure_fields_not_required(schema_name, schema, field_names):
+    errors = []
+    required_fields = schema.get("required")
+
+    if not isinstance(required_fields, list):
+        return [f"{schema_name}: 'required' must be a list"]
+
+    for field_name in field_names:
+        if field_name in required_fields:
+            errors.append(f"{schema_name}: field '{field_name}' must remain optional")
+
+    return errors
+
+
 def ensure_enum_contains(schema_name, schema, property_name, expected_values):
     errors = []
     properties = schema.get("properties")
@@ -136,6 +161,22 @@ def ensure_enum_contains(schema_name, schema, property_name, expected_values):
     for value in expected_values:
         if value not in enum_values:
             errors.append(f"{schema_name}: missing enum value '{value}' in '{property_name}'")
+
+    return errors
+
+
+def ensure_enum_matches(schema_name, schema, property_name, expected_values):
+    errors = ensure_enum_contains(schema_name, schema, property_name, expected_values)
+    if errors:
+        return errors
+
+    properties = schema.get("properties")
+    property_schema = properties.get(property_name)
+    enum_values = property_schema.get("enum")
+
+    unexpected_values = [value for value in enum_values if value not in expected_values]
+    for value in unexpected_values:
+        errors.append(f"{schema_name}: unexpected enum value '{value}' in '{property_name}'")
 
     return errors
 
@@ -265,6 +306,7 @@ def main():
 
     state_rules, state_rules_load_errors = load_json_file(COMMAND_STATE_RULES_PATH)
     errors.extend(state_rules_load_errors)
+    state_rules_states = None
     if not state_rules_load_errors:
         checks.append(f"OK: {COMMAND_STATE_RULES_PATH.relative_to(REPO_ROOT)} exists")
         checks.append(f"OK: {COMMAND_STATE_RULES_PATH.relative_to(REPO_ROOT)} contains valid JSON")
@@ -275,6 +317,7 @@ def main():
             "states",
         )
         errors.extend(state_errors)
+        state_rules_states = states
 
         terminal_states, terminal_state_errors = ensure_string_list(
             "command-state-rules.json",
@@ -335,6 +378,44 @@ def main():
                 )
             )
 
+    traceability_schema, traceability_load_errors = load_json_file(TRACEABILITY_ENVELOPE_SCHEMA_PATH)
+    errors.extend(traceability_load_errors)
+    if not traceability_load_errors:
+        checks.append(f"OK: {TRACEABILITY_ENVELOPE_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {TRACEABILITY_ENVELOPE_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_required_fields(
+                "traceability-envelope.schema.json",
+                traceability_schema,
+                EXPECTED_TRACEABILITY_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "traceability-envelope.schema.json",
+                traceability_schema,
+                ["response_id"],
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "traceability-envelope.schema.json",
+                traceability_schema,
+                "channel",
+                EXPECTED_CHANNEL_ENUM,
+            )
+        )
+
+        if state_rules_states is not None:
+            errors.extend(
+                ensure_enum_matches(
+                    "traceability-envelope.schema.json",
+                    traceability_schema,
+                    "current_state",
+                    state_rules_states,
+                )
+            )
+
     if errors:
         print("Shared contracts verification: FAILED")
         for error in errors:
@@ -344,7 +425,9 @@ def main():
     print("Shared contracts verification: PASSED")
     for check in checks:
         print(f"- {check}")
-    print("- OK: required fields, target enums, and command state rules match the current shared contract expectations")
+    print(
+        "- OK: required fields, target enums, command state rules, and traceability envelope match the current shared contract expectations"
+    )
     return 0
 
 

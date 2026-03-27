@@ -16,16 +16,21 @@ Acceptance checklist в `tests/acceptance` проверяет проектные
 - наличие `packages/shared-contracts/command.schema.json`
 - наличие `packages/shared-contracts/response.schema.json`
 - наличие `packages/shared-contracts/command-state-rules.json`
+- наличие `packages/shared-contracts/traceability-envelope.schema.json`
 - что оба файла содержат валидный JSON
 - что `command-state-rules.json` содержит валидный JSON
+- что `traceability-envelope.schema.json` содержит валидный JSON
 - что `command.schema.json` содержит обязательные поля `command_id`, `channel`, `user_id`, `intent`, `message`, `created_at`
 - что `response.schema.json` содержит обязательные поля `response_id`, `command_id`, `channel`, `user_id`, `status`, `message`, `created_at`
+- что `traceability-envelope.schema.json` содержит обязательные поля `trace_id`, `command_id`, `session_id`, `user_id`, `channel`, `created_at`, `current_state`
 - что `command.schema.json` содержит значения `telegram` и `dashboard` в `properties.channel.enum`
 - что `command.schema.json` содержит значения `create_project`, `update_project`, `request_status`, `approve_action`, `reject_action`, `ask_question` в `properties.intent.enum`
 - что `response.schema.json` содержит значения `accepted`, `rejected`, `requires_approval`, `routed`, `planned`, `executing`, `completed`, `failed`, `cancelled` в `properties.status.enum`
 - что `command-state-rules.json` содержит обязательные состояния `received`, `validated`, `rejected`, `accepted`, `requires_approval`, `approved`, `routed`, `planned`, `executing`, `completed`, `failed`, `cancelled`
 - что `command-state-rules.json` содержит обязательные допустимые переходы и зафиксированные запрещённые переходы
 - что terminal states объявлены и присутствуют в полном списке states
+- что `traceability-envelope.schema.json` содержит значения `telegram` и `dashboard` в `properties.channel.enum`
+- что `traceability-envelope.schema.json` содержит значения current state, согласованные с `command-state-rules.json`
 
 ## Verification Boundaries
 Эта проверка не является runtime validation.
