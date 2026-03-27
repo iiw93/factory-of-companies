@@ -16,8 +16,10 @@ APPROVAL_ACTION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "app
 EXECUTION_REQUEST_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-request.schema.json"
 EXECUTION_RESULT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-result.schema.json"
 AGENT_ROLE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "agent-role.schema.json"
+ACTION_TYPE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "action-type.schema.json"
 EXECUTION_REQUEST_DOC_PATH = REPO_ROOT / "docs" / "specs" / "execution-request-contract.md"
 AGENT_ROLE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "agent-role-contract.md"
+ACTION_TYPE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "action-type-contract.md"
 
 EXPECTED_COMMAND_REQUIRED = [
     "command_id",
@@ -88,6 +90,13 @@ EXPECTED_AGENT_ROLE_REQUIRED = [
     "description",
 ]
 
+EXPECTED_ACTION_TYPE_REQUIRED = [
+    "action_type_id",
+    "action_name",
+    "action_type",
+    "description",
+]
+
 EXPECTED_CHANNEL_ENUM = [
     "telegram",
     "dashboard",
@@ -121,6 +130,17 @@ EXPECTED_AGENT_ROLE_TYPES = [
     "qa_agent",
     "devops_agent",
     "documentation_agent",
+]
+
+EXPECTED_ACTION_TYPES = [
+    "analyze_request",
+    "plan_work",
+    "design_architecture",
+    "generate_repository",
+    "write_code",
+    "run_checks",
+    "deploy_service",
+    "update_documentation",
 ]
 
 EXPECTED_STATUS_ENUM = [
@@ -758,6 +778,73 @@ def main():
             )
         )
 
+    action_type_schema, action_type_load_errors = load_json_file(ACTION_TYPE_SCHEMA_PATH)
+    errors.extend(action_type_load_errors)
+    if not action_type_load_errors:
+        checks.append(f"OK: {ACTION_TYPE_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {ACTION_TYPE_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_schema_type(
+                "action-type.schema.json",
+                action_type_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "action-type.schema.json",
+                action_type_schema,
+                EXPECTED_ACTION_TYPE_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "action-type.schema.json",
+                action_type_schema,
+                "action_type_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "action-type.schema.json",
+                action_type_schema,
+                "action_name",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "action-type.schema.json",
+                action_type_schema,
+                "description",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "action-type.schema.json",
+                action_type_schema,
+                ["recommended_roles"],
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "action-type.schema.json",
+                action_type_schema,
+                "action_type",
+                EXPECTED_ACTION_TYPES,
+            )
+        )
+        errors.extend(
+            ensure_array_items_type(
+                "action-type.schema.json",
+                action_type_schema,
+                "recommended_roles",
+                "string",
+            )
+        )
+
     execution_request_doc, execution_request_doc_errors = load_text_file(EXECUTION_REQUEST_DOC_PATH)
     errors.extend(execution_request_doc_errors)
     if not execution_request_doc_errors:
@@ -768,6 +855,7 @@ def main():
                 execution_request_doc,
                 [
                     "`target_role` определяет логическую роль исполнителя.",
+                    "docs/specs/action-type-contract.md",
                     "docs/specs/agent-role-contract.md",
                 ],
             )
@@ -778,6 +866,14 @@ def main():
                 execution_request_doc,
                 "target_role",
                 EXPECTED_AGENT_ROLE_TYPES,
+            )
+        )
+        errors.extend(
+            ensure_example_values_match(
+                "execution-request-contract.md",
+                execution_request_doc,
+                "action_type",
+                EXPECTED_ACTION_TYPES,
             )
         )
 
@@ -807,6 +903,33 @@ def main():
             )
         )
 
+    action_type_doc, action_type_doc_errors = load_text_file(ACTION_TYPE_DOC_PATH)
+    errors.extend(action_type_doc_errors)
+    if not action_type_doc_errors:
+        checks.append(f"OK: {ACTION_TYPE_DOC_PATH.relative_to(REPO_ROOT)} exists")
+        errors.extend(
+            ensure_doc_contains(
+                "action-type-contract.md",
+                action_type_doc,
+                [
+                    "execution-request.action_type",
+                    "agent-role.allowed_action_types",
+                    "не является runtime queue taxonomy.",
+                    "не является scheduler.",
+                    "не является permission system.",
+                    "не является execution engine.",
+                ],
+            )
+        )
+        errors.extend(
+            ensure_doc_mentions_values(
+                "action-type-contract.md",
+                action_type_doc,
+                EXPECTED_ACTION_TYPES,
+                "action type",
+            )
+        )
+
     if errors:
         print("Shared contracts verification: FAILED")
         for error in errors:
@@ -817,7 +940,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, approval action contract, execution request contract, execution result contract, and agent role contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, approval action contract, execution request contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
     )
     return 0
 

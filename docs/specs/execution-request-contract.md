@@ -18,7 +18,7 @@ Execution request contract описывает нормализованный о�
   "session_id": "session-001",
   "user_id": "owner-001",
   "target_role": "planner_agent",
-  "action_type": "prepare_project_plan",
+  "action_type": "plan_work",
   "priority": "normal",
   "created_at": "2026-03-26T00:20:00Z",
   "timeout_seconds": 300,
@@ -69,6 +69,8 @@ Execution request contract описывает нормализованный о�
 
 ### action_type
 `action_type` определяет тип исполняемой работы.
+
+Значение `action_type` должно оставаться согласованным с `docs/specs/action-type-contract.md`.
 
 ### priority
 `priority` определяет относительный приоритет запроса на исполнение.

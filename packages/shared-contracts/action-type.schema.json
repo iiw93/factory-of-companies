@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Action Type Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "action_type_id",
+    "action_name",
+    "action_type",
+    "description"
+  ],
+  "properties": {
+    "action_type_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "analyze_request",
+        "plan_work",
+        "design_architecture",
+        "generate_repository",
+        "write_code",
+        "run_checks",
+        "deploy_service",
+        "update_documentation"
+      ]
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "recommended_roles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
