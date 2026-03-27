@@ -12,6 +12,7 @@ RESPONSE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "response.s
 COMMAND_STATE_RULES_PATH = REPO_ROOT / "packages" / "shared-contracts" / "command-state-rules.json"
 TRACEABILITY_ENVELOPE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "traceability-envelope.schema.json"
 APPROVAL_ACTION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "approval-action.schema.json"
+EXECUTION_REQUEST_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-request.schema.json"
 
 EXPECTED_COMMAND_REQUIRED = [
     "command_id",
@@ -52,6 +53,18 @@ EXPECTED_APPROVAL_ACTION_REQUIRED = [
     "created_at",
 ]
 
+EXPECTED_EXECUTION_REQUEST_REQUIRED = [
+    "execution_request_id",
+    "trace_id",
+    "command_id",
+    "session_id",
+    "user_id",
+    "target_role",
+    "action_type",
+    "priority",
+    "created_at",
+]
+
 EXPECTED_CHANNEL_ENUM = [
     "telegram",
     "dashboard",
@@ -60,6 +73,13 @@ EXPECTED_CHANNEL_ENUM = [
 EXPECTED_APPROVAL_DECISION_ENUM = [
     "approve",
     "reject",
+]
+
+EXPECTED_EXECUTION_PRIORITY_ENUM = [
+    "low",
+    "normal",
+    "high",
+    "critical",
 ]
 
 EXPECTED_STATUS_ENUM = [
@@ -460,6 +480,34 @@ def main():
             )
         )
 
+    execution_request_schema, execution_request_load_errors = load_json_file(EXECUTION_REQUEST_SCHEMA_PATH)
+    errors.extend(execution_request_load_errors)
+    if not execution_request_load_errors:
+        checks.append(f"OK: {EXECUTION_REQUEST_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {EXECUTION_REQUEST_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_required_fields(
+                "execution-request.schema.json",
+                execution_request_schema,
+                EXPECTED_EXECUTION_REQUEST_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "execution-request.schema.json",
+                execution_request_schema,
+                ["timeout_seconds", "budget_hint", "payload"],
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "execution-request.schema.json",
+                execution_request_schema,
+                "priority",
+                EXPECTED_EXECUTION_PRIORITY_ENUM,
+            )
+        )
+
     if errors:
         print("Shared contracts verification: FAILED")
         for error in errors:
@@ -470,7 +518,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, and approval action contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, approval action contract, and execution request contract match the current shared contract expectations"
     )
     return 0
 
