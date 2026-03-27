@@ -13,6 +13,7 @@ RESPONSE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "response.s
 COMMAND_STATE_RULES_PATH = REPO_ROOT / "packages" / "shared-contracts" / "command-state-rules.json"
 TRACEABILITY_ENVELOPE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "traceability-envelope.schema.json"
 SESSION_CONTEXT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "session-context.schema.json"
+PROJECT_CONTEXT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "project-context.schema.json"
 APPROVAL_ACTION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "approval-action.schema.json"
 EXECUTION_REQUEST_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-request.schema.json"
 EXECUTION_RESULT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-result.schema.json"
@@ -63,6 +64,14 @@ EXPECTED_SESSION_CONTEXT_REQUIRED = [
     "channel",
     "session_status",
     "created_at",
+]
+
+EXPECTED_PROJECT_CONTEXT_REQUIRED = [
+    "project_id",
+    "project_name",
+    "project_status",
+    "created_at",
+    "owner_user_id",
 ]
 
 EXPECTED_APPROVAL_ACTION_REQUIRED = [
@@ -148,6 +157,13 @@ EXPECTED_SESSION_STATUS_ENUM = [
     "active",
     "paused",
     "closed",
+]
+
+EXPECTED_PROJECT_STATUS_ENUM = [
+    "draft",
+    "active",
+    "paused",
+    "archived",
 ]
 
 EXPECTED_APPROVAL_DECISION_ENUM = [
@@ -759,6 +775,21 @@ def main():
             )
         )
         errors.extend(
+            ensure_property_defined(
+                "traceability-envelope.schema.json",
+                traceability_schema,
+                "project_id",
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "traceability-envelope.schema.json",
+                traceability_schema,
+                "project_id",
+                1,
+            )
+        )
+        errors.extend(
             ensure_string_min_length(
                 "traceability-envelope.schema.json",
                 traceability_schema,
@@ -817,6 +848,13 @@ def main():
                 "session-context.schema.json",
                 session_context_schema,
                 EXPECTED_SESSION_CONTEXT_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_property_defined(
+                "session-context.schema.json",
+                session_context_schema,
+                "project_id",
             )
         )
         errors.extend(
@@ -926,6 +964,143 @@ def main():
                 session_context_schema,
                 "session_status",
                 EXPECTED_SESSION_STATUS_ENUM,
+            )
+        )
+
+    project_context_schema, project_context_load_errors = load_json_file(PROJECT_CONTEXT_SCHEMA_PATH)
+    errors.extend(project_context_load_errors)
+    if not project_context_load_errors:
+        checks.append(f"OK: {PROJECT_CONTEXT_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {PROJECT_CONTEXT_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "project-context.schema.json",
+                project_context_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "project-context.schema.json",
+                project_context_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "project-context.schema.json",
+                project_context_schema,
+                EXPECTED_PROJECT_CONTEXT_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "project-context.schema.json",
+                project_context_schema,
+                [
+                    "updated_at",
+                    "company_id",
+                    "active_session_id",
+                    "active_trace_id",
+                    "project_note",
+                ],
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "project-context.schema.json",
+                project_context_schema,
+                "project_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "project-context.schema.json",
+                project_context_schema,
+                "project_name",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "project-context.schema.json",
+                project_context_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "project-context.schema.json",
+                project_context_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "project-context.schema.json",
+                project_context_schema,
+                "updated_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "project-context.schema.json",
+                project_context_schema,
+                "updated_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "project-context.schema.json",
+                project_context_schema,
+                "company_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "project-context.schema.json",
+                project_context_schema,
+                "active_session_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "project-context.schema.json",
+                project_context_schema,
+                "active_trace_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "project-context.schema.json",
+                project_context_schema,
+                "owner_user_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "project-context.schema.json",
+                project_context_schema,
+                "project_note",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "project-context.schema.json",
+                project_context_schema,
+                "project_status",
+                EXPECTED_PROJECT_STATUS_ENUM,
             )
         )
 
@@ -1040,6 +1215,14 @@ def main():
             ensure_string_min_length(
                 "execution-request.schema.json",
                 execution_request_schema,
+                "project_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "execution-request.schema.json",
+                execution_request_schema,
                 "session_id",
                 1,
             )
@@ -1056,7 +1239,14 @@ def main():
             ensure_fields_not_required(
                 "execution-request.schema.json",
                 execution_request_schema,
-                ["timeout_seconds", "budget_hint", "payload"],
+                ["project_id", "timeout_seconds", "budget_hint", "payload"],
+            )
+        )
+        errors.extend(
+            ensure_property_defined(
+                "execution-request.schema.json",
+                execution_request_schema,
+                "project_id",
             )
         )
         errors.extend(
@@ -1626,7 +1816,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, approval action contract, execution request contract, priority contract, budget hint contract, timeout policy contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, approval action contract, execution request contract, priority contract, budget hint contract, timeout policy contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
     )
     return 0
 

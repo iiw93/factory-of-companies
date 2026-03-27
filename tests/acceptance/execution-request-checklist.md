@@ -31,13 +31,16 @@ Execution request schema exists.
 `created_at` is required.
 
 ## AC-511
-`timeout_seconds` is optional.
+`project_id` is optional.
 
 ## AC-512
-`budget_hint` is optional.
+`timeout_seconds` is optional.
 
 ## AC-513
-`payload` is optional.
+`budget_hint` is optional.
 
 ## AC-514
+`payload` is optional.
+
+## AC-515
 Docs/specs/schema remain aligned.
