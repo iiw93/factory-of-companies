@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agent Role Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "role_id",
+    "role_name",
+    "role_type",
+    "description"
+  ],
+  "properties": {
+    "role_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "role_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "role_type": {
+      "type": "string",
+      "enum": [
+        "ceo_agent",
+        "planner_agent",
+        "architect_agent",
+        "repo_generator_agent",
+        "developer_agent",
+        "qa_agent",
+        "devops_agent",
+        "documentation_agent"
+      ]
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "allowed_action_types": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

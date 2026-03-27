@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -14,6 +15,9 @@ TRACEABILITY_ENVELOPE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" 
 APPROVAL_ACTION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "approval-action.schema.json"
 EXECUTION_REQUEST_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-request.schema.json"
 EXECUTION_RESULT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-result.schema.json"
+AGENT_ROLE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "agent-role.schema.json"
+EXECUTION_REQUEST_DOC_PATH = REPO_ROOT / "docs" / "specs" / "execution-request-contract.md"
+AGENT_ROLE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "agent-role-contract.md"
 
 EXPECTED_COMMAND_REQUIRED = [
     "command_id",
@@ -77,6 +81,13 @@ EXPECTED_EXECUTION_RESULT_REQUIRED = [
     "created_at",
 ]
 
+EXPECTED_AGENT_ROLE_REQUIRED = [
+    "role_id",
+    "role_name",
+    "role_type",
+    "description",
+]
+
 EXPECTED_CHANNEL_ENUM = [
     "telegram",
     "dashboard",
@@ -99,6 +110,17 @@ EXPECTED_EXECUTION_OUTCOME_ENUM = [
     "failed",
     "cancelled",
     "timed_out",
+]
+
+EXPECTED_AGENT_ROLE_TYPES = [
+    "ceo_agent",
+    "planner_agent",
+    "architect_agent",
+    "repo_generator_agent",
+    "developer_agent",
+    "qa_agent",
+    "devops_agent",
+    "documentation_agent",
 ]
 
 EXPECTED_STATUS_ENUM = [
@@ -170,6 +192,16 @@ def load_json_file(path):
         return None, [f"Invalid JSON in {path.relative_to(REPO_ROOT)} at {location}: {error.msg}"]
 
 
+def load_text_file(path):
+    if not path.exists():
+        return None, [f"Missing documentation file: {path.relative_to(REPO_ROOT)}"]
+
+    try:
+        return path.read_text(encoding="utf-8"), []
+    except OSError as error:
+        return None, [f"Unable to read {path.relative_to(REPO_ROOT)}: {error}"]
+
+
 def ensure_required_fields(schema_name, schema, expected_fields):
     errors = []
     required_fields = schema.get("required")
@@ -196,6 +228,64 @@ def ensure_fields_not_required(schema_name, schema, field_names):
             errors.append(f"{schema_name}: field '{field_name}' must remain optional")
 
     return errors
+
+
+def ensure_schema_type(schema_name, schema, expected_type):
+    schema_type = schema.get("type")
+    if schema_type != expected_type:
+        return [f"{schema_name}: top-level 'type' must be '{expected_type}'"]
+    return []
+
+
+def ensure_property_type(schema_name, schema, property_name, expected_type):
+    properties = schema.get("properties")
+
+    if not isinstance(properties, dict):
+        return [f"{schema_name}: 'properties' must be an object"]
+
+    property_schema = properties.get(property_name)
+    if not isinstance(property_schema, dict):
+        return [f"{schema_name}: missing property definition for '{property_name}'"]
+
+    property_type = property_schema.get("type")
+    if property_type != expected_type:
+        return [f"{schema_name}: '{property_name}.type' must be '{expected_type}'"]
+
+    return []
+
+
+def ensure_string_min_length(schema_name, schema, property_name, expected_minimum):
+    errors = ensure_property_type(schema_name, schema, property_name, "string")
+    if errors:
+        return errors
+
+    properties = schema.get("properties")
+    property_schema = properties.get(property_name)
+    min_length = property_schema.get("minLength")
+
+    if min_length != expected_minimum:
+        return [f"{schema_name}: '{property_name}.minLength' must be {expected_minimum}"]
+
+    return []
+
+
+def ensure_array_items_type(schema_name, schema, property_name, expected_type):
+    errors = ensure_property_type(schema_name, schema, property_name, "array")
+    if errors:
+        return errors
+
+    properties = schema.get("properties")
+    property_schema = properties.get(property_name)
+    items_schema = property_schema.get("items")
+
+    if not isinstance(items_schema, dict):
+        return [f"{schema_name}: '{property_name}.items' must be an object"]
+
+    item_type = items_schema.get("type")
+    if item_type != expected_type:
+        return [f"{schema_name}: '{property_name}.items.type' must be '{expected_type}'"]
+
+    return []
 
 
 def ensure_enum_contains(schema_name, schema, property_name, expected_values):
@@ -232,6 +322,38 @@ def ensure_enum_matches(schema_name, schema, property_name, expected_values):
     unexpected_values = [value for value in enum_values if value not in expected_values]
     for value in unexpected_values:
         errors.append(f"{schema_name}: unexpected enum value '{value}' in '{property_name}'")
+
+    return errors
+
+
+def ensure_doc_contains(doc_name, content, required_fragments):
+    errors = []
+
+    for fragment in required_fragments:
+        if fragment not in content:
+            errors.append(f"{doc_name}: missing required text '{fragment}'")
+
+    return errors
+
+
+def ensure_doc_mentions_values(doc_name, content, expected_values, context_label):
+    errors = []
+
+    for value in expected_values:
+        if value not in content:
+            errors.append(f"{doc_name}: missing {context_label} '{value}'")
+
+    return errors
+
+
+def ensure_example_values_match(doc_name, content, field_name, expected_values):
+    errors = []
+    pattern = re.compile(rf'"{re.escape(field_name)}"\s*:\s*"([^"]+)"')
+    values = pattern.findall(content)
+
+    for value in values:
+        if value not in expected_values:
+            errors.append(f"{doc_name}: example value '{value}' for '{field_name}' is not declared in role model")
 
     return errors
 
@@ -512,6 +634,14 @@ def main():
             )
         )
         errors.extend(
+            ensure_string_min_length(
+                "execution-request.schema.json",
+                execution_request_schema,
+                "target_role",
+                1,
+            )
+        )
+        errors.extend(
             ensure_fields_not_required(
                 "execution-request.schema.json",
                 execution_request_schema,
@@ -561,6 +691,122 @@ def main():
             )
         )
 
+    agent_role_schema, agent_role_load_errors = load_json_file(AGENT_ROLE_SCHEMA_PATH)
+    errors.extend(agent_role_load_errors)
+    if not agent_role_load_errors:
+        checks.append(f"OK: {AGENT_ROLE_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {AGENT_ROLE_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_schema_type(
+                "agent-role.schema.json",
+                agent_role_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "agent-role.schema.json",
+                agent_role_schema,
+                EXPECTED_AGENT_ROLE_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "agent-role.schema.json",
+                agent_role_schema,
+                "role_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "agent-role.schema.json",
+                agent_role_schema,
+                "role_name",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "agent-role.schema.json",
+                agent_role_schema,
+                "description",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "agent-role.schema.json",
+                agent_role_schema,
+                ["allowed_action_types"],
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "agent-role.schema.json",
+                agent_role_schema,
+                "role_type",
+                EXPECTED_AGENT_ROLE_TYPES,
+            )
+        )
+        errors.extend(
+            ensure_array_items_type(
+                "agent-role.schema.json",
+                agent_role_schema,
+                "allowed_action_types",
+                "string",
+            )
+        )
+
+    execution_request_doc, execution_request_doc_errors = load_text_file(EXECUTION_REQUEST_DOC_PATH)
+    errors.extend(execution_request_doc_errors)
+    if not execution_request_doc_errors:
+        checks.append(f"OK: {EXECUTION_REQUEST_DOC_PATH.relative_to(REPO_ROOT)} exists")
+        errors.extend(
+            ensure_doc_contains(
+                "execution-request-contract.md",
+                execution_request_doc,
+                [
+                    "`target_role` определяет логическую роль исполнителя.",
+                    "docs/specs/agent-role-contract.md",
+                ],
+            )
+        )
+        errors.extend(
+            ensure_example_values_match(
+                "execution-request-contract.md",
+                execution_request_doc,
+                "target_role",
+                EXPECTED_AGENT_ROLE_TYPES,
+            )
+        )
+
+    agent_role_doc, agent_role_doc_errors = load_text_file(AGENT_ROLE_DOC_PATH)
+    errors.extend(agent_role_doc_errors)
+    if not agent_role_doc_errors:
+        checks.append(f"OK: {AGENT_ROLE_DOC_PATH.relative_to(REPO_ROOT)} exists")
+        errors.extend(
+            ensure_doc_contains(
+                "agent-role-contract.md",
+                agent_role_doc,
+                [
+                    "execution-request.target_role",
+                    "не является runtime registry.",
+                    "не является org chart implementation.",
+                    "не является permission system.",
+                    "не является scheduling layer.",
+                ],
+            )
+        )
+        errors.extend(
+            ensure_doc_mentions_values(
+                "agent-role-contract.md",
+                agent_role_doc,
+                EXPECTED_AGENT_ROLE_TYPES,
+                "role type",
+            )
+        )
+
     if errors:
         print("Shared contracts verification: FAILED")
         for error in errors:
@@ -571,7 +817,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, approval action contract, execution request contract, and execution result contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, approval action contract, execution request contract, execution result contract, and agent role contract match the current shared contract expectations"
     )
     return 0
 

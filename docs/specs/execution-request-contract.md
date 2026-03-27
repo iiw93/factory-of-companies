@@ -17,7 +17,7 @@ Execution request contract описывает нормализованный о�
   "command_id": "cmd-0001",
   "session_id": "session-001",
   "user_id": "owner-001",
-  "target_role": "planner",
+  "target_role": "planner_agent",
   "action_type": "prepare_project_plan",
   "priority": "normal",
   "created_at": "2026-03-26T00:20:00Z",
@@ -64,6 +64,8 @@ Execution request contract описывает нормализованный о�
 
 ### target_role
 `target_role` определяет логическую роль исполнителя.
+
+Значение `target_role` должно оставаться согласованным с `docs/specs/agent-role-contract.md`.
 
 ### action_type
 `action_type` определяет тип исполняемой работы.
