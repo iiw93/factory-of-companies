@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Deployment Target Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "deployment_target_id",
+    "target_name",
+    "target_type",
+    "target_status",
+    "created_at"
+  ],
+  "properties": {
+    "deployment_target_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_type": {
+      "type": "string",
+      "enum": [
+        "local_server",
+        "container_host",
+        "vm",
+        "bare_metal",
+        "cloud_service",
+        "other"
+      ]
+    },
+    "target_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "ready",
+        "active",
+        "paused",
+        "retired"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "company_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_delivery_package_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_release_decision_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "environment_name": {
+      "type": "string",
+      "enum": [
+        "dev",
+        "staging",
+        "prod",
+        "test",
+        "other"
+      ]
+    },
+    "target_uri": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

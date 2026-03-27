@@ -26,6 +26,7 @@ EXECUTION_REQUEST_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "e
 EXECUTION_RESULT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-result.schema.json"
 RELEASE_DECISION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "release-decision.schema.json"
 DELIVERY_PACKAGE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "delivery-package.schema.json"
+DEPLOYMENT_TARGET_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "deployment-target.schema.json"
 ORCHESTRATION_HANDOFF_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "orchestration-handoff.schema.json"
 AGENT_ROLE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "agent-role.schema.json"
 ACTION_TYPE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "action-type.schema.json"
@@ -190,6 +191,14 @@ EXPECTED_DELIVERY_PACKAGE_REQUIRED = [
     "delivery_package_id",
     "package_name",
     "package_status",
+    "created_at",
+]
+
+EXPECTED_DEPLOYMENT_TARGET_REQUIRED = [
+    "deployment_target_id",
+    "target_name",
+    "target_type",
+    "target_status",
     "created_at",
 ]
 
@@ -390,6 +399,31 @@ EXPECTED_DELIVERY_PACKAGE_STATUS_ENUM = [
     "approved",
     "published",
     "archived",
+]
+
+EXPECTED_DEPLOYMENT_TARGET_TYPE_ENUM = [
+    "local_server",
+    "container_host",
+    "vm",
+    "bare_metal",
+    "cloud_service",
+    "other",
+]
+
+EXPECTED_DEPLOYMENT_TARGET_STATUS_ENUM = [
+    "draft",
+    "ready",
+    "active",
+    "paused",
+    "retired",
+]
+
+EXPECTED_ENVIRONMENT_NAME_ENUM = [
+    "dev",
+    "staging",
+    "prod",
+    "test",
+    "other",
 ]
 
 EXPECTED_HANDOFF_STATUS_ENUM = [
@@ -3130,6 +3164,107 @@ def main():
             )
         )
 
+    deployment_target_schema, deployment_target_load_errors = load_json_file(DEPLOYMENT_TARGET_SCHEMA_PATH)
+    errors.extend(deployment_target_load_errors)
+    if not deployment_target_load_errors:
+        checks.append(f"OK: {DEPLOYMENT_TARGET_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {DEPLOYMENT_TARGET_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "deployment-target.schema.json",
+                deployment_target_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "deployment-target.schema.json",
+                deployment_target_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "deployment-target.schema.json",
+                deployment_target_schema,
+                EXPECTED_DEPLOYMENT_TARGET_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "deployment-target.schema.json",
+                deployment_target_schema,
+                [
+                    "project_id",
+                    "company_id",
+                    "linked_delivery_package_id",
+                    "linked_release_decision_id",
+                    "environment_name",
+                    "target_uri",
+                    "target_note",
+                ],
+            )
+        )
+        for property_name in [
+            "deployment_target_id",
+            "target_name",
+            "project_id",
+            "company_id",
+            "linked_delivery_package_id",
+            "linked_release_decision_id",
+            "target_uri",
+            "target_note",
+        ]:
+            errors.extend(
+                ensure_string_min_length(
+                    "deployment-target.schema.json",
+                    deployment_target_schema,
+                    property_name,
+                    1,
+                )
+            )
+        errors.extend(
+            ensure_property_type(
+                "deployment-target.schema.json",
+                deployment_target_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "deployment-target.schema.json",
+                deployment_target_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "deployment-target.schema.json",
+                deployment_target_schema,
+                "target_type",
+                EXPECTED_DEPLOYMENT_TARGET_TYPE_ENUM,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "deployment-target.schema.json",
+                deployment_target_schema,
+                "target_status",
+                EXPECTED_DEPLOYMENT_TARGET_STATUS_ENUM,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "deployment-target.schema.json",
+                deployment_target_schema,
+                "environment_name",
+                EXPECTED_ENVIRONMENT_NAME_ENUM,
+            )
+        )
+
     identifier_checks = [
         ("quality-gate.schema.json", quality_gate_schema, quality_gate_load_errors, "quality_gate_id"),
         ("evidence-bundle.schema.json", evidence_bundle_schema, evidence_bundle_load_errors, "evidence_bundle_id"),
@@ -3139,7 +3274,9 @@ def main():
         ("artifact-reference.schema.json", artifact_reference_schema, artifact_reference_load_errors, "artifact_id"),
         ("traceability-envelope.schema.json", traceability_schema, traceability_load_errors, "trace_id"),
         ("project-context.schema.json", project_context_schema, project_context_load_errors, "project_id"),
+        ("company-context.schema.json", company_context_schema, company_context_load_errors, "company_id"),
         ("delivery-package.schema.json", delivery_package_schema, delivery_package_load_errors, "delivery_package_id"),
+        ("deployment-target.schema.json", deployment_target_schema, deployment_target_load_errors, "deployment_target_id"),
     ]
 
     for schema_name, schema, load_errors, identifier_name in identifier_checks:
@@ -3501,7 +3638,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, priority contract, budget hint contract, timeout policy contract, execution result contract, release decision contract, delivery package contract, agent role contract, and action type contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, priority contract, budget hint contract, timeout policy contract, execution result contract, release decision contract, delivery package contract, deployment target contract, agent role contract, and action type contract match the current shared contract expectations"
     )
     return 0
 
