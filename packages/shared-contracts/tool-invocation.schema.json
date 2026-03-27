@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Tool Invocation Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tool_invocation_id",
+    "tool_name",
+    "tool_type",
+    "invocation_status",
+    "created_at"
+  ],
+  "properties": {
+    "tool_invocation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tool_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tool_type": {
+      "type": "string",
+      "enum": [
+        "script",
+        "cli",
+        "api",
+        "agent_tool",
+        "system_tool",
+        "other"
+      ]
+    },
+    "invocation_status": {
+      "type": "string",
+      "enum": [
+        "prepared",
+        "running",
+        "succeeded",
+        "failed",
+        "cancelled"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_result_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "handoff_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "role_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "input_reference": {
+      "type": "string",
+      "minLength": 1
+    },
+    "output_reference": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tool_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

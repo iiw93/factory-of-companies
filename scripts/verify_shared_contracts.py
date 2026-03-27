@@ -31,6 +31,7 @@ ORCHESTRATION_HANDOFF_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" 
 AGENT_ROLE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "agent-role.schema.json"
 ACTION_TYPE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "action-type.schema.json"
 RUNTIME_CAPABILITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "runtime-capability.schema.json"
+TOOL_INVOCATION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "tool-invocation.schema.json"
 BUDGET_HINT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "budget-hint.schema.json"
 PRIORITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "priority.schema.json"
 TIMEOUT_POLICY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "timeout-policy.schema.json"
@@ -235,6 +236,14 @@ EXPECTED_RUNTIME_CAPABILITY_REQUIRED = [
     "capability_status",
     "created_at",
     "role_type",
+]
+
+EXPECTED_TOOL_INVOCATION_REQUIRED = [
+    "tool_invocation_id",
+    "tool_name",
+    "tool_type",
+    "invocation_status",
+    "created_at",
 ]
 
 EXPECTED_BUDGET_HINT_REQUIRED = [
@@ -470,6 +479,23 @@ EXPECTED_RUNTIME_CAPABILITY_STATUS_ENUM = [
     "limited",
     "unavailable",
     "deprecated",
+]
+
+EXPECTED_TOOL_TYPES = [
+    "script",
+    "cli",
+    "api",
+    "agent_tool",
+    "system_tool",
+    "other",
+]
+
+EXPECTED_INVOCATION_STATUS_ENUM = [
+    "prepared",
+    "running",
+    "succeeded",
+    "failed",
+    "cancelled",
 ]
 
 EXPECTED_BUDGET_UNITS = [
@@ -3402,9 +3428,108 @@ def main():
                 )
             )
 
+    tool_invocation_schema, tool_invocation_load_errors = load_json_file(TOOL_INVOCATION_SCHEMA_PATH)
+    errors.extend(tool_invocation_load_errors)
+    if not tool_invocation_load_errors:
+        checks.append(f"OK: {TOOL_INVOCATION_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {TOOL_INVOCATION_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "tool-invocation.schema.json",
+                tool_invocation_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "tool-invocation.schema.json",
+                tool_invocation_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "tool-invocation.schema.json",
+                tool_invocation_schema,
+                EXPECTED_TOOL_INVOCATION_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "tool-invocation.schema.json",
+                tool_invocation_schema,
+                [
+                    "trace_id",
+                    "execution_request_id",
+                    "execution_result_id",
+                    "handoff_id",
+                    "role_type",
+                    "action_type",
+                    "input_reference",
+                    "output_reference",
+                    "tool_note",
+                ],
+            )
+        )
+        for property_name in [
+            "tool_invocation_id",
+            "tool_name",
+            "trace_id",
+            "execution_request_id",
+            "execution_result_id",
+            "handoff_id",
+            "role_type",
+            "action_type",
+            "input_reference",
+            "output_reference",
+            "tool_note",
+        ]:
+            errors.extend(
+                ensure_string_min_length(
+                    "tool-invocation.schema.json",
+                    tool_invocation_schema,
+                    property_name,
+                    1,
+                )
+            )
+        errors.extend(
+            ensure_property_type(
+                "tool-invocation.schema.json",
+                tool_invocation_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "tool-invocation.schema.json",
+                tool_invocation_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "tool-invocation.schema.json",
+                tool_invocation_schema,
+                "tool_type",
+                EXPECTED_TOOL_TYPES,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "tool-invocation.schema.json",
+                tool_invocation_schema,
+                "invocation_status",
+                EXPECTED_INVOCATION_STATUS_ENUM,
+            )
+        )
+
     identifier_checks = [
         ("quality-gate.schema.json", quality_gate_schema, quality_gate_load_errors, "quality_gate_id"),
         ("evidence-bundle.schema.json", evidence_bundle_schema, evidence_bundle_load_errors, "evidence_bundle_id"),
+        ("execution-request.schema.json", execution_request_schema, execution_request_load_errors, "execution_request_id"),
         ("execution-result.schema.json", execution_result_schema, execution_result_load_errors, "execution_result_id"),
         ("release-decision.schema.json", release_decision_schema, release_decision_load_errors, "release_decision_id"),
         ("governance-decision.schema.json", governance_decision_schema, governance_decision_load_errors, "governance_decision_id"),
@@ -3414,8 +3539,9 @@ def main():
         ("company-context.schema.json", company_context_schema, company_context_load_errors, "company_id"),
         ("delivery-package.schema.json", delivery_package_schema, delivery_package_load_errors, "delivery_package_id"),
         ("deployment-target.schema.json", deployment_target_schema, deployment_target_load_errors, "deployment_target_id"),
-        ("orchestration-handoff.schema.json", orchestration_handoff_schema, orchestration_handoff_load_errors, "target_role"),
+        ("orchestration-handoff.schema.json", orchestration_handoff_schema, orchestration_handoff_load_errors, "handoff_id"),
         ("runtime-capability.schema.json", runtime_capability_schema, runtime_capability_load_errors, "capability_id"),
+        ("tool-invocation.schema.json", tool_invocation_schema, tool_invocation_load_errors, "tool_invocation_id"),
     ]
 
     for schema_name, schema, load_errors, identifier_name in identifier_checks:
@@ -3795,7 +3921,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, priority contract, budget hint contract, timeout policy contract, execution result contract, release decision contract, delivery package contract, deployment target contract, agent role contract, action type contract, and runtime capability contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, priority contract, budget hint contract, timeout policy contract, execution result contract, release decision contract, delivery package contract, deployment target contract, agent role contract, action type contract, runtime capability contract, and tool invocation contract match the current shared contract expectations"
     )
     return 0
 
