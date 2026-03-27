@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Execution Result Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "execution_result_id",
+    "execution_request_id",
+    "trace_id",
+    "command_id",
+    "session_id",
+    "user_id",
+    "outcome",
+    "created_at"
+  ],
+  "properties": {
+    "execution_result_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "command_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "user_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "failed",
+        "cancelled",
+        "timed_out"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status_message": {
+      "type": "string",
+      "minLength": 1
+    },
+    "result_payload": {
+      "type": "object"
+    },
+    "error_code": {
+      "type": "string",
+      "minLength": 1
+    },
+    "error_message": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
