@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Orchestration Handoff Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "handoff_id",
+    "trace_id",
+    "command_id",
+    "source_role",
+    "target_role",
+    "action_type",
+    "handoff_status",
+    "created_at",
+    "priority"
+  ],
+  "properties": {
+    "handoff_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "command_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "handoff_status": {
+      "type": "string",
+      "enum": [
+        "prepared",
+        "dispatched",
+        "accepted",
+        "rejected",
+        "cancelled"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "normal",
+        "high",
+        "critical"
+      ]
+    },
+    "linked_governance_decision_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_artifact_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "handoff_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

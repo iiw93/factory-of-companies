@@ -21,6 +21,7 @@ GOVERNANCE_DECISION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / 
 APPROVAL_ACTION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "approval-action.schema.json"
 EXECUTION_REQUEST_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-request.schema.json"
 EXECUTION_RESULT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-result.schema.json"
+ORCHESTRATION_HANDOFF_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "orchestration-handoff.schema.json"
 AGENT_ROLE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "agent-role.schema.json"
 ACTION_TYPE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "action-type.schema.json"
 BUDGET_HINT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "budget-hint.schema.json"
@@ -145,6 +146,18 @@ EXPECTED_EXECUTION_RESULT_REQUIRED = [
     "created_at",
 ]
 
+EXPECTED_ORCHESTRATION_HANDOFF_REQUIRED = [
+    "handoff_id",
+    "trace_id",
+    "command_id",
+    "source_role",
+    "target_role",
+    "action_type",
+    "handoff_status",
+    "created_at",
+    "priority",
+]
+
 EXPECTED_AGENT_ROLE_REQUIRED = [
     "role_id",
     "role_name",
@@ -264,6 +277,14 @@ EXPECTED_EXECUTION_OUTCOME_ENUM = [
     "failed",
     "cancelled",
     "timed_out",
+]
+
+EXPECTED_HANDOFF_STATUS_ENUM = [
+    "prepared",
+    "dispatched",
+    "accepted",
+    "rejected",
+    "cancelled",
 ]
 
 EXPECTED_AGENT_ROLE_TYPES = [
@@ -1540,6 +1561,13 @@ def main():
             )
         )
         errors.extend(
+            ensure_property_defined(
+                "artifact-reference.schema.json",
+                artifact_reference_schema,
+                "artifact_id",
+            )
+        )
+        errors.extend(
             ensure_string_min_length(
                 "artifact-reference.schema.json",
                 artifact_reference_schema,
@@ -1667,6 +1695,13 @@ def main():
                 governance_decision_schema,
                 "governance_decision_id",
                 1,
+            )
+        )
+        errors.extend(
+            ensure_property_defined(
+                "governance-decision.schema.json",
+                governance_decision_schema,
+                "governance_decision_id",
             )
         )
         errors.extend(
@@ -1906,6 +1941,13 @@ def main():
             )
         )
         errors.extend(
+            ensure_property_defined(
+                "execution-request.schema.json",
+                execution_request_schema,
+                "execution_request_id",
+            )
+        )
+        errors.extend(
             ensure_string_min_length(
                 "execution-request.schema.json",
                 execution_request_schema,
@@ -1986,6 +2028,169 @@ def main():
                 ensure_property_enum_alignment(
                     "execution-request.schema.json",
                     execution_request_schema,
+                    "priority",
+                    "priority.schema.json",
+                    priority_schema,
+                    "priority_level",
+                )
+            )
+
+    orchestration_handoff_schema, orchestration_handoff_load_errors = load_json_file(ORCHESTRATION_HANDOFF_SCHEMA_PATH)
+    errors.extend(orchestration_handoff_load_errors)
+    if not orchestration_handoff_load_errors:
+        checks.append(f"OK: {ORCHESTRATION_HANDOFF_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {ORCHESTRATION_HANDOFF_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "orchestration-handoff.schema.json",
+                orchestration_handoff_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "orchestration-handoff.schema.json",
+                orchestration_handoff_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "orchestration-handoff.schema.json",
+                orchestration_handoff_schema,
+                EXPECTED_ORCHESTRATION_HANDOFF_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "orchestration-handoff.schema.json",
+                orchestration_handoff_schema,
+                [
+                    "execution_request_id",
+                    "linked_governance_decision_id",
+                    "linked_artifact_id",
+                    "handoff_note",
+                ],
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "orchestration-handoff.schema.json",
+                orchestration_handoff_schema,
+                "handoff_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "orchestration-handoff.schema.json",
+                orchestration_handoff_schema,
+                "trace_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "orchestration-handoff.schema.json",
+                orchestration_handoff_schema,
+                "command_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "orchestration-handoff.schema.json",
+                orchestration_handoff_schema,
+                "execution_request_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "orchestration-handoff.schema.json",
+                orchestration_handoff_schema,
+                "source_role",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "orchestration-handoff.schema.json",
+                orchestration_handoff_schema,
+                "target_role",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "orchestration-handoff.schema.json",
+                orchestration_handoff_schema,
+                "action_type",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "orchestration-handoff.schema.json",
+                orchestration_handoff_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "orchestration-handoff.schema.json",
+                orchestration_handoff_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "orchestration-handoff.schema.json",
+                orchestration_handoff_schema,
+                "linked_governance_decision_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "orchestration-handoff.schema.json",
+                orchestration_handoff_schema,
+                "linked_artifact_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "orchestration-handoff.schema.json",
+                orchestration_handoff_schema,
+                "handoff_note",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "orchestration-handoff.schema.json",
+                orchestration_handoff_schema,
+                "handoff_status",
+                EXPECTED_HANDOFF_STATUS_ENUM,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "orchestration-handoff.schema.json",
+                orchestration_handoff_schema,
+                "priority",
+                EXPECTED_EXECUTION_PRIORITY_ENUM,
+            )
+        )
+        if not priority_load_errors:
+            errors.extend(
+                ensure_property_enum_alignment(
+                    "orchestration-handoff.schema.json",
+                    orchestration_handoff_schema,
                     "priority",
                     "priority.schema.json",
                     priority_schema,
@@ -2230,6 +2435,13 @@ def main():
             )
         )
         errors.extend(
+            ensure_property_defined(
+                "agent-role.schema.json",
+                agent_role_schema,
+                "role_type",
+            )
+        )
+        errors.extend(
             ensure_string_min_length(
                 "agent-role.schema.json",
                 agent_role_schema,
@@ -2294,6 +2506,13 @@ def main():
                 action_type_schema,
                 "action_name",
                 1,
+            )
+        )
+        errors.extend(
+            ensure_property_defined(
+                "action-type.schema.json",
+                action_type_schema,
+                "action_type",
             )
         )
         errors.extend(
@@ -2526,7 +2745,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, governance decision contract, approval action contract, execution request contract, priority contract, budget hint contract, timeout policy contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, priority contract, budget hint contract, timeout policy contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
     )
     return 0
 
