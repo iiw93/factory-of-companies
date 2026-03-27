@@ -12,6 +12,7 @@ COMMAND_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "command.sch
 RESPONSE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "response.schema.json"
 COMMAND_STATE_RULES_PATH = REPO_ROOT / "packages" / "shared-contracts" / "command-state-rules.json"
 TRACEABILITY_ENVELOPE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "traceability-envelope.schema.json"
+SESSION_CONTEXT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "session-context.schema.json"
 APPROVAL_ACTION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "approval-action.schema.json"
 EXECUTION_REQUEST_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-request.schema.json"
 EXECUTION_RESULT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-result.schema.json"
@@ -54,6 +55,14 @@ EXPECTED_TRACEABILITY_REQUIRED = [
     "channel",
     "created_at",
     "current_state",
+]
+
+EXPECTED_SESSION_CONTEXT_REQUIRED = [
+    "session_id",
+    "user_id",
+    "channel",
+    "session_status",
+    "created_at",
 ]
 
 EXPECTED_APPROVAL_ACTION_REQUIRED = [
@@ -133,6 +142,12 @@ EXPECTED_TIMEOUT_POLICY_REQUIRED = [
 EXPECTED_CHANNEL_ENUM = [
     "telegram",
     "dashboard",
+]
+
+EXPECTED_SESSION_STATUS_ENUM = [
+    "active",
+    "paused",
+    "closed",
 ]
 
 EXPECTED_APPROVAL_DECISION_ENUM = [
@@ -313,6 +328,13 @@ def ensure_schema_type(schema_name, schema, expected_type):
     schema_type = schema.get("type")
     if schema_type != expected_type:
         return [f"{schema_name}: top-level 'type' must be '{expected_type}'"]
+    return []
+
+
+def ensure_top_level_value(schema_name, schema, property_name, expected_value):
+    actual_value = schema.get(property_name)
+    if actual_value != expected_value:
+        return [f"{schema_name}: top-level '{property_name}' must be '{expected_value}'"]
     return []
 
 
@@ -737,6 +759,14 @@ def main():
             )
         )
         errors.extend(
+            ensure_string_min_length(
+                "traceability-envelope.schema.json",
+                traceability_schema,
+                "session_id",
+                1,
+            )
+        )
+        errors.extend(
             ensure_fields_not_required(
                 "traceability-envelope.schema.json",
                 traceability_schema,
@@ -761,6 +791,143 @@ def main():
                     state_rules_states,
                 )
             )
+
+    session_context_schema, session_context_load_errors = load_json_file(SESSION_CONTEXT_SCHEMA_PATH)
+    errors.extend(session_context_load_errors)
+    if not session_context_load_errors:
+        checks.append(f"OK: {SESSION_CONTEXT_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {SESSION_CONTEXT_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "session-context.schema.json",
+                session_context_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "session-context.schema.json",
+                session_context_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "session-context.schema.json",
+                session_context_schema,
+                EXPECTED_SESSION_CONTEXT_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "session-context.schema.json",
+                session_context_schema,
+                [
+                    "updated_at",
+                    "active_trace_id",
+                    "project_id",
+                    "company_id",
+                    "context_note",
+                ],
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "session-context.schema.json",
+                session_context_schema,
+                "session_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "session-context.schema.json",
+                session_context_schema,
+                "user_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "session-context.schema.json",
+                session_context_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "session-context.schema.json",
+                session_context_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "session-context.schema.json",
+                session_context_schema,
+                "updated_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "session-context.schema.json",
+                session_context_schema,
+                "updated_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "session-context.schema.json",
+                session_context_schema,
+                "active_trace_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "session-context.schema.json",
+                session_context_schema,
+                "project_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "session-context.schema.json",
+                session_context_schema,
+                "company_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "session-context.schema.json",
+                session_context_schema,
+                "context_note",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "session-context.schema.json",
+                session_context_schema,
+                "channel",
+                EXPECTED_CHANNEL_ENUM,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "session-context.schema.json",
+                session_context_schema,
+                "session_status",
+                EXPECTED_SESSION_STATUS_ENUM,
+            )
+        )
 
     approval_action_schema, approval_action_load_errors = load_json_file(APPROVAL_ACTION_SCHEMA_PATH)
     errors.extend(approval_action_load_errors)
@@ -867,6 +1034,14 @@ def main():
                 "execution-request.schema.json",
                 execution_request_schema,
                 EXPECTED_EXECUTION_REQUEST_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "execution-request.schema.json",
+                execution_request_schema,
+                "session_id",
+                1,
             )
         )
         errors.extend(
@@ -1079,6 +1254,14 @@ def main():
                 "execution-result.schema.json",
                 execution_result_schema,
                 EXPECTED_EXECUTION_RESULT_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "execution-result.schema.json",
+                execution_result_schema,
+                "session_id",
+                1,
             )
         )
         errors.extend(
@@ -1443,7 +1626,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, approval action contract, execution request contract, priority contract, budget hint contract, timeout policy contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, approval action contract, execution request contract, priority contract, budget hint contract, timeout policy contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
     )
     return 0
 

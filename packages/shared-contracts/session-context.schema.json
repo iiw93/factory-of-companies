@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Session Context Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "session_id",
+    "user_id",
+    "channel",
+    "session_status",
+    "created_at"
+  ],
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "user_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "channel": {
+      "type": "string",
+      "enum": [
+        "telegram",
+        "dashboard"
+      ]
+    },
+    "session_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paused",
+        "closed"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "active_trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "company_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "context_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
