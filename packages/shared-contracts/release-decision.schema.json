@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Release Decision Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "release_decision_id",
+    "decision_name",
+    "release_status",
+    "created_at"
+  ],
+  "properties": {
+    "release_decision_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decision_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "release_status": {
+      "type": "string",
+      "enum": [
+        "approved",
+        "blocked",
+        "deferred",
+        "requires_review"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_result_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_quality_gate_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_evidence_bundle_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_governance_decision_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "release_scope": {
+      "type": "string",
+      "enum": [
+        "artifact",
+        "project",
+        "bundle"
+      ]
+    },
+    "release_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
