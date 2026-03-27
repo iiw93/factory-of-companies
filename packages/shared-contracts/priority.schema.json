@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Priority Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "priority_id",
+    "priority_name",
+    "priority_level",
+    "description"
+  ],
+  "properties": {
+    "priority_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "priority_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "priority_level": {
+      "type": "string",
+      "enum": [
+        "low",
+        "normal",
+        "high",
+        "critical"
+      ]
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "recommended_use_cases": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

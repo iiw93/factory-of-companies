@@ -18,9 +18,11 @@ EXECUTION_RESULT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "ex
 AGENT_ROLE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "agent-role.schema.json"
 ACTION_TYPE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "action-type.schema.json"
 BUDGET_HINT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "budget-hint.schema.json"
+PRIORITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "priority.schema.json"
 EXECUTION_REQUEST_DOC_PATH = REPO_ROOT / "docs" / "specs" / "execution-request-contract.md"
 AGENT_ROLE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "agent-role-contract.md"
 ACTION_TYPE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "action-type-contract.md"
+PRIORITY_DOC_PATH = REPO_ROOT / "docs" / "specs" / "priority-contract.md"
 
 EXPECTED_COMMAND_REQUIRED = [
     "command_id",
@@ -106,6 +108,13 @@ EXPECTED_BUDGET_HINT_REQUIRED = [
     "budget_unit",
     "created_at",
     "scope",
+]
+
+EXPECTED_PRIORITY_REQUIRED = [
+    "priority_id",
+    "priority_name",
+    "priority_level",
+    "description",
 ]
 
 EXPECTED_CHANNEL_ENUM = [
@@ -379,6 +388,49 @@ def ensure_enum_matches(schema_name, schema, property_name, expected_values):
     unexpected_values = [value for value in enum_values if value not in expected_values]
     for value in unexpected_values:
         errors.append(f"{schema_name}: unexpected enum value '{value}' in '{property_name}'")
+
+    return errors
+
+
+def get_property_enum(schema_name, schema, property_name):
+    properties = schema.get("properties")
+
+    if not isinstance(properties, dict):
+        return None, [f"{schema_name}: 'properties' must be an object"]
+
+    property_schema = properties.get(property_name)
+    if not isinstance(property_schema, dict):
+        return None, [f"{schema_name}: missing property definition for '{property_name}'"]
+
+    enum_values = property_schema.get("enum")
+    if not isinstance(enum_values, list):
+        return None, [f"{schema_name}: '{property_name}.enum' must be a list"]
+
+    return enum_values, []
+
+
+def ensure_property_enum_alignment(left_schema_name, left_schema, left_property_name, right_schema_name, right_schema, right_property_name):
+    left_enum, left_errors = get_property_enum(left_schema_name, left_schema, left_property_name)
+    if left_errors:
+        return left_errors
+
+    right_enum, right_errors = get_property_enum(right_schema_name, right_schema, right_property_name)
+    if right_errors:
+        return right_errors
+
+    left_values = set(left_enum)
+    right_values = set(right_enum)
+    errors = []
+
+    for value in sorted(right_values - left_values):
+        errors.append(
+            f"{left_schema_name}: missing enum value '{value}' in '{left_property_name}' compared to {right_schema_name}.{right_property_name}"
+        )
+
+    for value in sorted(left_values - right_values):
+        errors.append(
+            f"{left_schema_name}: unexpected enum value '{value}' in '{left_property_name}' compared to {right_schema_name}.{right_property_name}"
+        )
 
     return errors
 
@@ -678,6 +730,73 @@ def main():
             )
         )
 
+    priority_schema, priority_load_errors = load_json_file(PRIORITY_SCHEMA_PATH)
+    errors.extend(priority_load_errors)
+    if not priority_load_errors:
+        checks.append(f"OK: {PRIORITY_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {PRIORITY_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_schema_type(
+                "priority.schema.json",
+                priority_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "priority.schema.json",
+                priority_schema,
+                EXPECTED_PRIORITY_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "priority.schema.json",
+                priority_schema,
+                "priority_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "priority.schema.json",
+                priority_schema,
+                "priority_name",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "priority.schema.json",
+                priority_schema,
+                "description",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "priority.schema.json",
+                priority_schema,
+                ["recommended_use_cases"],
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "priority.schema.json",
+                priority_schema,
+                "priority_level",
+                EXPECTED_EXECUTION_PRIORITY_ENUM,
+            )
+        )
+        errors.extend(
+            ensure_array_items_type(
+                "priority.schema.json",
+                priority_schema,
+                "recommended_use_cases",
+                "string",
+            )
+        )
+
     execution_request_schema, execution_request_load_errors = load_json_file(EXECUTION_REQUEST_SCHEMA_PATH)
     errors.extend(execution_request_load_errors)
     if not execution_request_load_errors:
@@ -720,6 +839,17 @@ def main():
                 EXPECTED_EXECUTION_PRIORITY_ENUM,
             )
         )
+        if not priority_load_errors:
+            errors.extend(
+                ensure_property_enum_alignment(
+                    "execution-request.schema.json",
+                    execution_request_schema,
+                    "priority",
+                    "priority.schema.json",
+                    priority_schema,
+                    "priority_level",
+                )
+            )
 
     budget_hint_schema, budget_hint_load_errors = load_json_file(BUDGET_HINT_SCHEMA_PATH)
     errors.extend(budget_hint_load_errors)
@@ -1010,6 +1140,36 @@ def main():
             )
         )
 
+    priority_doc, priority_doc_errors = load_text_file(PRIORITY_DOC_PATH)
+    errors.extend(priority_doc_errors)
+    if not priority_doc_errors:
+        checks.append(f"OK: {PRIORITY_DOC_PATH.relative_to(REPO_ROOT)} exists")
+        errors.extend(
+            ensure_doc_contains(
+                "priority-contract.md",
+                priority_doc,
+                [
+                    "`execution-request.priority`",
+                    "relative importance and urgency",
+                    "advisory routing",
+                    "planning and orchestration hints",
+                    "future linkage с approvals, budget и execution",
+                    "не является scheduler.",
+                    "не является queue engine.",
+                    "не является SLA engine.",
+                    "не является runtime enforcement policy.",
+                ],
+            )
+        )
+        errors.extend(
+            ensure_doc_mentions_values(
+                "priority-contract.md",
+                priority_doc,
+                EXPECTED_EXECUTION_PRIORITY_ENUM,
+                "priority level",
+            )
+        )
+
     if errors:
         print("Shared contracts verification: FAILED")
         for error in errors:
@@ -1020,7 +1180,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, approval action contract, execution request contract, budget hint contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, approval action contract, execution request contract, priority contract, budget hint contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
     )
     return 0
 
