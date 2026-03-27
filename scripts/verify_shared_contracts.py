@@ -14,6 +14,7 @@ COMMAND_STATE_RULES_PATH = REPO_ROOT / "packages" / "shared-contracts" / "comman
 TRACEABILITY_ENVELOPE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "traceability-envelope.schema.json"
 SESSION_CONTEXT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "session-context.schema.json"
 PROJECT_CONTEXT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "project-context.schema.json"
+COMPANY_CONTEXT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "company-context.schema.json"
 APPROVAL_ACTION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "approval-action.schema.json"
 EXECUTION_REQUEST_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-request.schema.json"
 EXECUTION_RESULT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "execution-result.schema.json"
@@ -70,6 +71,14 @@ EXPECTED_PROJECT_CONTEXT_REQUIRED = [
     "project_id",
     "project_name",
     "project_status",
+    "created_at",
+    "owner_user_id",
+]
+
+EXPECTED_COMPANY_CONTEXT_REQUIRED = [
+    "company_id",
+    "company_name",
+    "company_status",
     "created_at",
     "owner_user_id",
 ]
@@ -160,6 +169,13 @@ EXPECTED_SESSION_STATUS_ENUM = [
 ]
 
 EXPECTED_PROJECT_STATUS_ENUM = [
+    "draft",
+    "active",
+    "paused",
+    "archived",
+]
+
+EXPECTED_COMPANY_STATUS_ENUM = [
     "draft",
     "active",
     "paused",
@@ -778,7 +794,22 @@ def main():
             ensure_property_defined(
                 "traceability-envelope.schema.json",
                 traceability_schema,
+                "company_id",
+            )
+        )
+        errors.extend(
+            ensure_property_defined(
+                "traceability-envelope.schema.json",
+                traceability_schema,
                 "project_id",
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "traceability-envelope.schema.json",
+                traceability_schema,
+                "company_id",
+                1,
             )
         )
         errors.extend(
@@ -1101,6 +1132,143 @@ def main():
                 project_context_schema,
                 "project_status",
                 EXPECTED_PROJECT_STATUS_ENUM,
+            )
+        )
+
+    company_context_schema, company_context_load_errors = load_json_file(COMPANY_CONTEXT_SCHEMA_PATH)
+    errors.extend(company_context_load_errors)
+    if not company_context_load_errors:
+        checks.append(f"OK: {COMPANY_CONTEXT_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {COMPANY_CONTEXT_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "company-context.schema.json",
+                company_context_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "company-context.schema.json",
+                company_context_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "company-context.schema.json",
+                company_context_schema,
+                EXPECTED_COMPANY_CONTEXT_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "company-context.schema.json",
+                company_context_schema,
+                [
+                    "updated_at",
+                    "active_project_id",
+                    "active_session_id",
+                    "active_trace_id",
+                    "company_note",
+                ],
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "company-context.schema.json",
+                company_context_schema,
+                "company_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "company-context.schema.json",
+                company_context_schema,
+                "company_name",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "company-context.schema.json",
+                company_context_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "company-context.schema.json",
+                company_context_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "company-context.schema.json",
+                company_context_schema,
+                "updated_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "company-context.schema.json",
+                company_context_schema,
+                "updated_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "company-context.schema.json",
+                company_context_schema,
+                "owner_user_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "company-context.schema.json",
+                company_context_schema,
+                "active_project_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "company-context.schema.json",
+                company_context_schema,
+                "active_session_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "company-context.schema.json",
+                company_context_schema,
+                "active_trace_id",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_string_min_length(
+                "company-context.schema.json",
+                company_context_schema,
+                "company_note",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "company-context.schema.json",
+                company_context_schema,
+                "company_status",
+                EXPECTED_COMPANY_STATUS_ENUM,
             )
         )
 
@@ -1816,7 +1984,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, approval action contract, execution request contract, priority contract, budget hint contract, timeout policy contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, approval action contract, execution request contract, priority contract, budget hint contract, timeout policy contract, execution result contract, agent role contract, and action type contract match the current shared contract expectations"
     )
     return 0
 
