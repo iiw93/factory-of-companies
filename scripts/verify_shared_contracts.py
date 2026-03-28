@@ -46,6 +46,7 @@ OBSERVABILITY_EVENT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / 
 TRACE_STEP_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "trace-step.schema.json"
 FAILURE_REPORT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "failure-report.schema.json"
 DEBUG_NODE_VIEW_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "debug-node-view.schema.json"
+PIPELINE_VIEW_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "pipeline-view.schema.json"
 BUDGET_HINT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "budget-hint.schema.json"
 PRIORITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "priority.schema.json"
 TIMEOUT_POLICY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "timeout-policy.schema.json"
@@ -61,6 +62,7 @@ OBSERVABILITY_EVENT_DOC_PATH = REPO_ROOT / "docs" / "specs" / "observability-eve
 TRACE_STEP_DOC_PATH = REPO_ROOT / "docs" / "specs" / "trace-step-contract.md"
 FAILURE_REPORT_DOC_PATH = REPO_ROOT / "docs" / "specs" / "failure-report-contract.md"
 DEBUG_NODE_VIEW_DOC_PATH = REPO_ROOT / "docs" / "specs" / "debug-node-view-contract.md"
+PIPELINE_VIEW_DOC_PATH = REPO_ROOT / "docs" / "specs" / "pipeline-view-contract.md"
 AGENT_ROLE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "agent-role-contract.md"
 ACTION_TYPE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "action-type-contract.md"
 PRIORITY_DOC_PATH = REPO_ROOT / "docs" / "specs" / "priority-contract.md"
@@ -77,6 +79,7 @@ OBSERVABILITY_EVENT_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "obser
 TRACE_STEP_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "trace-step-checklist.md"
 FAILURE_REPORT_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "failure-report-checklist.md"
 DEBUG_NODE_VIEW_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "debug-node-view-checklist.md"
+PIPELINE_VIEW_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "pipeline-view-checklist.md"
 
 EXPECTED_COMMAND_REQUIRED = [
     "command_id",
@@ -305,6 +308,20 @@ EXPECTED_DEBUG_NODE_VIEW_REQUIRED = [
     "display_label",
     "sequence_order",
     "is_current_focus",
+]
+
+EXPECTED_PIPELINE_VIEW_REQUIRED = [
+    "pipeline_view_id",
+    "view_name",
+    "view_status",
+    "created_at",
+    "trace_id",
+    "view_scope",
+    "node_ids",
+    "step_ids",
+    "event_ids",
+    "failure_report_ids",
+    "summary_message",
 ]
 
 EXPECTED_GOVERNANCE_DECISION_REQUIRED = [
@@ -874,6 +891,21 @@ EXPECTED_DEBUG_NODE_VIEW_STATUS_ENUM = [
     "failed",
     "blocked",
     "archived",
+]
+
+EXPECTED_PIPELINE_VIEW_STATUS_ENUM = [
+    "draft",
+    "ready",
+    "active",
+    "degraded",
+    "archived",
+]
+
+EXPECTED_PIPELINE_VIEW_SCOPES = [
+    "indexing_pipeline",
+    "retrieval_pipeline",
+    "debug_pipeline",
+    "mixed",
 ]
 
 EXPECTED_CONTEXT_SELECTION_STRATEGIES = [
@@ -5664,6 +5696,125 @@ def main():
         )
     )
 
+    pipeline_view_schema, pipeline_view_load_errors = load_json_file(PIPELINE_VIEW_SCHEMA_PATH)
+    errors.extend(pipeline_view_load_errors)
+    if not pipeline_view_load_errors:
+        checks.append(f"OK: {PIPELINE_VIEW_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {PIPELINE_VIEW_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "pipeline-view.schema.json",
+                pipeline_view_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "pipeline-view.schema.json",
+                pipeline_view_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "pipeline-view.schema.json",
+                pipeline_view_schema,
+                EXPECTED_PIPELINE_VIEW_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "pipeline-view.schema.json",
+                pipeline_view_schema,
+                [
+                    "active_node_id",
+                    "active_step_id",
+                    "view_note",
+                ],
+            )
+        )
+        for property_name in [
+            "pipeline_view_id",
+            "view_name",
+            "trace_id",
+            "active_node_id",
+            "active_step_id",
+            "summary_message",
+            "view_note",
+        ]:
+            errors.extend(
+                ensure_string_min_length(
+                    "pipeline-view.schema.json",
+                    pipeline_view_schema,
+                    property_name,
+                    1,
+                )
+            )
+        errors.extend(
+            ensure_property_type(
+                "pipeline-view.schema.json",
+                pipeline_view_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "pipeline-view.schema.json",
+                pipeline_view_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        for property_name in [
+            "node_ids",
+            "step_ids",
+            "event_ids",
+            "failure_report_ids",
+        ]:
+            errors.extend(
+                ensure_array_items_type(
+                    "pipeline-view.schema.json",
+                    pipeline_view_schema,
+                    property_name,
+                    "string",
+                )
+            )
+            errors.extend(
+                ensure_array_items_min_length(
+                    "pipeline-view.schema.json",
+                    pipeline_view_schema,
+                    property_name,
+                    1,
+                )
+            )
+        errors.extend(
+            ensure_enum_matches(
+                "pipeline-view.schema.json",
+                pipeline_view_schema,
+                "view_status",
+                EXPECTED_PIPELINE_VIEW_STATUS_ENUM,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "pipeline-view.schema.json",
+                pipeline_view_schema,
+                "view_scope",
+                EXPECTED_PIPELINE_VIEW_SCOPES,
+            )
+        )
+
+    identifier_checks.append(
+        (
+            "pipeline-view.schema.json",
+            pipeline_view_schema,
+            pipeline_view_load_errors,
+            "pipeline_view_id",
+        )
+    )
+
     for schema_name, schema, load_errors, identifier_name in identifier_checks:
         if load_errors:
             continue
@@ -5996,6 +6147,16 @@ def main():
     if not debug_node_view_checklist_errors:
         checks.append(f"OK: {DEBUG_NODE_VIEW_CHECKLIST_PATH.relative_to(REPO_ROOT)} exists")
 
+    pipeline_view_doc, pipeline_view_doc_errors = load_text_file(PIPELINE_VIEW_DOC_PATH)
+    errors.extend(pipeline_view_doc_errors)
+    if not pipeline_view_doc_errors:
+        checks.append(f"OK: {PIPELINE_VIEW_DOC_PATH.relative_to(REPO_ROOT)} exists")
+
+    pipeline_view_checklist, pipeline_view_checklist_errors = load_text_file(PIPELINE_VIEW_CHECKLIST_PATH)
+    errors.extend(pipeline_view_checklist_errors)
+    if not pipeline_view_checklist_errors:
+        checks.append(f"OK: {PIPELINE_VIEW_CHECKLIST_PATH.relative_to(REPO_ROOT)} exists")
+
     agent_role_doc, agent_role_doc_errors = load_text_file(AGENT_ROLE_DOC_PATH)
     errors.extend(agent_role_doc_errors)
     if not agent_role_doc_errors:
@@ -6162,7 +6323,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, embedding provider contract, embedding job contract, retrieval index contract, context selection contract, prompt package contract, model routing contract, knowledge retrieval contract, retrieval session contract, retrieval result contract, observability event contract, trace step contract, failure report contract, debug node view contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, embedding provider contract, embedding job contract, retrieval index contract, context selection contract, prompt package contract, model routing contract, knowledge retrieval contract, retrieval session contract, retrieval result contract, observability event contract, trace step contract, failure report contract, debug node view contract, pipeline view contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
     )
     return 0
 

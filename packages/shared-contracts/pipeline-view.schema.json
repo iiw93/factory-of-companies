@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Pipeline View Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pipeline_view_id",
+    "view_name",
+    "view_status",
+    "created_at",
+    "trace_id",
+    "view_scope",
+    "node_ids",
+    "step_ids",
+    "event_ids",
+    "failure_report_ids",
+    "summary_message"
+  ],
+  "properties": {
+    "pipeline_view_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "view_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "view_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "ready",
+        "active",
+        "degraded",
+        "archived"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "view_scope": {
+      "type": "string",
+      "enum": [
+        "indexing_pipeline",
+        "retrieval_pipeline",
+        "debug_pipeline",
+        "mixed"
+      ]
+    },
+    "node_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "step_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "event_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "failure_report_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "active_node_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "active_step_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "summary_message": {
+      "type": "string",
+      "minLength": 1
+    },
+    "view_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
