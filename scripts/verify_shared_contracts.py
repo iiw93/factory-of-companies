@@ -34,6 +34,7 @@ RUNTIME_CAPABILITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "
 TOOL_INVOCATION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "tool-invocation.schema.json"
 KNOWLEDGE_SOURCE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "knowledge-source.schema.json"
 CONTEXT_SELECTION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "context-selection.schema.json"
+PROMPT_PACKAGE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "prompt-package.schema.json"
 BUDGET_HINT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "budget-hint.schema.json"
 PRIORITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "priority.schema.json"
 TIMEOUT_POLICY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "timeout-policy.schema.json"
@@ -154,6 +155,14 @@ EXPECTED_CONTEXT_SELECTION_REQUIRED = [
     "selection_name",
     "selection_status",
     "created_at",
+]
+
+EXPECTED_PROMPT_PACKAGE_REQUIRED = [
+    "prompt_package_id",
+    "package_name",
+    "package_status",
+    "created_at",
+    "instruction_text",
 ]
 
 EXPECTED_GOVERNANCE_DECISION_REQUIRED = [
@@ -532,6 +541,14 @@ EXPECTED_KNOWLEDGE_SOURCE_STATUS_ENUM = [
 ]
 
 EXPECTED_CONTEXT_SELECTION_STATUS_ENUM = [
+    "draft",
+    "prepared",
+    "applied",
+    "superseded",
+    "archived",
+]
+
+EXPECTED_PROMPT_PACKAGE_STATUS_ENUM = [
     "draft",
     "prepared",
     "applied",
@@ -3768,6 +3785,102 @@ def main():
             )
         )
 
+    prompt_package_schema, prompt_package_load_errors = load_json_file(PROMPT_PACKAGE_SCHEMA_PATH)
+    errors.extend(prompt_package_load_errors)
+    if not prompt_package_load_errors:
+        checks.append(f"OK: {PROMPT_PACKAGE_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {PROMPT_PACKAGE_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "prompt-package.schema.json",
+                prompt_package_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "prompt-package.schema.json",
+                prompt_package_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "prompt-package.schema.json",
+                prompt_package_schema,
+                EXPECTED_PROMPT_PACKAGE_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "prompt-package.schema.json",
+                prompt_package_schema,
+                [
+                    "trace_id",
+                    "execution_request_id",
+                    "context_selection_id",
+                    "role_type",
+                    "action_type",
+                    "selected_source_ids",
+                    "linked_tool_invocation_id",
+                    "package_note",
+                ],
+            )
+        )
+        for property_name in [
+            "prompt_package_id",
+            "package_name",
+            "trace_id",
+            "execution_request_id",
+            "context_selection_id",
+            "role_type",
+            "action_type",
+            "instruction_text",
+            "linked_tool_invocation_id",
+            "package_note",
+        ]:
+            errors.extend(
+                ensure_string_min_length(
+                    "prompt-package.schema.json",
+                    prompt_package_schema,
+                    property_name,
+                    1,
+                )
+            )
+        errors.extend(
+            ensure_property_type(
+                "prompt-package.schema.json",
+                prompt_package_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "prompt-package.schema.json",
+                prompt_package_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_array_items_min_length(
+                "prompt-package.schema.json",
+                prompt_package_schema,
+                "selected_source_ids",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "prompt-package.schema.json",
+                prompt_package_schema,
+                "package_status",
+                EXPECTED_PROMPT_PACKAGE_STATUS_ENUM,
+            )
+        )
+
     identifier_checks = [
         ("quality-gate.schema.json", quality_gate_schema, quality_gate_load_errors, "quality_gate_id"),
         ("evidence-bundle.schema.json", evidence_bundle_schema, evidence_bundle_load_errors, "evidence_bundle_id"),
@@ -3786,6 +3899,7 @@ def main():
         ("tool-invocation.schema.json", tool_invocation_schema, tool_invocation_load_errors, "tool_invocation_id"),
         ("knowledge-source.schema.json", knowledge_source_schema, knowledge_source_load_errors, "knowledge_source_id"),
         ("context-selection.schema.json", context_selection_schema, context_selection_load_errors, "context_selection_id"),
+        ("prompt-package.schema.json", prompt_package_schema, prompt_package_load_errors, "prompt_package_id"),
     ]
 
     for schema_name, schema, load_errors, identifier_name in identifier_checks:
@@ -4165,7 +4279,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, context selection contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, context selection contract, prompt package contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
     )
     return 0
 

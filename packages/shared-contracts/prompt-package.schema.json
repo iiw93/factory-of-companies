@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Prompt Package Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "prompt_package_id",
+    "package_name",
+    "package_status",
+    "created_at",
+    "instruction_text"
+  ],
+  "properties": {
+    "prompt_package_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "package_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "package_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "prepared",
+        "applied",
+        "superseded",
+        "archived"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "instruction_text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "context_selection_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "role_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selected_source_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "linked_tool_invocation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "package_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
