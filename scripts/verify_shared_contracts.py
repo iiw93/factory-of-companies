@@ -47,6 +47,7 @@ TRACE_STEP_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "trace-st
 FAILURE_REPORT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "failure-report.schema.json"
 DEBUG_NODE_VIEW_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "debug-node-view.schema.json"
 PIPELINE_VIEW_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "pipeline-view.schema.json"
+DEBUG_PANEL_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "debug-panel.schema.json"
 BUDGET_HINT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "budget-hint.schema.json"
 PRIORITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "priority.schema.json"
 TIMEOUT_POLICY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "timeout-policy.schema.json"
@@ -63,6 +64,7 @@ TRACE_STEP_DOC_PATH = REPO_ROOT / "docs" / "specs" / "trace-step-contract.md"
 FAILURE_REPORT_DOC_PATH = REPO_ROOT / "docs" / "specs" / "failure-report-contract.md"
 DEBUG_NODE_VIEW_DOC_PATH = REPO_ROOT / "docs" / "specs" / "debug-node-view-contract.md"
 PIPELINE_VIEW_DOC_PATH = REPO_ROOT / "docs" / "specs" / "pipeline-view-contract.md"
+DEBUG_PANEL_DOC_PATH = REPO_ROOT / "docs" / "specs" / "debug-panel-contract.md"
 AGENT_ROLE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "agent-role-contract.md"
 ACTION_TYPE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "action-type-contract.md"
 PRIORITY_DOC_PATH = REPO_ROOT / "docs" / "specs" / "priority-contract.md"
@@ -80,6 +82,7 @@ TRACE_STEP_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "trace-step-che
 FAILURE_REPORT_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "failure-report-checklist.md"
 DEBUG_NODE_VIEW_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "debug-node-view-checklist.md"
 PIPELINE_VIEW_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "pipeline-view-checklist.md"
+DEBUG_PANEL_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "debug-panel-checklist.md"
 
 EXPECTED_COMMAND_REQUIRED = [
     "command_id",
@@ -322,6 +325,19 @@ EXPECTED_PIPELINE_VIEW_REQUIRED = [
     "event_ids",
     "failure_report_ids",
     "summary_message",
+]
+
+EXPECTED_DEBUG_PANEL_REQUIRED = [
+    "debug_panel_id",
+    "panel_name",
+    "panel_status",
+    "created_at",
+    "trace_id",
+    "panel_scope",
+    "linked_pipeline_view_id",
+    "primary_message",
+    "highlight_level",
+    "requires_attention",
 ]
 
 EXPECTED_GOVERNANCE_DECISION_REQUIRED = [
@@ -906,6 +922,29 @@ EXPECTED_PIPELINE_VIEW_SCOPES = [
     "retrieval_pipeline",
     "debug_pipeline",
     "mixed",
+]
+
+EXPECTED_DEBUG_PANEL_STATUS_ENUM = [
+    "draft",
+    "ready",
+    "active",
+    "degraded",
+    "archived",
+]
+
+EXPECTED_DEBUG_PANEL_SCOPES = [
+    "node_focus",
+    "step_focus",
+    "failure_focus",
+    "pipeline_focus",
+    "mixed",
+]
+
+EXPECTED_DEBUG_PANEL_HIGHLIGHT_LEVELS = [
+    "normal",
+    "attention",
+    "warning",
+    "critical",
 ]
 
 EXPECTED_CONTEXT_SELECTION_STRATEGIES = [
@@ -5815,6 +5854,126 @@ def main():
         )
     )
 
+    debug_panel_schema, debug_panel_load_errors = load_json_file(DEBUG_PANEL_SCHEMA_PATH)
+    errors.extend(debug_panel_load_errors)
+    if not debug_panel_load_errors:
+        checks.append(f"OK: {DEBUG_PANEL_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {DEBUG_PANEL_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "debug-panel.schema.json",
+                debug_panel_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "debug-panel.schema.json",
+                debug_panel_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "debug-panel.schema.json",
+                debug_panel_schema,
+                EXPECTED_DEBUG_PANEL_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "debug-panel.schema.json",
+                debug_panel_schema,
+                [
+                    "focused_node_id",
+                    "focused_step_id",
+                    "focused_event_id",
+                    "focused_failure_report_id",
+                    "secondary_message",
+                    "panel_note",
+                ],
+            )
+        )
+        for property_name in [
+            "debug_panel_id",
+            "panel_name",
+            "trace_id",
+            "linked_pipeline_view_id",
+            "focused_node_id",
+            "focused_step_id",
+            "focused_event_id",
+            "focused_failure_report_id",
+            "primary_message",
+            "secondary_message",
+            "panel_note",
+        ]:
+            errors.extend(
+                ensure_string_min_length(
+                    "debug-panel.schema.json",
+                    debug_panel_schema,
+                    property_name,
+                    1,
+                )
+            )
+        errors.extend(
+            ensure_property_type(
+                "debug-panel.schema.json",
+                debug_panel_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "debug-panel.schema.json",
+                debug_panel_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "debug-panel.schema.json",
+                debug_panel_schema,
+                "requires_attention",
+                "boolean",
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "debug-panel.schema.json",
+                debug_panel_schema,
+                "panel_status",
+                EXPECTED_DEBUG_PANEL_STATUS_ENUM,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "debug-panel.schema.json",
+                debug_panel_schema,
+                "panel_scope",
+                EXPECTED_DEBUG_PANEL_SCOPES,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "debug-panel.schema.json",
+                debug_panel_schema,
+                "highlight_level",
+                EXPECTED_DEBUG_PANEL_HIGHLIGHT_LEVELS,
+            )
+        )
+
+    identifier_checks.append(
+        (
+            "debug-panel.schema.json",
+            debug_panel_schema,
+            debug_panel_load_errors,
+            "debug_panel_id",
+        )
+    )
+
     for schema_name, schema, load_errors, identifier_name in identifier_checks:
         if load_errors:
             continue
@@ -5823,6 +5982,20 @@ def main():
         errors.extend(identifier_errors)
         if not identifier_errors:
             checks.append(f"OK: {schema_name} uses {identifier_name}")
+
+    if not any(
+        [
+            traceability_load_errors,
+            pipeline_view_load_errors,
+            debug_node_view_load_errors,
+            trace_step_load_errors,
+            observability_event_load_errors,
+            failure_report_load_errors,
+        ]
+    ):
+        checks.append(
+            "OK: traceability envelope, pipeline view, debug node view, trace step, observability event, and failure report schemas use their expected identifiers"
+        )
 
     if not priority_load_errors:
         priority_level_errors = ensure_property_type(
@@ -6157,6 +6330,16 @@ def main():
     if not pipeline_view_checklist_errors:
         checks.append(f"OK: {PIPELINE_VIEW_CHECKLIST_PATH.relative_to(REPO_ROOT)} exists")
 
+    debug_panel_doc, debug_panel_doc_errors = load_text_file(DEBUG_PANEL_DOC_PATH)
+    errors.extend(debug_panel_doc_errors)
+    if not debug_panel_doc_errors:
+        checks.append(f"OK: {DEBUG_PANEL_DOC_PATH.relative_to(REPO_ROOT)} exists")
+
+    debug_panel_checklist, debug_panel_checklist_errors = load_text_file(DEBUG_PANEL_CHECKLIST_PATH)
+    errors.extend(debug_panel_checklist_errors)
+    if not debug_panel_checklist_errors:
+        checks.append(f"OK: {DEBUG_PANEL_CHECKLIST_PATH.relative_to(REPO_ROOT)} exists")
+
     agent_role_doc, agent_role_doc_errors = load_text_file(AGENT_ROLE_DOC_PATH)
     errors.extend(agent_role_doc_errors)
     if not agent_role_doc_errors:
@@ -6323,7 +6506,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, embedding provider contract, embedding job contract, retrieval index contract, context selection contract, prompt package contract, model routing contract, knowledge retrieval contract, retrieval session contract, retrieval result contract, observability event contract, trace step contract, failure report contract, debug node view contract, pipeline view contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, embedding provider contract, embedding job contract, retrieval index contract, context selection contract, prompt package contract, model routing contract, knowledge retrieval contract, retrieval session contract, retrieval result contract, observability event contract, trace step contract, failure report contract, debug node view contract, pipeline view contract, debug panel contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
     )
     return 0
 

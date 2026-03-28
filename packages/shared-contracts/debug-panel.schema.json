@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Debug Panel Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "debug_panel_id",
+    "panel_name",
+    "panel_status",
+    "created_at",
+    "trace_id",
+    "panel_scope",
+    "linked_pipeline_view_id",
+    "primary_message",
+    "highlight_level",
+    "requires_attention"
+  ],
+  "properties": {
+    "debug_panel_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "panel_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "panel_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "ready",
+        "active",
+        "degraded",
+        "archived"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "panel_scope": {
+      "type": "string",
+      "enum": [
+        "node_focus",
+        "step_focus",
+        "failure_focus",
+        "pipeline_focus",
+        "mixed"
+      ]
+    },
+    "linked_pipeline_view_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "focused_node_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "focused_step_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "focused_event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "focused_failure_report_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "primary_message": {
+      "type": "string",
+      "minLength": 1
+    },
+    "secondary_message": {
+      "type": "string",
+      "minLength": 1
+    },
+    "highlight_level": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "attention",
+        "warning",
+        "critical"
+      ]
+    },
+    "requires_attention": {
+      "type": "boolean"
+    },
+    "panel_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
