@@ -38,6 +38,7 @@ PROMPT_PACKAGE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "prom
 MODEL_ROUTING_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "model-routing.schema.json"
 KNOWLEDGE_RETRIEVAL_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "knowledge-retrieval.schema.json"
 RETRIEVAL_SESSION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "retrieval-session.schema.json"
+RETRIEVAL_RESULT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "retrieval-result.schema.json"
 BUDGET_HINT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "budget-hint.schema.json"
 PRIORITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "priority.schema.json"
 TIMEOUT_POLICY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "timeout-policy.schema.json"
@@ -45,6 +46,7 @@ EXECUTION_REQUEST_DOC_PATH = REPO_ROOT / "docs" / "specs" / "execution-request-c
 MODEL_ROUTING_DOC_PATH = REPO_ROOT / "docs" / "specs" / "model-routing-contract.md"
 KNOWLEDGE_RETRIEVAL_DOC_PATH = REPO_ROOT / "docs" / "specs" / "knowledge-retrieval-contract.md"
 RETRIEVAL_SESSION_DOC_PATH = REPO_ROOT / "docs" / "specs" / "retrieval-session-contract.md"
+RETRIEVAL_RESULT_DOC_PATH = REPO_ROOT / "docs" / "specs" / "retrieval-result-contract.md"
 AGENT_ROLE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "agent-role-contract.md"
 ACTION_TYPE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "action-type-contract.md"
 PRIORITY_DOC_PATH = REPO_ROOT / "docs" / "specs" / "priority-contract.md"
@@ -53,6 +55,7 @@ TIMEOUT_POLICY_DOC_PATH = REPO_ROOT / "docs" / "specs" / "timeout-policy-contrac
 MODEL_ROUTING_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "model-routing-checklist.md"
 KNOWLEDGE_RETRIEVAL_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "knowledge-retrieval-checklist.md"
 RETRIEVAL_SESSION_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "retrieval-session-checklist.md"
+RETRIEVAL_RESULT_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "retrieval-result-checklist.md"
 
 EXPECTED_COMMAND_REQUIRED = [
     "command_id",
@@ -197,6 +200,13 @@ EXPECTED_RETRIEVAL_SESSION_REQUIRED = [
     "retrieval_session_id",
     "session_name",
     "session_status",
+    "created_at",
+]
+
+EXPECTED_RETRIEVAL_RESULT_REQUIRED = [
+    "retrieval_result_id",
+    "result_name",
+    "result_status",
     "created_at",
 ]
 
@@ -616,6 +626,15 @@ EXPECTED_RETRIEVAL_SESSION_STATUS_ENUM = [
     "archived",
 ]
 
+EXPECTED_RETRIEVAL_RESULT_STATUS_ENUM = [
+    "draft",
+    "prepared",
+    "usable",
+    "insufficient",
+    "superseded",
+    "archived",
+]
+
 EXPECTED_CONTEXT_SELECTION_STRATEGIES = [
     "manual",
     "rule_based",
@@ -657,6 +676,13 @@ EXPECTED_RETRIEVAL_OUTCOMES = [
     "partial",
     "sufficient",
     "superseded",
+]
+
+EXPECTED_RETRIEVAL_RESULT_QUALITIES = [
+    "low",
+    "medium",
+    "high",
+    "mixed",
 ]
 
 EXPECTED_BUDGET_UNITS = [
@@ -4311,6 +4337,127 @@ def main():
             )
         )
 
+    retrieval_result_schema, retrieval_result_load_errors = load_json_file(RETRIEVAL_RESULT_SCHEMA_PATH)
+    errors.extend(retrieval_result_load_errors)
+    if not retrieval_result_load_errors:
+        checks.append(f"OK: {RETRIEVAL_RESULT_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {RETRIEVAL_RESULT_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "retrieval-result.schema.json",
+                retrieval_result_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "retrieval-result.schema.json",
+                retrieval_result_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "retrieval-result.schema.json",
+                retrieval_result_schema,
+                EXPECTED_RETRIEVAL_RESULT_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "retrieval-result.schema.json",
+                retrieval_result_schema,
+                [
+                    "trace_id",
+                    "execution_request_id",
+                    "context_selection_id",
+                    "linked_knowledge_retrieval_id",
+                    "linked_retrieval_session_id",
+                    "linked_prompt_package_id",
+                    "resolved_source_ids",
+                    "result_quality",
+                    "selected_excerpt_count",
+                    "result_note",
+                ],
+            )
+        )
+        for property_name in [
+            "retrieval_result_id",
+            "result_name",
+            "trace_id",
+            "execution_request_id",
+            "context_selection_id",
+            "linked_knowledge_retrieval_id",
+            "linked_retrieval_session_id",
+            "linked_prompt_package_id",
+            "result_note",
+        ]:
+            errors.extend(
+                ensure_string_min_length(
+                    "retrieval-result.schema.json",
+                    retrieval_result_schema,
+                    property_name,
+                    1,
+                )
+            )
+        errors.extend(
+            ensure_property_type(
+                "retrieval-result.schema.json",
+                retrieval_result_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "retrieval-result.schema.json",
+                retrieval_result_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "retrieval-result.schema.json",
+                retrieval_result_schema,
+                "result_status",
+                EXPECTED_RETRIEVAL_RESULT_STATUS_ENUM,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "retrieval-result.schema.json",
+                retrieval_result_schema,
+                "result_quality",
+                EXPECTED_RETRIEVAL_RESULT_QUALITIES,
+            )
+        )
+        errors.extend(
+            ensure_array_items_min_length(
+                "retrieval-result.schema.json",
+                retrieval_result_schema,
+                "resolved_source_ids",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "retrieval-result.schema.json",
+                retrieval_result_schema,
+                "selected_excerpt_count",
+                "integer",
+            )
+        )
+        errors.extend(
+            ensure_numeric_minimum(
+                "retrieval-result.schema.json",
+                retrieval_result_schema,
+                "selected_excerpt_count",
+                0,
+            )
+        )
+
     identifier_checks = [
         ("quality-gate.schema.json", quality_gate_schema, quality_gate_load_errors, "quality_gate_id"),
         ("evidence-bundle.schema.json", evidence_bundle_schema, evidence_bundle_load_errors, "evidence_bundle_id"),
@@ -4333,6 +4480,7 @@ def main():
         ("model-routing.schema.json", model_routing_schema, model_routing_load_errors, "model_routing_id"),
         ("knowledge-retrieval.schema.json", knowledge_retrieval_schema, knowledge_retrieval_load_errors, "knowledge_retrieval_id"),
         ("retrieval-session.schema.json", retrieval_session_schema, retrieval_session_load_errors, "retrieval_session_id"),
+        ("retrieval-result.schema.json", retrieval_result_schema, retrieval_result_load_errors, "retrieval_result_id"),
         ("budget-hint.schema.json", budget_hint_schema, budget_hint_load_errors, "budget_hint_id"),
         ("timeout-policy.schema.json", timeout_policy_schema, timeout_policy_load_errors, "timeout_policy_id"),
     ]
@@ -4589,6 +4737,16 @@ def main():
     if not retrieval_session_checklist_errors:
         checks.append(f"OK: {RETRIEVAL_SESSION_CHECKLIST_PATH.relative_to(REPO_ROOT)} exists")
 
+    retrieval_result_doc, retrieval_result_doc_errors = load_text_file(RETRIEVAL_RESULT_DOC_PATH)
+    errors.extend(retrieval_result_doc_errors)
+    if not retrieval_result_doc_errors:
+        checks.append(f"OK: {RETRIEVAL_RESULT_DOC_PATH.relative_to(REPO_ROOT)} exists")
+
+    retrieval_result_checklist, retrieval_result_checklist_errors = load_text_file(RETRIEVAL_RESULT_CHECKLIST_PATH)
+    errors.extend(retrieval_result_checklist_errors)
+    if not retrieval_result_checklist_errors:
+        checks.append(f"OK: {RETRIEVAL_RESULT_CHECKLIST_PATH.relative_to(REPO_ROOT)} exists")
+
     agent_role_doc, agent_role_doc_errors = load_text_file(AGENT_ROLE_DOC_PATH)
     errors.extend(agent_role_doc_errors)
     if not agent_role_doc_errors:
@@ -4755,7 +4913,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, context selection contract, prompt package contract, model routing contract, knowledge retrieval contract, retrieval session contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, context selection contract, prompt package contract, model routing contract, knowledge retrieval contract, retrieval session contract, retrieval result contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
     )
     return 0
 

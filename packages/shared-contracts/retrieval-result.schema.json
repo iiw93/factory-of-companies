@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Retrieval Result Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "retrieval_result_id",
+    "result_name",
+    "result_status",
+    "created_at"
+  ],
+  "properties": {
+    "retrieval_result_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "result_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "result_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "prepared",
+        "usable",
+        "insufficient",
+        "superseded",
+        "archived"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "context_selection_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_knowledge_retrieval_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_retrieval_session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_prompt_package_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "resolved_source_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "result_quality": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "mixed"
+      ]
+    },
+    "selected_excerpt_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "result_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
