@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Observability Event Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "observability_event_id",
+    "event_name",
+    "event_type",
+    "event_status",
+    "created_at",
+    "source_contract",
+    "source_id",
+    "stage_name",
+    "severity"
+  ],
+  "properties": {
+    "observability_event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "state_transition",
+        "processing",
+        "validation",
+        "warning",
+        "error",
+        "info"
+      ]
+    },
+    "event_status": {
+      "type": "string",
+      "enum": [
+        "started",
+        "in_progress",
+        "completed",
+        "failed",
+        "skipped"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_contract": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stage_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "debug",
+        "info",
+        "warning",
+        "error",
+        "critical"
+      ]
+    },
+    "linked_embedding_job_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_retrieval_index_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_knowledge_retrieval_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_retrieval_session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_retrieval_result_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event_message": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

@@ -42,6 +42,7 @@ MODEL_ROUTING_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "model
 KNOWLEDGE_RETRIEVAL_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "knowledge-retrieval.schema.json"
 RETRIEVAL_SESSION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "retrieval-session.schema.json"
 RETRIEVAL_RESULT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "retrieval-result.schema.json"
+OBSERVABILITY_EVENT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "observability-event.schema.json"
 BUDGET_HINT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "budget-hint.schema.json"
 PRIORITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "priority.schema.json"
 TIMEOUT_POLICY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "timeout-policy.schema.json"
@@ -53,6 +54,7 @@ RETRIEVAL_INDEX_DOC_PATH = REPO_ROOT / "docs" / "specs" / "retrieval-index-contr
 KNOWLEDGE_RETRIEVAL_DOC_PATH = REPO_ROOT / "docs" / "specs" / "knowledge-retrieval-contract.md"
 RETRIEVAL_SESSION_DOC_PATH = REPO_ROOT / "docs" / "specs" / "retrieval-session-contract.md"
 RETRIEVAL_RESULT_DOC_PATH = REPO_ROOT / "docs" / "specs" / "retrieval-result-contract.md"
+OBSERVABILITY_EVENT_DOC_PATH = REPO_ROOT / "docs" / "specs" / "observability-event-contract.md"
 AGENT_ROLE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "agent-role-contract.md"
 ACTION_TYPE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "action-type-contract.md"
 PRIORITY_DOC_PATH = REPO_ROOT / "docs" / "specs" / "priority-contract.md"
@@ -65,6 +67,7 @@ RETRIEVAL_INDEX_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "retrieval
 KNOWLEDGE_RETRIEVAL_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "knowledge-retrieval-checklist.md"
 RETRIEVAL_SESSION_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "retrieval-session-checklist.md"
 RETRIEVAL_RESULT_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "retrieval-result-checklist.md"
+OBSERVABILITY_EVENT_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "observability-event-checklist.md"
 
 EXPECTED_COMMAND_REQUIRED = [
     "command_id",
@@ -241,6 +244,18 @@ EXPECTED_RETRIEVAL_RESULT_REQUIRED = [
     "result_name",
     "result_status",
     "created_at",
+]
+
+EXPECTED_OBSERVABILITY_EVENT_REQUIRED = [
+    "observability_event_id",
+    "event_name",
+    "event_type",
+    "event_status",
+    "created_at",
+    "source_contract",
+    "source_id",
+    "stage_name",
+    "severity",
 ]
 
 EXPECTED_GOVERNANCE_DECISION_REQUIRED = [
@@ -720,6 +735,31 @@ EXPECTED_RETRIEVAL_RESULT_STATUS_ENUM = [
     "insufficient",
     "superseded",
     "archived",
+]
+
+EXPECTED_OBSERVABILITY_EVENT_TYPES = [
+    "state_transition",
+    "processing",
+    "validation",
+    "warning",
+    "error",
+    "info",
+]
+
+EXPECTED_OBSERVABILITY_EVENT_STATUS_ENUM = [
+    "started",
+    "in_progress",
+    "completed",
+    "failed",
+    "skipped",
+]
+
+EXPECTED_OBSERVABILITY_EVENT_SEVERITIES = [
+    "debug",
+    "info",
+    "warning",
+    "error",
+    "critical",
 ]
 
 EXPECTED_CONTEXT_SELECTION_STRATEGIES = [
@@ -4961,6 +5001,122 @@ def main():
         ("timeout-policy.schema.json", timeout_policy_schema, timeout_policy_load_errors, "timeout_policy_id"),
     ]
 
+    observability_event_schema, observability_event_load_errors = load_json_file(OBSERVABILITY_EVENT_SCHEMA_PATH)
+    errors.extend(observability_event_load_errors)
+    if not observability_event_load_errors:
+        checks.append(f"OK: {OBSERVABILITY_EVENT_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {OBSERVABILITY_EVENT_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "observability-event.schema.json",
+                observability_event_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "observability-event.schema.json",
+                observability_event_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "observability-event.schema.json",
+                observability_event_schema,
+                EXPECTED_OBSERVABILITY_EVENT_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "observability-event.schema.json",
+                observability_event_schema,
+                [
+                    "trace_id",
+                    "linked_embedding_job_id",
+                    "linked_retrieval_index_id",
+                    "linked_knowledge_retrieval_id",
+                    "linked_retrieval_session_id",
+                    "linked_retrieval_result_id",
+                    "event_message",
+                    "event_note",
+                ],
+            )
+        )
+        for property_name in [
+            "observability_event_id",
+            "event_name",
+            "trace_id",
+            "source_contract",
+            "source_id",
+            "stage_name",
+            "linked_embedding_job_id",
+            "linked_retrieval_index_id",
+            "linked_knowledge_retrieval_id",
+            "linked_retrieval_session_id",
+            "linked_retrieval_result_id",
+            "event_message",
+            "event_note",
+        ]:
+            errors.extend(
+                ensure_string_min_length(
+                    "observability-event.schema.json",
+                    observability_event_schema,
+                    property_name,
+                    1,
+                )
+            )
+        errors.extend(
+            ensure_property_type(
+                "observability-event.schema.json",
+                observability_event_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "observability-event.schema.json",
+                observability_event_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "observability-event.schema.json",
+                observability_event_schema,
+                "event_type",
+                EXPECTED_OBSERVABILITY_EVENT_TYPES,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "observability-event.schema.json",
+                observability_event_schema,
+                "event_status",
+                EXPECTED_OBSERVABILITY_EVENT_STATUS_ENUM,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "observability-event.schema.json",
+                observability_event_schema,
+                "severity",
+                EXPECTED_OBSERVABILITY_EVENT_SEVERITIES,
+            )
+        )
+
+    identifier_checks.append(
+        (
+            "observability-event.schema.json",
+            observability_event_schema,
+            observability_event_load_errors,
+            "observability_event_id",
+        )
+    )
+
     for schema_name, schema, load_errors, identifier_name in identifier_checks:
         if load_errors:
             continue
@@ -5253,6 +5409,16 @@ def main():
     if not retrieval_result_checklist_errors:
         checks.append(f"OK: {RETRIEVAL_RESULT_CHECKLIST_PATH.relative_to(REPO_ROOT)} exists")
 
+    observability_event_doc, observability_event_doc_errors = load_text_file(OBSERVABILITY_EVENT_DOC_PATH)
+    errors.extend(observability_event_doc_errors)
+    if not observability_event_doc_errors:
+        checks.append(f"OK: {OBSERVABILITY_EVENT_DOC_PATH.relative_to(REPO_ROOT)} exists")
+
+    observability_event_checklist, observability_event_checklist_errors = load_text_file(OBSERVABILITY_EVENT_CHECKLIST_PATH)
+    errors.extend(observability_event_checklist_errors)
+    if not observability_event_checklist_errors:
+        checks.append(f"OK: {OBSERVABILITY_EVENT_CHECKLIST_PATH.relative_to(REPO_ROOT)} exists")
+
     agent_role_doc, agent_role_doc_errors = load_text_file(AGENT_ROLE_DOC_PATH)
     errors.extend(agent_role_doc_errors)
     if not agent_role_doc_errors:
@@ -5419,7 +5585,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, embedding provider contract, embedding job contract, retrieval index contract, context selection contract, prompt package contract, model routing contract, knowledge retrieval contract, retrieval session contract, retrieval result contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, embedding provider contract, embedding job contract, retrieval index contract, context selection contract, prompt package contract, model routing contract, knowledge retrieval contract, retrieval session contract, retrieval result contract, observability event contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
     )
     return 0
 
