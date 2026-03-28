@@ -35,15 +35,18 @@ TOOL_INVOCATION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "too
 KNOWLEDGE_SOURCE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "knowledge-source.schema.json"
 CONTEXT_SELECTION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "context-selection.schema.json"
 PROMPT_PACKAGE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "prompt-package.schema.json"
+MODEL_ROUTING_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "model-routing.schema.json"
 BUDGET_HINT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "budget-hint.schema.json"
 PRIORITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "priority.schema.json"
 TIMEOUT_POLICY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "timeout-policy.schema.json"
 EXECUTION_REQUEST_DOC_PATH = REPO_ROOT / "docs" / "specs" / "execution-request-contract.md"
+MODEL_ROUTING_DOC_PATH = REPO_ROOT / "docs" / "specs" / "model-routing-contract.md"
 AGENT_ROLE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "agent-role-contract.md"
 ACTION_TYPE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "action-type-contract.md"
 PRIORITY_DOC_PATH = REPO_ROOT / "docs" / "specs" / "priority-contract.md"
 BUDGET_HINT_DOC_PATH = REPO_ROOT / "docs" / "specs" / "budget-hint-contract.md"
 TIMEOUT_POLICY_DOC_PATH = REPO_ROOT / "docs" / "specs" / "timeout-policy-contract.md"
+MODEL_ROUTING_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "model-routing-checklist.md"
 
 EXPECTED_COMMAND_REQUIRED = [
     "command_id",
@@ -163,6 +166,18 @@ EXPECTED_PROMPT_PACKAGE_REQUIRED = [
     "package_status",
     "created_at",
     "instruction_text",
+]
+
+EXPECTED_MODEL_ROUTING_REQUIRED = [
+    "model_routing_id",
+    "routing_name",
+    "routing_status",
+    "created_at",
+    "routing_target_id",
+    "provider_name",
+    "model_name",
+    "routing_mode",
+    "contract_version",
 ]
 
 EXPECTED_GOVERNANCE_DECISION_REQUIRED = [
@@ -556,11 +571,26 @@ EXPECTED_PROMPT_PACKAGE_STATUS_ENUM = [
     "archived",
 ]
 
+EXPECTED_MODEL_ROUTING_STATUS_ENUM = [
+    "draft",
+    "prepared",
+    "applied",
+    "superseded",
+    "archived",
+]
+
 EXPECTED_CONTEXT_SELECTION_STRATEGIES = [
     "manual",
     "rule_based",
     "evidence_guided",
     "hybrid",
+]
+
+EXPECTED_MODEL_ROUTING_MODES = [
+    "direct",
+    "capability_aware",
+    "constraint_aware",
+    "fallback_chain",
 ]
 
 EXPECTED_BUDGET_UNITS = [
@@ -3881,6 +3911,120 @@ def main():
             )
         )
 
+    model_routing_schema, model_routing_load_errors = load_json_file(MODEL_ROUTING_SCHEMA_PATH)
+    errors.extend(model_routing_load_errors)
+    if not model_routing_load_errors:
+        checks.append(f"OK: {MODEL_ROUTING_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {MODEL_ROUTING_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "model-routing.schema.json",
+                model_routing_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "model-routing.schema.json",
+                model_routing_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "model-routing.schema.json",
+                model_routing_schema,
+                EXPECTED_MODEL_ROUTING_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "model-routing.schema.json",
+                model_routing_schema,
+                [
+                    "trace_id",
+                    "execution_request_id",
+                    "prompt_package_id",
+                    "role_type",
+                    "action_type",
+                    "required_capability_ids",
+                    "routing_constraints",
+                    "fallback_target_ids",
+                    "linked_tool_invocation_id",
+                    "routing_note",
+                ],
+            )
+        )
+        for property_name in [
+            "model_routing_id",
+            "routing_name",
+            "routing_target_id",
+            "provider_name",
+            "model_name",
+            "contract_version",
+            "trace_id",
+            "execution_request_id",
+            "prompt_package_id",
+            "role_type",
+            "action_type",
+            "linked_tool_invocation_id",
+            "routing_note",
+        ]:
+            errors.extend(
+                ensure_string_min_length(
+                    "model-routing.schema.json",
+                    model_routing_schema,
+                    property_name,
+                    1,
+                )
+            )
+        errors.extend(
+            ensure_property_type(
+                "model-routing.schema.json",
+                model_routing_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "model-routing.schema.json",
+                model_routing_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "model-routing.schema.json",
+                model_routing_schema,
+                "routing_status",
+                EXPECTED_MODEL_ROUTING_STATUS_ENUM,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "model-routing.schema.json",
+                model_routing_schema,
+                "routing_mode",
+                EXPECTED_MODEL_ROUTING_MODES,
+            )
+        )
+        for property_name in [
+            "required_capability_ids",
+            "routing_constraints",
+            "fallback_target_ids",
+        ]:
+            errors.extend(
+                ensure_array_items_min_length(
+                    "model-routing.schema.json",
+                    model_routing_schema,
+                    property_name,
+                    1,
+                )
+            )
+
     identifier_checks = [
         ("quality-gate.schema.json", quality_gate_schema, quality_gate_load_errors, "quality_gate_id"),
         ("evidence-bundle.schema.json", evidence_bundle_schema, evidence_bundle_load_errors, "evidence_bundle_id"),
@@ -3900,6 +4044,7 @@ def main():
         ("knowledge-source.schema.json", knowledge_source_schema, knowledge_source_load_errors, "knowledge_source_id"),
         ("context-selection.schema.json", context_selection_schema, context_selection_load_errors, "context_selection_id"),
         ("prompt-package.schema.json", prompt_package_schema, prompt_package_load_errors, "prompt_package_id"),
+        ("model-routing.schema.json", model_routing_schema, model_routing_load_errors, "model_routing_id"),
     ]
 
     for schema_name, schema, load_errors, identifier_name in identifier_checks:
@@ -4113,6 +4258,16 @@ def main():
             )
         )
 
+    model_routing_doc, model_routing_doc_errors = load_text_file(MODEL_ROUTING_DOC_PATH)
+    errors.extend(model_routing_doc_errors)
+    if not model_routing_doc_errors:
+        checks.append(f"OK: {MODEL_ROUTING_DOC_PATH.relative_to(REPO_ROOT)} exists")
+
+    model_routing_checklist, model_routing_checklist_errors = load_text_file(MODEL_ROUTING_CHECKLIST_PATH)
+    errors.extend(model_routing_checklist_errors)
+    if not model_routing_checklist_errors:
+        checks.append(f"OK: {MODEL_ROUTING_CHECKLIST_PATH.relative_to(REPO_ROOT)} exists")
+
     agent_role_doc, agent_role_doc_errors = load_text_file(AGENT_ROLE_DOC_PATH)
     errors.extend(agent_role_doc_errors)
     if not agent_role_doc_errors:
@@ -4279,7 +4434,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, context selection contract, prompt package contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, context selection contract, prompt package contract, model routing contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
     )
     return 0
 
