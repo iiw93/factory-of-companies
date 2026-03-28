@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Context Selection Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "context_selection_id",
+    "selection_name",
+    "selection_status",
+    "created_at"
+  ],
+  "properties": {
+    "context_selection_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selection_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selection_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "prepared",
+        "applied",
+        "superseded",
+        "archived"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selected_source_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "selection_strategy": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "rule_based",
+        "evidence_guided",
+        "hybrid"
+      ]
+    },
+    "linked_tool_invocation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_evidence_bundle_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selection_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

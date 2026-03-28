@@ -33,6 +33,7 @@ ACTION_TYPE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "action-
 RUNTIME_CAPABILITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "runtime-capability.schema.json"
 TOOL_INVOCATION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "tool-invocation.schema.json"
 KNOWLEDGE_SOURCE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "knowledge-source.schema.json"
+CONTEXT_SELECTION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "context-selection.schema.json"
 BUDGET_HINT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "budget-hint.schema.json"
 PRIORITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "priority.schema.json"
 TIMEOUT_POLICY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "timeout-policy.schema.json"
@@ -145,6 +146,13 @@ EXPECTED_KNOWLEDGE_SOURCE_REQUIRED = [
     "source_name",
     "source_type",
     "source_status",
+    "created_at",
+]
+
+EXPECTED_CONTEXT_SELECTION_REQUIRED = [
+    "context_selection_id",
+    "selection_name",
+    "selection_status",
     "created_at",
 ]
 
@@ -521,6 +529,21 @@ EXPECTED_KNOWLEDGE_SOURCE_STATUS_ENUM = [
     "available",
     "stale",
     "archived",
+]
+
+EXPECTED_CONTEXT_SELECTION_STATUS_ENUM = [
+    "draft",
+    "prepared",
+    "applied",
+    "superseded",
+    "archived",
+]
+
+EXPECTED_CONTEXT_SELECTION_STRATEGIES = [
+    "manual",
+    "rule_based",
+    "evidence_guided",
+    "hybrid",
 ]
 
 EXPECTED_BUDGET_UNITS = [
@@ -3645,6 +3668,106 @@ def main():
             )
         )
 
+    context_selection_schema, context_selection_load_errors = load_json_file(CONTEXT_SELECTION_SCHEMA_PATH)
+    errors.extend(context_selection_load_errors)
+    if not context_selection_load_errors:
+        checks.append(f"OK: {CONTEXT_SELECTION_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {CONTEXT_SELECTION_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "context-selection.schema.json",
+                context_selection_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "context-selection.schema.json",
+                context_selection_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "context-selection.schema.json",
+                context_selection_schema,
+                EXPECTED_CONTEXT_SELECTION_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "context-selection.schema.json",
+                context_selection_schema,
+                [
+                    "trace_id",
+                    "execution_request_id",
+                    "selected_source_ids",
+                    "selection_strategy",
+                    "linked_tool_invocation_id",
+                    "linked_evidence_bundle_id",
+                    "selection_note",
+                ],
+            )
+        )
+        for property_name in [
+            "context_selection_id",
+            "selection_name",
+            "trace_id",
+            "execution_request_id",
+            "linked_tool_invocation_id",
+            "linked_evidence_bundle_id",
+            "selection_note",
+        ]:
+            errors.extend(
+                ensure_string_min_length(
+                    "context-selection.schema.json",
+                    context_selection_schema,
+                    property_name,
+                    1,
+                )
+            )
+        errors.extend(
+            ensure_property_type(
+                "context-selection.schema.json",
+                context_selection_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "context-selection.schema.json",
+                context_selection_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_array_items_min_length(
+                "context-selection.schema.json",
+                context_selection_schema,
+                "selected_source_ids",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "context-selection.schema.json",
+                context_selection_schema,
+                "selection_status",
+                EXPECTED_CONTEXT_SELECTION_STATUS_ENUM,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "context-selection.schema.json",
+                context_selection_schema,
+                "selection_strategy",
+                EXPECTED_CONTEXT_SELECTION_STRATEGIES,
+            )
+        )
+
     identifier_checks = [
         ("quality-gate.schema.json", quality_gate_schema, quality_gate_load_errors, "quality_gate_id"),
         ("evidence-bundle.schema.json", evidence_bundle_schema, evidence_bundle_load_errors, "evidence_bundle_id"),
@@ -3662,6 +3785,7 @@ def main():
         ("runtime-capability.schema.json", runtime_capability_schema, runtime_capability_load_errors, "capability_id"),
         ("tool-invocation.schema.json", tool_invocation_schema, tool_invocation_load_errors, "tool_invocation_id"),
         ("knowledge-source.schema.json", knowledge_source_schema, knowledge_source_load_errors, "knowledge_source_id"),
+        ("context-selection.schema.json", context_selection_schema, context_selection_load_errors, "context_selection_id"),
     ]
 
     for schema_name, schema, load_errors, identifier_name in identifier_checks:
@@ -4041,7 +4165,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, priority contract, budget hint contract, timeout policy contract, execution result contract, release decision contract, delivery package contract, deployment target contract, agent role contract, action type contract, runtime capability contract, tool invocation contract, and knowledge source contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, context selection contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
     )
     return 0
 
