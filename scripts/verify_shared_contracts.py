@@ -43,6 +43,7 @@ KNOWLEDGE_RETRIEVAL_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / 
 RETRIEVAL_SESSION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "retrieval-session.schema.json"
 RETRIEVAL_RESULT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "retrieval-result.schema.json"
 OBSERVABILITY_EVENT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "observability-event.schema.json"
+TRACE_STEP_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "trace-step.schema.json"
 BUDGET_HINT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "budget-hint.schema.json"
 PRIORITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "priority.schema.json"
 TIMEOUT_POLICY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "timeout-policy.schema.json"
@@ -55,6 +56,7 @@ KNOWLEDGE_RETRIEVAL_DOC_PATH = REPO_ROOT / "docs" / "specs" / "knowledge-retriev
 RETRIEVAL_SESSION_DOC_PATH = REPO_ROOT / "docs" / "specs" / "retrieval-session-contract.md"
 RETRIEVAL_RESULT_DOC_PATH = REPO_ROOT / "docs" / "specs" / "retrieval-result-contract.md"
 OBSERVABILITY_EVENT_DOC_PATH = REPO_ROOT / "docs" / "specs" / "observability-event-contract.md"
+TRACE_STEP_DOC_PATH = REPO_ROOT / "docs" / "specs" / "trace-step-contract.md"
 AGENT_ROLE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "agent-role-contract.md"
 ACTION_TYPE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "action-type-contract.md"
 PRIORITY_DOC_PATH = REPO_ROOT / "docs" / "specs" / "priority-contract.md"
@@ -68,6 +70,7 @@ KNOWLEDGE_RETRIEVAL_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "knowl
 RETRIEVAL_SESSION_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "retrieval-session-checklist.md"
 RETRIEVAL_RESULT_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "retrieval-result-checklist.md"
 OBSERVABILITY_EVENT_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "observability-event-checklist.md"
+TRACE_STEP_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "trace-step-checklist.md"
 
 EXPECTED_COMMAND_REQUIRED = [
     "command_id",
@@ -256,6 +259,18 @@ EXPECTED_OBSERVABILITY_EVENT_REQUIRED = [
     "source_id",
     "stage_name",
     "severity",
+]
+
+EXPECTED_TRACE_STEP_REQUIRED = [
+    "trace_step_id",
+    "step_name",
+    "step_type",
+    "step_status",
+    "created_at",
+    "trace_id",
+    "sequence_order",
+    "source_contract",
+    "source_id",
 ]
 
 EXPECTED_GOVERNANCE_DECISION_REQUIRED = [
@@ -760,6 +775,26 @@ EXPECTED_OBSERVABILITY_EVENT_SEVERITIES = [
     "warning",
     "error",
     "critical",
+]
+
+EXPECTED_TRACE_STEP_TYPES = [
+    "input",
+    "preparation",
+    "embedding",
+    "indexing",
+    "retrieval",
+    "validation",
+    "output",
+]
+
+EXPECTED_TRACE_STEP_STATUS_ENUM = [
+    "pending",
+    "ready",
+    "running",
+    "completed",
+    "failed",
+    "blocked",
+    "skipped",
 ]
 
 EXPECTED_CONTEXT_SELECTION_STRATEGIES = [
@@ -5117,6 +5152,145 @@ def main():
         )
     )
 
+    trace_step_schema, trace_step_load_errors = load_json_file(TRACE_STEP_SCHEMA_PATH)
+    errors.extend(trace_step_load_errors)
+    if not trace_step_load_errors:
+        checks.append(f"OK: {TRACE_STEP_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {TRACE_STEP_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "trace-step.schema.json",
+                trace_step_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "trace-step.schema.json",
+                trace_step_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "trace-step.schema.json",
+                trace_step_schema,
+                EXPECTED_TRACE_STEP_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "trace-step.schema.json",
+                trace_step_schema,
+                [
+                    "linked_event_ids",
+                    "linked_embedding_job_id",
+                    "linked_retrieval_index_id",
+                    "linked_knowledge_retrieval_id",
+                    "linked_retrieval_session_id",
+                    "linked_retrieval_result_id",
+                    "step_message",
+                    "step_note",
+                ],
+            )
+        )
+        for property_name in [
+            "trace_step_id",
+            "step_name",
+            "trace_id",
+            "source_contract",
+            "source_id",
+            "linked_embedding_job_id",
+            "linked_retrieval_index_id",
+            "linked_knowledge_retrieval_id",
+            "linked_retrieval_session_id",
+            "linked_retrieval_result_id",
+            "step_message",
+            "step_note",
+        ]:
+            errors.extend(
+                ensure_string_min_length(
+                    "trace-step.schema.json",
+                    trace_step_schema,
+                    property_name,
+                    1,
+                )
+            )
+        errors.extend(
+            ensure_property_type(
+                "trace-step.schema.json",
+                trace_step_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "trace-step.schema.json",
+                trace_step_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "trace-step.schema.json",
+                trace_step_schema,
+                "sequence_order",
+                "integer",
+            )
+        )
+        errors.extend(
+            ensure_numeric_minimum(
+                "trace-step.schema.json",
+                trace_step_schema,
+                "sequence_order",
+                0,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "trace-step.schema.json",
+                trace_step_schema,
+                "step_type",
+                EXPECTED_TRACE_STEP_TYPES,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "trace-step.schema.json",
+                trace_step_schema,
+                "step_status",
+                EXPECTED_TRACE_STEP_STATUS_ENUM,
+            )
+        )
+        errors.extend(
+            ensure_array_items_type(
+                "trace-step.schema.json",
+                trace_step_schema,
+                "linked_event_ids",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_array_items_min_length(
+                "trace-step.schema.json",
+                trace_step_schema,
+                "linked_event_ids",
+                1,
+            )
+        )
+
+    identifier_checks.append(
+        (
+            "trace-step.schema.json",
+            trace_step_schema,
+            trace_step_load_errors,
+            "trace_step_id",
+        )
+    )
+
     for schema_name, schema, load_errors, identifier_name in identifier_checks:
         if load_errors:
             continue
@@ -5419,6 +5593,16 @@ def main():
     if not observability_event_checklist_errors:
         checks.append(f"OK: {OBSERVABILITY_EVENT_CHECKLIST_PATH.relative_to(REPO_ROOT)} exists")
 
+    trace_step_doc, trace_step_doc_errors = load_text_file(TRACE_STEP_DOC_PATH)
+    errors.extend(trace_step_doc_errors)
+    if not trace_step_doc_errors:
+        checks.append(f"OK: {TRACE_STEP_DOC_PATH.relative_to(REPO_ROOT)} exists")
+
+    trace_step_checklist, trace_step_checklist_errors = load_text_file(TRACE_STEP_CHECKLIST_PATH)
+    errors.extend(trace_step_checklist_errors)
+    if not trace_step_checklist_errors:
+        checks.append(f"OK: {TRACE_STEP_CHECKLIST_PATH.relative_to(REPO_ROOT)} exists")
+
     agent_role_doc, agent_role_doc_errors = load_text_file(AGENT_ROLE_DOC_PATH)
     errors.extend(agent_role_doc_errors)
     if not agent_role_doc_errors:
@@ -5585,7 +5769,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, embedding provider contract, embedding job contract, retrieval index contract, context selection contract, prompt package contract, model routing contract, knowledge retrieval contract, retrieval session contract, retrieval result contract, observability event contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, embedding provider contract, embedding job contract, retrieval index contract, context selection contract, prompt package contract, model routing contract, knowledge retrieval contract, retrieval session contract, retrieval result contract, observability event contract, trace step contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
     )
     return 0
 

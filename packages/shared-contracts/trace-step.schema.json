@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Trace Step Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "trace_step_id",
+    "step_name",
+    "step_type",
+    "step_status",
+    "created_at",
+    "trace_id",
+    "sequence_order",
+    "source_contract",
+    "source_id"
+  ],
+  "properties": {
+    "trace_step_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "step_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "step_type": {
+      "type": "string",
+      "enum": [
+        "input",
+        "preparation",
+        "embedding",
+        "indexing",
+        "retrieval",
+        "validation",
+        "output"
+      ]
+    },
+    "step_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "ready",
+        "running",
+        "completed",
+        "failed",
+        "blocked",
+        "skipped"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sequence_order": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "source_contract": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_event_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "linked_embedding_job_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_retrieval_index_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_knowledge_retrieval_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_retrieval_session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_retrieval_result_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "step_message": {
+      "type": "string",
+      "minLength": 1
+    },
+    "step_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
