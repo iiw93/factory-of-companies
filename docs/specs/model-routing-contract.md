@@ -1,12 +1,12 @@
 # Model Routing Contract
 
 ## Goal
-Определить отдельный контракт model routing без внедрения runtime routing logic, prompt builder, model gateway или policy engine.
+Определить отдельный контракт model routing без внедрения runtime router.
 
 ## Purpose
-Model routing contract описывает зафиксированное routing decision для выбора модели и связанного routing target в рамках конкретного выполнения.
+Model routing contract описывает решение о выборе model, provider и runtime path для конкретной работы.
 
-Он связывает routing-level reference с `trace_id`, `execution_request_id`, `prompt_package_id`, `tool_invocation_id`, `role_type` и `action_type`, чтобы routing decision можно было согласованно привязывать к execution context, prompt packaging и audit linkage.
+Он связывает routing-level reference с `trace_id`, `execution_request_id`, `prompt_package_id`, runtime capability, `priority`, budget hint и timeout policy, чтобы routing choice можно было согласованно привязывать к prompt package, execution intent и будущему observability/audit context.
 
 ## Model Routing Object
 
@@ -14,31 +14,18 @@ Model routing contract описывает зафиксированное routing
 {
   "model_routing_id": "routing-0001",
   "routing_name": "planner-primary-route",
-  "routing_status": "prepared",
-  "created_at": "2026-03-28T02:20:00Z",
-  "routing_target_id": "planner-primary",
-  "provider_name": "openai",
-  "model_name": "gpt-5.1",
-  "routing_mode": "direct",
-  "contract_version": "1.0",
+  "routing_status": "selected",
+  "created_at": "2026-03-28T03:10:00Z",
   "trace_id": "trace-0001",
   "execution_request_id": "exec-0001",
   "prompt_package_id": "prompt-package-0001",
-  "role_type": "planner_agent",
-  "action_type": "plan_work",
-  "required_capability_ids": [
-    "cap-0001"
-  ],
-  "routing_constraints": [
-    "budget-aware",
-    "text-only"
-  ],
-  "fallback_target_ids": [
-    "planner-fallback-01",
-    "planner-fallback-02"
-  ],
-  "linked_tool_invocation_id": "tool-0001",
-  "routing_note": "Declarative route prepared for planner execution"
+  "provider_type": "openai",
+  "model_class": "reasoning",
+  "routing_mode": "fallback",
+  "priority_level": "high",
+  "linked_budget_hint_id": "budget-hint-0001",
+  "linked_timeout_policy_id": "timeout-policy-0001",
+  "routing_note": "Routing choice prepared for primary reasoning execution with fallback allowance"
 }
 ```
 
@@ -47,22 +34,17 @@ Model routing contract описывает зафиксированное routing
 - `routing_name`
 - `routing_status`
 - `created_at`
-- `routing_target_id`
-- `provider_name`
-- `model_name`
+- `provider_type`
+- `model_class`
 - `routing_mode`
-- `contract_version`
 
 ## Optional Fields
 - `trace_id`
 - `execution_request_id`
 - `prompt_package_id`
-- `role_type`
-- `action_type`
-- `required_capability_ids`
-- `routing_constraints`
-- `fallback_target_ids`
-- `linked_tool_invocation_id`
+- `priority_level`
+- `linked_budget_hint_id`
+- `linked_timeout_policy_id`
 - `routing_note`
 
 ## Field Semantics
@@ -70,41 +52,19 @@ Model routing contract описывает зафиксированное routing
 Уникальный идентификатор model routing contract.
 
 ### routing_name
-Человекочитаемое имя routing decision.
+Человекочитаемое имя routing choice.
 
 ### routing_status
 `routing_status` фиксирует текущее состояние routing decision.
 
 Допустимые значения:
 - `draft`
-- `prepared`
+- `selected`
 - `applied`
 - `superseded`
-- `archived`
 
 ### created_at
-Момент фиксации model routing contract в формате ISO 8601 date-time.
-
-### routing_target_id
-`routing_target_id` фиксирует идентичность выбранного routing target.
-
-### provider_name
-`provider_name` фиксирует provider или vendor identity для выбранного route.
-
-### model_name
-`model_name` фиксирует идентичность выбранной модели.
-
-### routing_mode
-`routing_mode` фиксирует декларативный режим маршрутизации.
-
-Допустимые значения:
-- `direct`
-- `capability_aware`
-- `constraint_aware`
-- `fallback_chain`
-
-### contract_version
-`contract_version` фиксирует версию контрактного представления routing decision.
+Момент фиксации routing decision в формате ISO 8601 date-time.
 
 ### trace_id
 `trace_id` является опциональной ссылкой на traceability envelope.
@@ -115,53 +75,68 @@ Model routing contract описывает зафиксированное routing
 ### prompt_package_id
 `prompt_package_id` является опциональной ссылкой на prompt package contract.
 
-### role_type
-`role_type` является опциональной ссылкой на логическую роль исполнителя, для которой зафиксирован route.
+### provider_type
+`provider_type` фиксирует тип provider или vendor, выбранный для выполнения.
 
-Значение `role_type` должно оставаться согласованным с `docs/specs/agent-role-contract.md`.
+Допустимые значения:
+- `local_llm`
+- `cloud_llm`
+- `openai`
+- `other`
 
-### action_type
-`action_type` является опциональной ссылкой на нормализованный тип работы, для которого зафиксирован route.
+### model_class
+`model_class` фиксирует нормализованный класс модели, к которому относится routing choice.
 
-Значение `action_type` должно оставаться согласованным с `docs/specs/action-type-contract.md`.
+Допустимые значения:
+- `reasoning`
+- `coding`
+- `general`
+- `embedding`
+- `other`
 
-### required_capability_ids
-`required_capability_ids` является опциональным массивом ссылок на runtime capability contracts.
+### routing_mode
+`routing_mode` фиксирует декларативный режим маршрутизации.
 
-### routing_constraints
-`routing_constraints` является опциональным массивом декларативных constraint descriptors.
+Допустимые значения:
+- `local_only`
+- `cloud_only`
+- `hybrid`
+- `fallback`
 
-### fallback_target_ids
-`fallback_target_ids` является опциональным упорядоченным массивом routing target identities для fallback chain.
+### priority_level
+`priority_level` является опциональным текстовым значением, которое концептуально должно оставаться согласованным с priority contract.
 
-### linked_tool_invocation_id
-`linked_tool_invocation_id` является опциональной ссылкой на tool invocation.
+### linked_budget_hint_id
+`linked_budget_hint_id` является опциональной ссылкой на budget hint contract.
+
+### linked_timeout_policy_id
+`linked_timeout_policy_id` является опциональной ссылкой на timeout policy contract.
 
 ### routing_note
 `routing_note` является опциональным пояснением.
 
 ## Rules
-1. Model routing contract должен описывать только формализованное routing decision, а не runtime routing logic.
-2. `trace_id`, `execution_request_id`, `prompt_package_id`, `role_type`, `action_type` и `linked_tool_invocation_id`, если переданы, используются только как опциональные ссылки на уже существующие контракты.
-3. `required_capability_ids`, если передан, должен содержать только ссылки на runtime capability contracts.
-4. `routing_constraints`, если передан, должен оставаться декларативным набором descriptors, а не executable policy.
-5. `fallback_target_ids`, если передан, должен оставаться декларативной ordered fallback chain без встраивания selection logic.
-6. `contract_version` должен использоваться только для versionability самого контракта, а не runtime compatibility negotiation.
+1. Model routing contract должен описывать только формализованное routing choice, а не runtime router implementation.
+2. `trace_id`, `execution_request_id` и `prompt_package_id`, если переданы, используются только как опциональные ссылки на уже существующие контракты.
+3. `provider_type`, `model_class` и `routing_mode` должны оставаться нормализованными contract-level descriptors, а не provider SDK configuration.
+4. `priority_level`, если передан, должен концептуально совпадать с priority contract.
+5. `linked_budget_hint_id` и `linked_timeout_policy_id`, если переданы, используются только как опциональные ссылки.
+6. Связь с runtime capability остаётся декларативной и концептуальной: routing choice должен интерпретироваться совместно с runtime capability contract, но не заменяет его.
 7. `routing_note`, если передан, должен оставаться кратким пояснением.
 
 ## Boundaries
-Этот контракт не является runtime policy engine.
-
-Этот контракт не является routing selection logic.
-
-Этот контракт не является model gateway.
+Этот контракт не является runtime router.
 
 Этот контракт не является inference engine.
 
+Этот контракт не является provider SDK.
+
+Этот контракт не является quota manager.
+
 ## Expected Usage
-- фиксация model-routing decision на уровне контракта
-- linkage between prompt package and actual execution route
-- future dashboard, audit and debugging views
+- фиксация routing choice
+- linkage between prompt package and actual execution path
+- future observability, debugging and policy views
 
 ## Source Alignment
 `docs/specs/model-routing-contract.md` остаётся смысловым источником model routing semantics.

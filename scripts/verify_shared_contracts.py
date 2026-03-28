@@ -176,11 +176,9 @@ EXPECTED_MODEL_ROUTING_REQUIRED = [
     "routing_name",
     "routing_status",
     "created_at",
-    "routing_target_id",
-    "provider_name",
-    "model_name",
+    "provider_type",
+    "model_class",
     "routing_mode",
-    "contract_version",
 ]
 
 EXPECTED_KNOWLEDGE_RETRIEVAL_REQUIRED = [
@@ -585,10 +583,9 @@ EXPECTED_PROMPT_PACKAGE_STATUS_ENUM = [
 
 EXPECTED_MODEL_ROUTING_STATUS_ENUM = [
     "draft",
-    "prepared",
+    "selected",
     "applied",
     "superseded",
-    "archived",
 ]
 
 EXPECTED_KNOWLEDGE_RETRIEVAL_STATUS_ENUM = [
@@ -608,10 +605,25 @@ EXPECTED_CONTEXT_SELECTION_STRATEGIES = [
 ]
 
 EXPECTED_MODEL_ROUTING_MODES = [
-    "direct",
-    "capability_aware",
-    "constraint_aware",
-    "fallback_chain",
+    "local_only",
+    "cloud_only",
+    "hybrid",
+    "fallback",
+]
+
+EXPECTED_MODEL_ROUTING_PROVIDER_TYPES = [
+    "local_llm",
+    "cloud_llm",
+    "openai",
+    "other",
+]
+
+EXPECTED_MODEL_ROUTING_MODEL_CLASSES = [
+    "reasoning",
+    "coding",
+    "general",
+    "embedding",
+    "other",
 ]
 
 EXPECTED_KNOWLEDGE_RETRIEVAL_MODES = [
@@ -3974,12 +3986,9 @@ def main():
                     "trace_id",
                     "execution_request_id",
                     "prompt_package_id",
-                    "role_type",
-                    "action_type",
-                    "required_capability_ids",
-                    "routing_constraints",
-                    "fallback_target_ids",
-                    "linked_tool_invocation_id",
+                    "priority_level",
+                    "linked_budget_hint_id",
+                    "linked_timeout_policy_id",
                     "routing_note",
                 ],
             )
@@ -3987,16 +3996,12 @@ def main():
         for property_name in [
             "model_routing_id",
             "routing_name",
-            "routing_target_id",
-            "provider_name",
-            "model_name",
-            "contract_version",
             "trace_id",
             "execution_request_id",
             "prompt_package_id",
-            "role_type",
-            "action_type",
-            "linked_tool_invocation_id",
+            "priority_level",
+            "linked_budget_hint_id",
+            "linked_timeout_policy_id",
             "routing_note",
         ]:
             errors.extend(
@@ -4035,23 +4040,26 @@ def main():
             ensure_enum_matches(
                 "model-routing.schema.json",
                 model_routing_schema,
+                "provider_type",
+                EXPECTED_MODEL_ROUTING_PROVIDER_TYPES,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "model-routing.schema.json",
+                model_routing_schema,
+                "model_class",
+                EXPECTED_MODEL_ROUTING_MODEL_CLASSES,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "model-routing.schema.json",
+                model_routing_schema,
                 "routing_mode",
                 EXPECTED_MODEL_ROUTING_MODES,
             )
         )
-        for property_name in [
-            "required_capability_ids",
-            "routing_constraints",
-            "fallback_target_ids",
-        ]:
-            errors.extend(
-                ensure_array_items_min_length(
-                    "model-routing.schema.json",
-                    model_routing_schema,
-                    property_name,
-                    1,
-                )
-            )
 
     knowledge_retrieval_schema, knowledge_retrieval_load_errors = load_json_file(KNOWLEDGE_RETRIEVAL_SCHEMA_PATH)
     errors.extend(knowledge_retrieval_load_errors)
@@ -4196,6 +4204,8 @@ def main():
         ("prompt-package.schema.json", prompt_package_schema, prompt_package_load_errors, "prompt_package_id"),
         ("model-routing.schema.json", model_routing_schema, model_routing_load_errors, "model_routing_id"),
         ("knowledge-retrieval.schema.json", knowledge_retrieval_schema, knowledge_retrieval_load_errors, "knowledge_retrieval_id"),
+        ("budget-hint.schema.json", budget_hint_schema, budget_hint_load_errors, "budget_hint_id"),
+        ("timeout-policy.schema.json", timeout_policy_schema, timeout_policy_load_errors, "timeout_policy_id"),
     ]
 
     for schema_name, schema, load_errors, identifier_name in identifier_checks:
@@ -4206,6 +4216,17 @@ def main():
         errors.extend(identifier_errors)
         if not identifier_errors:
             checks.append(f"OK: {schema_name} uses {identifier_name}")
+
+    if not priority_load_errors:
+        priority_level_errors = ensure_property_type(
+            "priority.schema.json",
+            priority_schema,
+            "priority_level",
+            "string",
+        )
+        errors.extend(priority_level_errors)
+        if not priority_level_errors:
+            checks.append("OK: priority.schema.json uses priority_level")
 
     agent_role_schema, agent_role_load_errors = load_json_file(AGENT_ROLE_SCHEMA_PATH)
     errors.extend(agent_role_load_errors)

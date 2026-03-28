@@ -16,52 +16,37 @@ Model routing schema exists.
 `created_at` is required.
 
 ## AC-3006
-`routing_target_id` is required.
+`provider_type` enum is enforced.
 
 ## AC-3007
-`provider_name` is required.
+`model_class` enum is enforced.
 
 ## AC-3008
-`model_name` is required.
-
-## AC-3009
 `routing_mode` enum is enforced.
 
-## AC-3010
-`contract_version` is required.
-
-## AC-3011
+## AC-3009
 `trace_id` is optional.
 
-## AC-3012
+## AC-3010
 `execution_request_id` is optional.
 
-## AC-3013
+## AC-3011
 `prompt_package_id` is optional.
 
+## AC-3012
+`priority_level` is optional.
+
+## AC-3013
+`linked_budget_hint_id` is optional.
+
 ## AC-3014
-`role_type` is optional.
+`linked_timeout_policy_id` is optional.
 
 ## AC-3015
-`action_type` is optional.
-
-## AC-3016
-`required_capability_ids` is optional.
-
-## AC-3017
-`routing_constraints` is optional.
-
-## AC-3018
-`fallback_target_ids` is optional.
-
-## AC-3019
-`linked_tool_invocation_id` is optional.
-
-## AC-3020
 `routing_note` is optional.
 
-## AC-3021
-Prompt/context/tool/request/role/action linkage remains aligned.
+## AC-3016
+Prompt/runtime/priority/budget/timeout linkage remains aligned.
 
-## AC-3022
+## AC-3017
 Docs/specs/schema remain aligned.

@@ -8,11 +8,9 @@
     "routing_name",
     "routing_status",
     "created_at",
-    "routing_target_id",
-    "provider_name",
-    "model_name",
-    "routing_mode",
-    "contract_version"
+    "provider_type",
+    "model_class",
+    "routing_mode"
   ],
   "properties": {
     "model_routing_id": {
@@ -27,40 +25,14 @@
       "type": "string",
       "enum": [
         "draft",
-        "prepared",
+        "selected",
         "applied",
-        "superseded",
-        "archived"
+        "superseded"
       ]
     },
     "created_at": {
       "type": "string",
       "format": "date-time"
-    },
-    "routing_target_id": {
-      "type": "string",
-      "minLength": 1
-    },
-    "provider_name": {
-      "type": "string",
-      "minLength": 1
-    },
-    "model_name": {
-      "type": "string",
-      "minLength": 1
-    },
-    "routing_mode": {
-      "type": "string",
-      "enum": [
-        "direct",
-        "capability_aware",
-        "constraint_aware",
-        "fallback_chain"
-      ]
-    },
-    "contract_version": {
-      "type": "string",
-      "minLength": 1
     },
     "trace_id": {
       "type": "string",
@@ -74,36 +46,43 @@
       "type": "string",
       "minLength": 1
     },
-    "role_type": {
+    "provider_type": {
+      "type": "string",
+      "enum": [
+        "local_llm",
+        "cloud_llm",
+        "openai",
+        "other"
+      ]
+    },
+    "model_class": {
+      "type": "string",
+      "enum": [
+        "reasoning",
+        "coding",
+        "general",
+        "embedding",
+        "other"
+      ]
+    },
+    "routing_mode": {
+      "type": "string",
+      "enum": [
+        "local_only",
+        "cloud_only",
+        "hybrid",
+        "fallback"
+      ]
+    },
+    "priority_level": {
       "type": "string",
       "minLength": 1
     },
-    "action_type": {
+    "linked_budget_hint_id": {
       "type": "string",
       "minLength": 1
     },
-    "required_capability_ids": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "minLength": 1
-      }
-    },
-    "routing_constraints": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "minLength": 1
-      }
-    },
-    "fallback_target_ids": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "minLength": 1
-      }
-    },
-    "linked_tool_invocation_id": {
+    "linked_timeout_policy_id": {
       "type": "string",
       "minLength": 1
     },
