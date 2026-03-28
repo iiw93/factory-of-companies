@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Embedding Job Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "embedding_job_id",
+    "job_name",
+    "job_status",
+    "created_at",
+    "embedding_provider_id"
+  ],
+  "properties": {
+    "embedding_job_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "job_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "job_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "prepared",
+        "running",
+        "completed",
+        "failed",
+        "archived"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "embedding_provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "knowledge_source_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_knowledge_retrieval_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_retrieval_session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "modality_scope": {
+      "type": "string",
+      "enum": [
+        "text_only",
+        "text_image",
+        "text_audio",
+        "text_video",
+        "multimodal"
+      ]
+    },
+    "output_dimension": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "chunk_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "job_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

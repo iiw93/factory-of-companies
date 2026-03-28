@@ -34,6 +34,7 @@ RUNTIME_CAPABILITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "
 TOOL_INVOCATION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "tool-invocation.schema.json"
 KNOWLEDGE_SOURCE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "knowledge-source.schema.json"
 EMBEDDING_PROVIDER_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "embedding-provider.schema.json"
+EMBEDDING_JOB_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "embedding-job.schema.json"
 CONTEXT_SELECTION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "context-selection.schema.json"
 PROMPT_PACKAGE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "prompt-package.schema.json"
 MODEL_ROUTING_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "model-routing.schema.json"
@@ -46,6 +47,7 @@ TIMEOUT_POLICY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "time
 EXECUTION_REQUEST_DOC_PATH = REPO_ROOT / "docs" / "specs" / "execution-request-contract.md"
 MODEL_ROUTING_DOC_PATH = REPO_ROOT / "docs" / "specs" / "model-routing-contract.md"
 EMBEDDING_PROVIDER_DOC_PATH = REPO_ROOT / "docs" / "specs" / "embedding-provider-contract.md"
+EMBEDDING_JOB_DOC_PATH = REPO_ROOT / "docs" / "specs" / "embedding-job-contract.md"
 KNOWLEDGE_RETRIEVAL_DOC_PATH = REPO_ROOT / "docs" / "specs" / "knowledge-retrieval-contract.md"
 RETRIEVAL_SESSION_DOC_PATH = REPO_ROOT / "docs" / "specs" / "retrieval-session-contract.md"
 RETRIEVAL_RESULT_DOC_PATH = REPO_ROOT / "docs" / "specs" / "retrieval-result-contract.md"
@@ -56,6 +58,7 @@ BUDGET_HINT_DOC_PATH = REPO_ROOT / "docs" / "specs" / "budget-hint-contract.md"
 TIMEOUT_POLICY_DOC_PATH = REPO_ROOT / "docs" / "specs" / "timeout-policy-contract.md"
 MODEL_ROUTING_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "model-routing-checklist.md"
 EMBEDDING_PROVIDER_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "embedding-provider-checklist.md"
+EMBEDDING_JOB_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "embedding-job-checklist.md"
 KNOWLEDGE_RETRIEVAL_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "knowledge-retrieval-checklist.md"
 RETRIEVAL_SESSION_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "retrieval-session-checklist.md"
 RETRIEVAL_RESULT_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "retrieval-result-checklist.md"
@@ -171,6 +174,14 @@ EXPECTED_EMBEDDING_PROVIDER_REQUIRED = [
     "provider_type",
     "provider_status",
     "created_at",
+]
+
+EXPECTED_EMBEDDING_JOB_REQUIRED = [
+    "embedding_job_id",
+    "job_name",
+    "job_status",
+    "created_at",
+    "embedding_provider_id",
 ]
 
 EXPECTED_CONTEXT_SELECTION_REQUIRED = [
@@ -608,6 +619,23 @@ EXPECTED_EMBEDDING_PROVIDER_STATUS_ENUM = [
     "available",
     "limited",
     "deprecated",
+]
+
+EXPECTED_EMBEDDING_JOB_STATUS_ENUM = [
+    "draft",
+    "prepared",
+    "running",
+    "completed",
+    "failed",
+    "archived",
+]
+
+EXPECTED_EMBEDDING_JOB_MODALITY_SCOPES = [
+    "text_only",
+    "text_image",
+    "text_audio",
+    "text_video",
+    "multimodal",
 ]
 
 EXPECTED_CONTEXT_SELECTION_STATUS_ENUM = [
@@ -3956,6 +3984,139 @@ def main():
             )
         )
 
+    embedding_job_schema, embedding_job_load_errors = load_json_file(EMBEDDING_JOB_SCHEMA_PATH)
+    errors.extend(embedding_job_load_errors)
+    if not embedding_job_load_errors:
+        checks.append(f"OK: {EMBEDDING_JOB_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {EMBEDDING_JOB_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "embedding-job.schema.json",
+                embedding_job_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "embedding-job.schema.json",
+                embedding_job_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "embedding-job.schema.json",
+                embedding_job_schema,
+                EXPECTED_EMBEDDING_JOB_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "embedding-job.schema.json",
+                embedding_job_schema,
+                [
+                    "knowledge_source_ids",
+                    "trace_id",
+                    "linked_knowledge_retrieval_id",
+                    "linked_retrieval_session_id",
+                    "modality_scope",
+                    "output_dimension",
+                    "chunk_count",
+                    "job_note",
+                ],
+            )
+        )
+        for property_name in [
+            "embedding_job_id",
+            "job_name",
+            "embedding_provider_id",
+            "trace_id",
+            "linked_knowledge_retrieval_id",
+            "linked_retrieval_session_id",
+            "job_note",
+        ]:
+            errors.extend(
+                ensure_string_min_length(
+                    "embedding-job.schema.json",
+                    embedding_job_schema,
+                    property_name,
+                    1,
+                )
+            )
+        errors.extend(
+            ensure_property_type(
+                "embedding-job.schema.json",
+                embedding_job_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "embedding-job.schema.json",
+                embedding_job_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_array_items_min_length(
+                "embedding-job.schema.json",
+                embedding_job_schema,
+                "knowledge_source_ids",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "embedding-job.schema.json",
+                embedding_job_schema,
+                "output_dimension",
+                "integer",
+            )
+        )
+        errors.extend(
+            ensure_numeric_minimum(
+                "embedding-job.schema.json",
+                embedding_job_schema,
+                "output_dimension",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "embedding-job.schema.json",
+                embedding_job_schema,
+                "chunk_count",
+                "integer",
+            )
+        )
+        errors.extend(
+            ensure_numeric_minimum(
+                "embedding-job.schema.json",
+                embedding_job_schema,
+                "chunk_count",
+                0,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "embedding-job.schema.json",
+                embedding_job_schema,
+                "job_status",
+                EXPECTED_EMBEDDING_JOB_STATUS_ENUM,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "embedding-job.schema.json",
+                embedding_job_schema,
+                "modality_scope",
+                EXPECTED_EMBEDDING_JOB_MODALITY_SCOPES,
+            )
+        )
+
     context_selection_schema, context_selection_load_errors = load_json_file(CONTEXT_SELECTION_SCHEMA_PATH)
     errors.extend(context_selection_load_errors)
     if not context_selection_load_errors:
@@ -4625,6 +4786,7 @@ def main():
         ("tool-invocation.schema.json", tool_invocation_schema, tool_invocation_load_errors, "tool_invocation_id"),
         ("knowledge-source.schema.json", knowledge_source_schema, knowledge_source_load_errors, "knowledge_source_id"),
         ("embedding-provider.schema.json", embedding_provider_schema, embedding_provider_load_errors, "embedding_provider_id"),
+        ("embedding-job.schema.json", embedding_job_schema, embedding_job_load_errors, "embedding_job_id"),
         ("context-selection.schema.json", context_selection_schema, context_selection_load_errors, "context_selection_id"),
         ("prompt-package.schema.json", prompt_package_schema, prompt_package_load_errors, "prompt_package_id"),
         ("model-routing.schema.json", model_routing_schema, model_routing_load_errors, "model_routing_id"),
@@ -4877,6 +5039,16 @@ def main():
     if not embedding_provider_checklist_errors:
         checks.append(f"OK: {EMBEDDING_PROVIDER_CHECKLIST_PATH.relative_to(REPO_ROOT)} exists")
 
+    embedding_job_doc, embedding_job_doc_errors = load_text_file(EMBEDDING_JOB_DOC_PATH)
+    errors.extend(embedding_job_doc_errors)
+    if not embedding_job_doc_errors:
+        checks.append(f"OK: {EMBEDDING_JOB_DOC_PATH.relative_to(REPO_ROOT)} exists")
+
+    embedding_job_checklist, embedding_job_checklist_errors = load_text_file(EMBEDDING_JOB_CHECKLIST_PATH)
+    errors.extend(embedding_job_checklist_errors)
+    if not embedding_job_checklist_errors:
+        checks.append(f"OK: {EMBEDDING_JOB_CHECKLIST_PATH.relative_to(REPO_ROOT)} exists")
+
     knowledge_retrieval_doc, knowledge_retrieval_doc_errors = load_text_file(KNOWLEDGE_RETRIEVAL_DOC_PATH)
     errors.extend(knowledge_retrieval_doc_errors)
     if not knowledge_retrieval_doc_errors:
@@ -5073,7 +5245,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, embedding provider contract, context selection contract, prompt package contract, model routing contract, knowledge retrieval contract, retrieval session contract, retrieval result contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, embedding provider contract, embedding job contract, context selection contract, prompt package contract, model routing contract, knowledge retrieval contract, retrieval session contract, retrieval result contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
     )
     return 0
 
