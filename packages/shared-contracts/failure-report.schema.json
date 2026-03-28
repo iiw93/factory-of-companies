@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Failure Report Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "failure_report_id",
+    "failure_name",
+    "failure_type",
+    "failure_status",
+    "created_at",
+    "trace_id",
+    "severity",
+    "source_contract",
+    "source_id",
+    "failure_message",
+    "requires_manual_review"
+  ],
+  "properties": {
+    "failure_report_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "failure_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "failure_type": {
+      "type": "string",
+      "enum": [
+        "validation_error",
+        "processing_error",
+        "linkage_error",
+        "missing_input",
+        "timeout",
+        "unexpected_state",
+        "other"
+      ]
+    },
+    "failure_status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "triaged",
+        "mitigated",
+        "resolved",
+        "archived"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "warning",
+        "error",
+        "critical"
+      ]
+    },
+    "source_contract": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_trace_step_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_embedding_job_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_retrieval_index_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_knowledge_retrieval_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_retrieval_session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_retrieval_result_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "failure_message": {
+      "type": "string",
+      "minLength": 1
+    },
+    "failure_root_cause": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requires_manual_review": {
+      "type": "boolean"
+    },
+    "failure_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

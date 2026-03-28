@@ -44,6 +44,7 @@ RETRIEVAL_SESSION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "r
 RETRIEVAL_RESULT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "retrieval-result.schema.json"
 OBSERVABILITY_EVENT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "observability-event.schema.json"
 TRACE_STEP_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "trace-step.schema.json"
+FAILURE_REPORT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "failure-report.schema.json"
 BUDGET_HINT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "budget-hint.schema.json"
 PRIORITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "priority.schema.json"
 TIMEOUT_POLICY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "timeout-policy.schema.json"
@@ -57,6 +58,7 @@ RETRIEVAL_SESSION_DOC_PATH = REPO_ROOT / "docs" / "specs" / "retrieval-session-c
 RETRIEVAL_RESULT_DOC_PATH = REPO_ROOT / "docs" / "specs" / "retrieval-result-contract.md"
 OBSERVABILITY_EVENT_DOC_PATH = REPO_ROOT / "docs" / "specs" / "observability-event-contract.md"
 TRACE_STEP_DOC_PATH = REPO_ROOT / "docs" / "specs" / "trace-step-contract.md"
+FAILURE_REPORT_DOC_PATH = REPO_ROOT / "docs" / "specs" / "failure-report-contract.md"
 AGENT_ROLE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "agent-role-contract.md"
 ACTION_TYPE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "action-type-contract.md"
 PRIORITY_DOC_PATH = REPO_ROOT / "docs" / "specs" / "priority-contract.md"
@@ -71,6 +73,7 @@ RETRIEVAL_SESSION_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "retriev
 RETRIEVAL_RESULT_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "retrieval-result-checklist.md"
 OBSERVABILITY_EVENT_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "observability-event-checklist.md"
 TRACE_STEP_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "trace-step-checklist.md"
+FAILURE_REPORT_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "failure-report-checklist.md"
 
 EXPECTED_COMMAND_REQUIRED = [
     "command_id",
@@ -271,6 +274,20 @@ EXPECTED_TRACE_STEP_REQUIRED = [
     "sequence_order",
     "source_contract",
     "source_id",
+]
+
+EXPECTED_FAILURE_REPORT_REQUIRED = [
+    "failure_report_id",
+    "failure_name",
+    "failure_type",
+    "failure_status",
+    "created_at",
+    "trace_id",
+    "severity",
+    "source_contract",
+    "source_id",
+    "failure_message",
+    "requires_manual_review",
 ]
 
 EXPECTED_GOVERNANCE_DECISION_REQUIRED = [
@@ -795,6 +812,30 @@ EXPECTED_TRACE_STEP_STATUS_ENUM = [
     "failed",
     "blocked",
     "skipped",
+]
+
+EXPECTED_FAILURE_REPORT_TYPES = [
+    "validation_error",
+    "processing_error",
+    "linkage_error",
+    "missing_input",
+    "timeout",
+    "unexpected_state",
+    "other",
+]
+
+EXPECTED_FAILURE_REPORT_STATUS_ENUM = [
+    "open",
+    "triaged",
+    "mitigated",
+    "resolved",
+    "archived",
+]
+
+EXPECTED_FAILURE_REPORT_SEVERITIES = [
+    "warning",
+    "error",
+    "critical",
 ]
 
 EXPECTED_CONTEXT_SELECTION_STRATEGIES = [
@@ -5291,6 +5332,133 @@ def main():
         )
     )
 
+    failure_report_schema, failure_report_load_errors = load_json_file(FAILURE_REPORT_SCHEMA_PATH)
+    errors.extend(failure_report_load_errors)
+    if not failure_report_load_errors:
+        checks.append(f"OK: {FAILURE_REPORT_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {FAILURE_REPORT_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "failure-report.schema.json",
+                failure_report_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "failure-report.schema.json",
+                failure_report_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "failure-report.schema.json",
+                failure_report_schema,
+                EXPECTED_FAILURE_REPORT_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "failure-report.schema.json",
+                failure_report_schema,
+                [
+                    "linked_event_id",
+                    "linked_trace_step_id",
+                    "linked_embedding_job_id",
+                    "linked_retrieval_index_id",
+                    "linked_knowledge_retrieval_id",
+                    "linked_retrieval_session_id",
+                    "linked_retrieval_result_id",
+                    "failure_root_cause",
+                    "failure_note",
+                ],
+            )
+        )
+        for property_name in [
+            "failure_report_id",
+            "failure_name",
+            "trace_id",
+            "source_contract",
+            "source_id",
+            "linked_event_id",
+            "linked_trace_step_id",
+            "linked_embedding_job_id",
+            "linked_retrieval_index_id",
+            "linked_knowledge_retrieval_id",
+            "linked_retrieval_session_id",
+            "linked_retrieval_result_id",
+            "failure_message",
+            "failure_root_cause",
+            "failure_note",
+        ]:
+            errors.extend(
+                ensure_string_min_length(
+                    "failure-report.schema.json",
+                    failure_report_schema,
+                    property_name,
+                    1,
+                )
+            )
+        errors.extend(
+            ensure_property_type(
+                "failure-report.schema.json",
+                failure_report_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "failure-report.schema.json",
+                failure_report_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "failure-report.schema.json",
+                failure_report_schema,
+                "requires_manual_review",
+                "boolean",
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "failure-report.schema.json",
+                failure_report_schema,
+                "failure_type",
+                EXPECTED_FAILURE_REPORT_TYPES,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "failure-report.schema.json",
+                failure_report_schema,
+                "failure_status",
+                EXPECTED_FAILURE_REPORT_STATUS_ENUM,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "failure-report.schema.json",
+                failure_report_schema,
+                "severity",
+                EXPECTED_FAILURE_REPORT_SEVERITIES,
+            )
+        )
+
+    identifier_checks.append(
+        (
+            "failure-report.schema.json",
+            failure_report_schema,
+            failure_report_load_errors,
+            "failure_report_id",
+        )
+    )
+
     for schema_name, schema, load_errors, identifier_name in identifier_checks:
         if load_errors:
             continue
@@ -5603,6 +5771,16 @@ def main():
     if not trace_step_checklist_errors:
         checks.append(f"OK: {TRACE_STEP_CHECKLIST_PATH.relative_to(REPO_ROOT)} exists")
 
+    failure_report_doc, failure_report_doc_errors = load_text_file(FAILURE_REPORT_DOC_PATH)
+    errors.extend(failure_report_doc_errors)
+    if not failure_report_doc_errors:
+        checks.append(f"OK: {FAILURE_REPORT_DOC_PATH.relative_to(REPO_ROOT)} exists")
+
+    failure_report_checklist, failure_report_checklist_errors = load_text_file(FAILURE_REPORT_CHECKLIST_PATH)
+    errors.extend(failure_report_checklist_errors)
+    if not failure_report_checklist_errors:
+        checks.append(f"OK: {FAILURE_REPORT_CHECKLIST_PATH.relative_to(REPO_ROOT)} exists")
+
     agent_role_doc, agent_role_doc_errors = load_text_file(AGENT_ROLE_DOC_PATH)
     errors.extend(agent_role_doc_errors)
     if not agent_role_doc_errors:
@@ -5769,7 +5947,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, embedding provider contract, embedding job contract, retrieval index contract, context selection contract, prompt package contract, model routing contract, knowledge retrieval contract, retrieval session contract, retrieval result contract, observability event contract, trace step contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, embedding provider contract, embedding job contract, retrieval index contract, context selection contract, prompt package contract, model routing contract, knowledge retrieval contract, retrieval session contract, retrieval result contract, observability event contract, trace step contract, failure report contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
     )
     return 0
 
