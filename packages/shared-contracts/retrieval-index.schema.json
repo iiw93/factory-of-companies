@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Retrieval Index Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "retrieval_index_id",
+    "index_name",
+    "index_status",
+    "created_at",
+    "embedding_provider_id"
+  ],
+  "properties": {
+    "retrieval_index_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "index_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "index_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "building",
+        "ready",
+        "degraded",
+        "archived"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "embedding_provider_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_embedding_job_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "knowledge_source_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "modality_scope": {
+      "type": "string",
+      "enum": [
+        "text_only",
+        "text_image",
+        "text_audio",
+        "text_video",
+        "multimodal"
+      ]
+    },
+    "dimension": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "index_backend": {
+      "type": "string",
+      "enum": [
+        "local_file_index",
+        "vector_db",
+        "hybrid_store",
+        "other"
+      ]
+    },
+    "record_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "index_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
