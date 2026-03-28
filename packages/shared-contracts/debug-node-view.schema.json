@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Debug Node View Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "debug_node_view_id",
+    "node_name",
+    "node_type",
+    "node_status",
+    "created_at",
+    "trace_id",
+    "source_contract",
+    "source_id",
+    "display_label",
+    "sequence_order",
+    "is_current_focus"
+  ],
+  "properties": {
+    "debug_node_view_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "node_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "node_type": {
+      "type": "string",
+      "enum": [
+        "input_node",
+        "processing_node",
+        "embedding_node",
+        "index_node",
+        "retrieval_node",
+        "validation_node",
+        "output_node",
+        "failure_node"
+      ]
+    },
+    "node_status": {
+      "type": "string",
+      "enum": [
+        "idle",
+        "ready",
+        "active",
+        "completed",
+        "failed",
+        "blocked",
+        "archived"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_contract": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "display_label": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sequence_order": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "linked_trace_step_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_event_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "linked_failure_report_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "linked_embedding_job_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_retrieval_index_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_knowledge_retrieval_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_retrieval_session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_retrieval_result_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "is_current_focus": {
+      "type": "boolean"
+    },
+    "debug_message": {
+      "type": "string",
+      "minLength": 1
+    },
+    "debug_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

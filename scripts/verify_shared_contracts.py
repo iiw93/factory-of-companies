@@ -45,6 +45,7 @@ RETRIEVAL_RESULT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "re
 OBSERVABILITY_EVENT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "observability-event.schema.json"
 TRACE_STEP_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "trace-step.schema.json"
 FAILURE_REPORT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "failure-report.schema.json"
+DEBUG_NODE_VIEW_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "debug-node-view.schema.json"
 BUDGET_HINT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "budget-hint.schema.json"
 PRIORITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "priority.schema.json"
 TIMEOUT_POLICY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "timeout-policy.schema.json"
@@ -59,6 +60,7 @@ RETRIEVAL_RESULT_DOC_PATH = REPO_ROOT / "docs" / "specs" / "retrieval-result-con
 OBSERVABILITY_EVENT_DOC_PATH = REPO_ROOT / "docs" / "specs" / "observability-event-contract.md"
 TRACE_STEP_DOC_PATH = REPO_ROOT / "docs" / "specs" / "trace-step-contract.md"
 FAILURE_REPORT_DOC_PATH = REPO_ROOT / "docs" / "specs" / "failure-report-contract.md"
+DEBUG_NODE_VIEW_DOC_PATH = REPO_ROOT / "docs" / "specs" / "debug-node-view-contract.md"
 AGENT_ROLE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "agent-role-contract.md"
 ACTION_TYPE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "action-type-contract.md"
 PRIORITY_DOC_PATH = REPO_ROOT / "docs" / "specs" / "priority-contract.md"
@@ -74,6 +76,7 @@ RETRIEVAL_RESULT_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "retrieva
 OBSERVABILITY_EVENT_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "observability-event-checklist.md"
 TRACE_STEP_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "trace-step-checklist.md"
 FAILURE_REPORT_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "failure-report-checklist.md"
+DEBUG_NODE_VIEW_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "debug-node-view-checklist.md"
 
 EXPECTED_COMMAND_REQUIRED = [
     "command_id",
@@ -288,6 +291,20 @@ EXPECTED_FAILURE_REPORT_REQUIRED = [
     "source_id",
     "failure_message",
     "requires_manual_review",
+]
+
+EXPECTED_DEBUG_NODE_VIEW_REQUIRED = [
+    "debug_node_view_id",
+    "node_name",
+    "node_type",
+    "node_status",
+    "created_at",
+    "trace_id",
+    "source_contract",
+    "source_id",
+    "display_label",
+    "sequence_order",
+    "is_current_focus",
 ]
 
 EXPECTED_GOVERNANCE_DECISION_REQUIRED = [
@@ -836,6 +853,27 @@ EXPECTED_FAILURE_REPORT_SEVERITIES = [
     "warning",
     "error",
     "critical",
+]
+
+EXPECTED_DEBUG_NODE_VIEW_TYPES = [
+    "input_node",
+    "processing_node",
+    "embedding_node",
+    "index_node",
+    "retrieval_node",
+    "validation_node",
+    "output_node",
+    "failure_node",
+]
+
+EXPECTED_DEBUG_NODE_VIEW_STATUS_ENUM = [
+    "idle",
+    "ready",
+    "active",
+    "completed",
+    "failed",
+    "blocked",
+    "archived",
 ]
 
 EXPECTED_CONTEXT_SELECTION_STRATEGIES = [
@@ -5459,6 +5497,173 @@ def main():
         )
     )
 
+    debug_node_view_schema, debug_node_view_load_errors = load_json_file(DEBUG_NODE_VIEW_SCHEMA_PATH)
+    errors.extend(debug_node_view_load_errors)
+    if not debug_node_view_load_errors:
+        checks.append(f"OK: {DEBUG_NODE_VIEW_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {DEBUG_NODE_VIEW_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "debug-node-view.schema.json",
+                debug_node_view_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "debug-node-view.schema.json",
+                debug_node_view_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "debug-node-view.schema.json",
+                debug_node_view_schema,
+                EXPECTED_DEBUG_NODE_VIEW_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "debug-node-view.schema.json",
+                debug_node_view_schema,
+                [
+                    "linked_trace_step_id",
+                    "linked_event_ids",
+                    "linked_failure_report_ids",
+                    "linked_embedding_job_id",
+                    "linked_retrieval_index_id",
+                    "linked_knowledge_retrieval_id",
+                    "linked_retrieval_session_id",
+                    "linked_retrieval_result_id",
+                    "debug_message",
+                    "debug_note",
+                ],
+            )
+        )
+        for property_name in [
+            "debug_node_view_id",
+            "node_name",
+            "trace_id",
+            "source_contract",
+            "source_id",
+            "display_label",
+            "linked_trace_step_id",
+            "linked_embedding_job_id",
+            "linked_retrieval_index_id",
+            "linked_knowledge_retrieval_id",
+            "linked_retrieval_session_id",
+            "linked_retrieval_result_id",
+            "debug_message",
+            "debug_note",
+        ]:
+            errors.extend(
+                ensure_string_min_length(
+                    "debug-node-view.schema.json",
+                    debug_node_view_schema,
+                    property_name,
+                    1,
+                )
+            )
+        errors.extend(
+            ensure_property_type(
+                "debug-node-view.schema.json",
+                debug_node_view_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "debug-node-view.schema.json",
+                debug_node_view_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "debug-node-view.schema.json",
+                debug_node_view_schema,
+                "sequence_order",
+                "integer",
+            )
+        )
+        errors.extend(
+            ensure_numeric_minimum(
+                "debug-node-view.schema.json",
+                debug_node_view_schema,
+                "sequence_order",
+                0,
+            )
+        )
+        errors.extend(
+            ensure_array_items_type(
+                "debug-node-view.schema.json",
+                debug_node_view_schema,
+                "linked_event_ids",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_array_items_min_length(
+                "debug-node-view.schema.json",
+                debug_node_view_schema,
+                "linked_event_ids",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_array_items_type(
+                "debug-node-view.schema.json",
+                debug_node_view_schema,
+                "linked_failure_report_ids",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_array_items_min_length(
+                "debug-node-view.schema.json",
+                debug_node_view_schema,
+                "linked_failure_report_ids",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "debug-node-view.schema.json",
+                debug_node_view_schema,
+                "is_current_focus",
+                "boolean",
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "debug-node-view.schema.json",
+                debug_node_view_schema,
+                "node_type",
+                EXPECTED_DEBUG_NODE_VIEW_TYPES,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "debug-node-view.schema.json",
+                debug_node_view_schema,
+                "node_status",
+                EXPECTED_DEBUG_NODE_VIEW_STATUS_ENUM,
+            )
+        )
+
+    identifier_checks.append(
+        (
+            "debug-node-view.schema.json",
+            debug_node_view_schema,
+            debug_node_view_load_errors,
+            "debug_node_view_id",
+        )
+    )
+
     for schema_name, schema, load_errors, identifier_name in identifier_checks:
         if load_errors:
             continue
@@ -5781,6 +5986,16 @@ def main():
     if not failure_report_checklist_errors:
         checks.append(f"OK: {FAILURE_REPORT_CHECKLIST_PATH.relative_to(REPO_ROOT)} exists")
 
+    debug_node_view_doc, debug_node_view_doc_errors = load_text_file(DEBUG_NODE_VIEW_DOC_PATH)
+    errors.extend(debug_node_view_doc_errors)
+    if not debug_node_view_doc_errors:
+        checks.append(f"OK: {DEBUG_NODE_VIEW_DOC_PATH.relative_to(REPO_ROOT)} exists")
+
+    debug_node_view_checklist, debug_node_view_checklist_errors = load_text_file(DEBUG_NODE_VIEW_CHECKLIST_PATH)
+    errors.extend(debug_node_view_checklist_errors)
+    if not debug_node_view_checklist_errors:
+        checks.append(f"OK: {DEBUG_NODE_VIEW_CHECKLIST_PATH.relative_to(REPO_ROOT)} exists")
+
     agent_role_doc, agent_role_doc_errors = load_text_file(AGENT_ROLE_DOC_PATH)
     errors.extend(agent_role_doc_errors)
     if not agent_role_doc_errors:
@@ -5947,7 +6162,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, embedding provider contract, embedding job contract, retrieval index contract, context selection contract, prompt package contract, model routing contract, knowledge retrieval contract, retrieval session contract, retrieval result contract, observability event contract, trace step contract, failure report contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, embedding provider contract, embedding job contract, retrieval index contract, context selection contract, prompt package contract, model routing contract, knowledge retrieval contract, retrieval session contract, retrieval result contract, observability event contract, trace step contract, failure report contract, debug node view contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
     )
     return 0
 
