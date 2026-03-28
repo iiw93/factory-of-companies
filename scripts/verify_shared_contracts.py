@@ -33,6 +33,7 @@ ACTION_TYPE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "action-
 RUNTIME_CAPABILITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "runtime-capability.schema.json"
 TOOL_INVOCATION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "tool-invocation.schema.json"
 KNOWLEDGE_SOURCE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "knowledge-source.schema.json"
+EMBEDDING_PROVIDER_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "embedding-provider.schema.json"
 CONTEXT_SELECTION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "context-selection.schema.json"
 PROMPT_PACKAGE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "prompt-package.schema.json"
 MODEL_ROUTING_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "model-routing.schema.json"
@@ -44,6 +45,7 @@ PRIORITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "priority.s
 TIMEOUT_POLICY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "timeout-policy.schema.json"
 EXECUTION_REQUEST_DOC_PATH = REPO_ROOT / "docs" / "specs" / "execution-request-contract.md"
 MODEL_ROUTING_DOC_PATH = REPO_ROOT / "docs" / "specs" / "model-routing-contract.md"
+EMBEDDING_PROVIDER_DOC_PATH = REPO_ROOT / "docs" / "specs" / "embedding-provider-contract.md"
 KNOWLEDGE_RETRIEVAL_DOC_PATH = REPO_ROOT / "docs" / "specs" / "knowledge-retrieval-contract.md"
 RETRIEVAL_SESSION_DOC_PATH = REPO_ROOT / "docs" / "specs" / "retrieval-session-contract.md"
 RETRIEVAL_RESULT_DOC_PATH = REPO_ROOT / "docs" / "specs" / "retrieval-result-contract.md"
@@ -53,6 +55,7 @@ PRIORITY_DOC_PATH = REPO_ROOT / "docs" / "specs" / "priority-contract.md"
 BUDGET_HINT_DOC_PATH = REPO_ROOT / "docs" / "specs" / "budget-hint-contract.md"
 TIMEOUT_POLICY_DOC_PATH = REPO_ROOT / "docs" / "specs" / "timeout-policy-contract.md"
 MODEL_ROUTING_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "model-routing-checklist.md"
+EMBEDDING_PROVIDER_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "embedding-provider-checklist.md"
 KNOWLEDGE_RETRIEVAL_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "knowledge-retrieval-checklist.md"
 RETRIEVAL_SESSION_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "retrieval-session-checklist.md"
 RETRIEVAL_RESULT_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "retrieval-result-checklist.md"
@@ -159,6 +162,14 @@ EXPECTED_KNOWLEDGE_SOURCE_REQUIRED = [
     "source_name",
     "source_type",
     "source_status",
+    "created_at",
+]
+
+EXPECTED_EMBEDDING_PROVIDER_REQUIRED = [
+    "embedding_provider_id",
+    "provider_name",
+    "provider_type",
+    "provider_status",
     "created_at",
 ]
 
@@ -583,6 +594,20 @@ EXPECTED_KNOWLEDGE_SOURCE_STATUS_ENUM = [
     "available",
     "stale",
     "archived",
+]
+
+EXPECTED_EMBEDDING_PROVIDER_TYPES = [
+    "local_embedding",
+    "cloud_embedding",
+    "gemini_embedding",
+    "other",
+]
+
+EXPECTED_EMBEDDING_PROVIDER_STATUS_ENUM = [
+    "draft",
+    "available",
+    "limited",
+    "deprecated",
 ]
 
 EXPECTED_CONTEXT_SELECTION_STATUS_ENUM = [
@@ -3807,6 +3832,130 @@ def main():
             )
         )
 
+    embedding_provider_schema, embedding_provider_load_errors = load_json_file(EMBEDDING_PROVIDER_SCHEMA_PATH)
+    errors.extend(embedding_provider_load_errors)
+    if not embedding_provider_load_errors:
+        checks.append(f"OK: {EMBEDDING_PROVIDER_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {EMBEDDING_PROVIDER_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "embedding-provider.schema.json",
+                embedding_provider_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "embedding-provider.schema.json",
+                embedding_provider_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "embedding-provider.schema.json",
+                embedding_provider_schema,
+                EXPECTED_EMBEDDING_PROVIDER_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "embedding-provider.schema.json",
+                embedding_provider_schema,
+                [
+                    "supports_text",
+                    "supports_image",
+                    "supports_audio",
+                    "supports_video",
+                    "supports_pdf",
+                    "default_dimension",
+                    "max_dimension",
+                    "provider_note",
+                ],
+            )
+        )
+        for property_name in [
+            "embedding_provider_id",
+            "provider_name",
+            "provider_note",
+        ]:
+            errors.extend(
+                ensure_string_min_length(
+                    "embedding-provider.schema.json",
+                    embedding_provider_schema,
+                    property_name,
+                    1,
+                )
+            )
+        errors.extend(
+            ensure_property_type(
+                "embedding-provider.schema.json",
+                embedding_provider_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "embedding-provider.schema.json",
+                embedding_provider_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        for property_name in [
+            "supports_text",
+            "supports_image",
+            "supports_audio",
+            "supports_video",
+            "supports_pdf",
+        ]:
+            errors.extend(
+                ensure_property_type(
+                    "embedding-provider.schema.json",
+                    embedding_provider_schema,
+                    property_name,
+                    "boolean",
+                )
+            )
+        for property_name in [
+            "default_dimension",
+            "max_dimension",
+        ]:
+            errors.extend(
+                ensure_property_type(
+                    "embedding-provider.schema.json",
+                    embedding_provider_schema,
+                    property_name,
+                    "integer",
+                )
+            )
+            errors.extend(
+                ensure_numeric_minimum(
+                    "embedding-provider.schema.json",
+                    embedding_provider_schema,
+                    property_name,
+                    1,
+                )
+            )
+        errors.extend(
+            ensure_enum_matches(
+                "embedding-provider.schema.json",
+                embedding_provider_schema,
+                "provider_type",
+                EXPECTED_EMBEDDING_PROVIDER_TYPES,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "embedding-provider.schema.json",
+                embedding_provider_schema,
+                "provider_status",
+                EXPECTED_EMBEDDING_PROVIDER_STATUS_ENUM,
+            )
+        )
+
     context_selection_schema, context_selection_load_errors = load_json_file(CONTEXT_SELECTION_SCHEMA_PATH)
     errors.extend(context_selection_load_errors)
     if not context_selection_load_errors:
@@ -4475,6 +4624,7 @@ def main():
         ("runtime-capability.schema.json", runtime_capability_schema, runtime_capability_load_errors, "capability_id"),
         ("tool-invocation.schema.json", tool_invocation_schema, tool_invocation_load_errors, "tool_invocation_id"),
         ("knowledge-source.schema.json", knowledge_source_schema, knowledge_source_load_errors, "knowledge_source_id"),
+        ("embedding-provider.schema.json", embedding_provider_schema, embedding_provider_load_errors, "embedding_provider_id"),
         ("context-selection.schema.json", context_selection_schema, context_selection_load_errors, "context_selection_id"),
         ("prompt-package.schema.json", prompt_package_schema, prompt_package_load_errors, "prompt_package_id"),
         ("model-routing.schema.json", model_routing_schema, model_routing_load_errors, "model_routing_id"),
@@ -4717,6 +4867,16 @@ def main():
     if not model_routing_checklist_errors:
         checks.append(f"OK: {MODEL_ROUTING_CHECKLIST_PATH.relative_to(REPO_ROOT)} exists")
 
+    embedding_provider_doc, embedding_provider_doc_errors = load_text_file(EMBEDDING_PROVIDER_DOC_PATH)
+    errors.extend(embedding_provider_doc_errors)
+    if not embedding_provider_doc_errors:
+        checks.append(f"OK: {EMBEDDING_PROVIDER_DOC_PATH.relative_to(REPO_ROOT)} exists")
+
+    embedding_provider_checklist, embedding_provider_checklist_errors = load_text_file(EMBEDDING_PROVIDER_CHECKLIST_PATH)
+    errors.extend(embedding_provider_checklist_errors)
+    if not embedding_provider_checklist_errors:
+        checks.append(f"OK: {EMBEDDING_PROVIDER_CHECKLIST_PATH.relative_to(REPO_ROOT)} exists")
+
     knowledge_retrieval_doc, knowledge_retrieval_doc_errors = load_text_file(KNOWLEDGE_RETRIEVAL_DOC_PATH)
     errors.extend(knowledge_retrieval_doc_errors)
     if not knowledge_retrieval_doc_errors:
@@ -4913,7 +5073,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, context selection contract, prompt package contract, model routing contract, knowledge retrieval contract, retrieval session contract, retrieval result contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, embedding provider contract, context selection contract, prompt package contract, model routing contract, knowledge retrieval contract, retrieval session contract, retrieval result contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
     )
     return 0
 
