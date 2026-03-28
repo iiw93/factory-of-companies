@@ -36,17 +36,20 @@ KNOWLEDGE_SOURCE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "kn
 CONTEXT_SELECTION_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "context-selection.schema.json"
 PROMPT_PACKAGE_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "prompt-package.schema.json"
 MODEL_ROUTING_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "model-routing.schema.json"
+KNOWLEDGE_RETRIEVAL_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "knowledge-retrieval.schema.json"
 BUDGET_HINT_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "budget-hint.schema.json"
 PRIORITY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "priority.schema.json"
 TIMEOUT_POLICY_SCHEMA_PATH = REPO_ROOT / "packages" / "shared-contracts" / "timeout-policy.schema.json"
 EXECUTION_REQUEST_DOC_PATH = REPO_ROOT / "docs" / "specs" / "execution-request-contract.md"
 MODEL_ROUTING_DOC_PATH = REPO_ROOT / "docs" / "specs" / "model-routing-contract.md"
+KNOWLEDGE_RETRIEVAL_DOC_PATH = REPO_ROOT / "docs" / "specs" / "knowledge-retrieval-contract.md"
 AGENT_ROLE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "agent-role-contract.md"
 ACTION_TYPE_DOC_PATH = REPO_ROOT / "docs" / "specs" / "action-type-contract.md"
 PRIORITY_DOC_PATH = REPO_ROOT / "docs" / "specs" / "priority-contract.md"
 BUDGET_HINT_DOC_PATH = REPO_ROOT / "docs" / "specs" / "budget-hint-contract.md"
 TIMEOUT_POLICY_DOC_PATH = REPO_ROOT / "docs" / "specs" / "timeout-policy-contract.md"
 MODEL_ROUTING_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "model-routing-checklist.md"
+KNOWLEDGE_RETRIEVAL_CHECKLIST_PATH = REPO_ROOT / "tests" / "acceptance" / "knowledge-retrieval-checklist.md"
 
 EXPECTED_COMMAND_REQUIRED = [
     "command_id",
@@ -178,6 +181,15 @@ EXPECTED_MODEL_ROUTING_REQUIRED = [
     "model_name",
     "routing_mode",
     "contract_version",
+]
+
+EXPECTED_KNOWLEDGE_RETRIEVAL_REQUIRED = [
+    "knowledge_retrieval_id",
+    "contract_version",
+    "retrieval_status",
+    "retrieval_mode",
+    "query_text",
+    "created_at",
 ]
 
 EXPECTED_GOVERNANCE_DECISION_REQUIRED = [
@@ -579,6 +591,15 @@ EXPECTED_MODEL_ROUTING_STATUS_ENUM = [
     "archived",
 ]
 
+EXPECTED_KNOWLEDGE_RETRIEVAL_STATUS_ENUM = [
+    "draft",
+    "prepared",
+    "collected",
+    "filtered",
+    "finalized",
+    "archived",
+]
+
 EXPECTED_CONTEXT_SELECTION_STRATEGIES = [
     "manual",
     "rule_based",
@@ -591,6 +612,13 @@ EXPECTED_MODEL_ROUTING_MODES = [
     "capability_aware",
     "constraint_aware",
     "fallback_chain",
+]
+
+EXPECTED_KNOWLEDGE_RETRIEVAL_MODES = [
+    "direct_lookup",
+    "semantic_search",
+    "hybrid_search",
+    "curated_context",
 ]
 
 EXPECTED_BUDGET_UNITS = [
@@ -4025,6 +4053,128 @@ def main():
                 )
             )
 
+    knowledge_retrieval_schema, knowledge_retrieval_load_errors = load_json_file(KNOWLEDGE_RETRIEVAL_SCHEMA_PATH)
+    errors.extend(knowledge_retrieval_load_errors)
+    if not knowledge_retrieval_load_errors:
+        checks.append(f"OK: {KNOWLEDGE_RETRIEVAL_SCHEMA_PATH.relative_to(REPO_ROOT)} exists")
+        checks.append(f"OK: {KNOWLEDGE_RETRIEVAL_SCHEMA_PATH.relative_to(REPO_ROOT)} contains valid JSON")
+        errors.extend(
+            ensure_top_level_value(
+                "knowledge-retrieval.schema.json",
+                knowledge_retrieval_schema,
+                "$schema",
+                "https://json-schema.org/draft/2020-12/schema",
+            )
+        )
+        errors.extend(
+            ensure_schema_type(
+                "knowledge-retrieval.schema.json",
+                knowledge_retrieval_schema,
+                "object",
+            )
+        )
+        errors.extend(
+            ensure_required_fields(
+                "knowledge-retrieval.schema.json",
+                knowledge_retrieval_schema,
+                EXPECTED_KNOWLEDGE_RETRIEVAL_REQUIRED,
+            )
+        )
+        errors.extend(
+            ensure_fields_not_required(
+                "knowledge-retrieval.schema.json",
+                knowledge_retrieval_schema,
+                [
+                    "trace_id",
+                    "execution_request_id",
+                    "context_selection_id",
+                    "selected_source_ids",
+                    "retrieved_artifact_ids",
+                    "retrieval_constraints",
+                    "ranking_hint",
+                    "token_budget_hint",
+                ],
+            )
+        )
+        for property_name in [
+            "knowledge_retrieval_id",
+            "contract_version",
+            "query_text",
+            "trace_id",
+            "execution_request_id",
+            "context_selection_id",
+            "ranking_hint",
+        ]:
+            errors.extend(
+                ensure_string_min_length(
+                    "knowledge-retrieval.schema.json",
+                    knowledge_retrieval_schema,
+                    property_name,
+                    1,
+                )
+            )
+        errors.extend(
+            ensure_property_type(
+                "knowledge-retrieval.schema.json",
+                knowledge_retrieval_schema,
+                "created_at",
+                "string",
+            )
+        )
+        errors.extend(
+            ensure_property_format(
+                "knowledge-retrieval.schema.json",
+                knowledge_retrieval_schema,
+                "created_at",
+                "date-time",
+            )
+        )
+        errors.extend(
+            ensure_property_type(
+                "knowledge-retrieval.schema.json",
+                knowledge_retrieval_schema,
+                "token_budget_hint",
+                "integer",
+            )
+        )
+        errors.extend(
+            ensure_numeric_minimum(
+                "knowledge-retrieval.schema.json",
+                knowledge_retrieval_schema,
+                "token_budget_hint",
+                1,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "knowledge-retrieval.schema.json",
+                knowledge_retrieval_schema,
+                "retrieval_status",
+                EXPECTED_KNOWLEDGE_RETRIEVAL_STATUS_ENUM,
+            )
+        )
+        errors.extend(
+            ensure_enum_matches(
+                "knowledge-retrieval.schema.json",
+                knowledge_retrieval_schema,
+                "retrieval_mode",
+                EXPECTED_KNOWLEDGE_RETRIEVAL_MODES,
+            )
+        )
+        for property_name in [
+            "selected_source_ids",
+            "retrieved_artifact_ids",
+            "retrieval_constraints",
+        ]:
+            errors.extend(
+                ensure_array_items_min_length(
+                    "knowledge-retrieval.schema.json",
+                    knowledge_retrieval_schema,
+                    property_name,
+                    1,
+                )
+            )
+
     identifier_checks = [
         ("quality-gate.schema.json", quality_gate_schema, quality_gate_load_errors, "quality_gate_id"),
         ("evidence-bundle.schema.json", evidence_bundle_schema, evidence_bundle_load_errors, "evidence_bundle_id"),
@@ -4045,6 +4195,7 @@ def main():
         ("context-selection.schema.json", context_selection_schema, context_selection_load_errors, "context_selection_id"),
         ("prompt-package.schema.json", prompt_package_schema, prompt_package_load_errors, "prompt_package_id"),
         ("model-routing.schema.json", model_routing_schema, model_routing_load_errors, "model_routing_id"),
+        ("knowledge-retrieval.schema.json", knowledge_retrieval_schema, knowledge_retrieval_load_errors, "knowledge_retrieval_id"),
     ]
 
     for schema_name, schema, load_errors, identifier_name in identifier_checks:
@@ -4268,6 +4419,16 @@ def main():
     if not model_routing_checklist_errors:
         checks.append(f"OK: {MODEL_ROUTING_CHECKLIST_PATH.relative_to(REPO_ROOT)} exists")
 
+    knowledge_retrieval_doc, knowledge_retrieval_doc_errors = load_text_file(KNOWLEDGE_RETRIEVAL_DOC_PATH)
+    errors.extend(knowledge_retrieval_doc_errors)
+    if not knowledge_retrieval_doc_errors:
+        checks.append(f"OK: {KNOWLEDGE_RETRIEVAL_DOC_PATH.relative_to(REPO_ROOT)} exists")
+
+    knowledge_retrieval_checklist, knowledge_retrieval_checklist_errors = load_text_file(KNOWLEDGE_RETRIEVAL_CHECKLIST_PATH)
+    errors.extend(knowledge_retrieval_checklist_errors)
+    if not knowledge_retrieval_checklist_errors:
+        checks.append(f"OK: {KNOWLEDGE_RETRIEVAL_CHECKLIST_PATH.relative_to(REPO_ROOT)} exists")
+
     agent_role_doc, agent_role_doc_errors = load_text_file(AGENT_ROLE_DOC_PATH)
     errors.extend(agent_role_doc_errors)
     if not agent_role_doc_errors:
@@ -4434,7 +4595,7 @@ def main():
     for check in checks:
         print(f"- {check}")
     print(
-        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, context selection contract, prompt package contract, model routing contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
+        "- OK: required fields, target enums, command state rules, traceability envelope, session context contract, project context contract, company context contract, owner identity contract, artifact reference contract, planning artifact contract, quality gate contract, evidence bundle contract, governance decision contract, approval action contract, execution request contract, orchestration handoff contract, execution result contract, release decision contract, delivery package contract, deployment target contract, runtime capability contract, tool invocation contract, knowledge source contract, context selection contract, prompt package contract, model routing contract, knowledge retrieval contract, agent role contract, action type contract, budget hint contract, priority contract, and timeout policy contract match the current shared contract expectations"
     )
     return 0
 

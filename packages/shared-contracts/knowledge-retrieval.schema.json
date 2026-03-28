@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Knowledge Retrieval Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "knowledge_retrieval_id",
+    "contract_version",
+    "retrieval_status",
+    "retrieval_mode",
+    "query_text",
+    "created_at"
+  ],
+  "properties": {
+    "knowledge_retrieval_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contract_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "retrieval_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "prepared",
+        "collected",
+        "filtered",
+        "finalized",
+        "archived"
+      ]
+    },
+    "retrieval_mode": {
+      "type": "string",
+      "enum": [
+        "direct_lookup",
+        "semantic_search",
+        "hybrid_search",
+        "curated_context"
+      ]
+    },
+    "query_text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "context_selection_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selected_source_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "retrieved_artifact_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "retrieval_constraints": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "ranking_hint": {
+      "type": "string",
+      "minLength": 1
+    },
+    "token_budget_hint": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}
