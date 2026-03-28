@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Retrieval Session Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "retrieval_session_id",
+    "session_name",
+    "session_status",
+    "created_at"
+  ],
+  "properties": {
+    "retrieval_session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "session_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "session_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "prepared",
+        "running",
+        "completed",
+        "failed",
+        "archived"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "execution_request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "context_selection_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_knowledge_retrieval_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "linked_prompt_package_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selected_source_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "retrieval_outcome": {
+      "type": "string",
+      "enum": [
+        "empty",
+        "partial",
+        "sufficient",
+        "superseded"
+      ]
+    },
+    "session_note": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
