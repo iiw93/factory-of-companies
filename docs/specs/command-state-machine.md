@@ -1,5 +1,18 @@
 # Command State Machine
 
+## Status Note (Guardrail-Only, Non-Authorizing)
+This contract is historical/planning context and is not evidence of current bridge, Telegram, or Web Dashboard active execution availability.
+
+Canonical authority is:
+- `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md`
+- `docs/specs/thin-runtime-mvp-scenario.md`
+
+Current enforced posture:
+- scenario-01 remains the only authoritative implemented runtime path
+- scenario-02, bridge, deploy, model-router, Telegram, Web Dashboard, Company Builder, and Paperclip integration remain blocked/parked unless explicitly reopened
+
+This contract does not authorize implementation-planning, coding, or execution.
+
 ## Goal
 Определить жизненный цикл команды от момента получения до завершения или отказа.
 

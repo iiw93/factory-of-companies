@@ -1,4 +1,12 @@
 # Owner Identity Contract
+## Status Note (Guardrail-Only, Non-Authorizing)
+This contract is historical/planning context only and is not evidence of active Telegram, Web Dashboard, or bridge availability.
+
+Canonical authority is:
+- `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md`
+- `docs/specs/thin-runtime-mvp-scenario.md`
+
+This contract does not authorize implementation-planning, coding, execution, deployment, release, or artifact publication.
 
 ## Goal
 Определить единый контракт owner identity без внедрения auth system, IAM или runtime identity manager.

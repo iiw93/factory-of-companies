@@ -1,5 +1,18 @@
 # Quality Gates
 
+## Status Note (Guardrail-Only, Non-Authorizing)
+This quality-gates document is historical/planning context and is not evidence that deploy is currently authorized or active.
+
+Canonical authority is:
+- `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md`
+- `docs/specs/thin-runtime-mvp-scenario.md`
+
+Current enforced posture:
+- scenario-01 is the only authoritative implemented runtime path
+- deploy, scenario-02, bridge, Telegram, Web Dashboard, model-router, Company Builder, and Paperclip integration remain blocked/parked unless explicitly reopened
+
+This document does not authorize implementation-planning, coding, or deploy execution.
+
 ## Principle
 Ни один важный change не должен проходить без проверок.
 

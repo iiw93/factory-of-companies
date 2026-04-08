@@ -1,4 +1,12 @@
 # Session Context Contract
+## Status Note (Guardrail-Only, Non-Authorizing)
+This contract is historical/planning context only and is not evidence of active session runtime, active trace orchestration, or active execution.
+
+Canonical authority is:
+- `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md`
+- `docs/specs/thin-runtime-mvp-scenario.md`
+
+This contract does not authorize implementation-planning, coding, execution, deployment, release, or artifact publication.
 
 ## Goal
 Определить единый контракт session context без внедрения runtime session manager.

@@ -1,5 +1,18 @@
 # SRS — Software Requirements Specification
 
+## Status Note (Guardrail-Only, Non-Authorizing)
+This SRS is historical context and is not the canonical source of current runtime or approval status.
+
+Canonical authority is:
+- `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md`
+- `docs/specs/thin-runtime-mvp-scenario.md`
+
+Current enforced posture:
+- scenario-01 is the only authoritative implemented runtime path
+- scenario-02, bridge, Telegram, Web Dashboard, deploy, model-router, Company Builder, and Paperclip integration remain blocked/parked unless explicitly reopened
+
+This document does not authorize implementation-planning or coding.
+
 ## 1. System Name
 Factory of Companies
 

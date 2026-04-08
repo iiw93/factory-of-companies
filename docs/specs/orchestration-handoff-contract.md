@@ -1,5 +1,12 @@
 # Orchestration Handoff Contract
 
+## Status Note (Guardrail-Only, Non-Authorizing)
+This contract is historical/planning context only and does not authorize implementation-planning, coding, or execution.
+
+Canonical authority is:
+- `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md`
+- `docs/specs/thin-runtime-mvp-scenario.md`
+
 ## Goal
 Определить отдельный контракт передачи единицы работы между слоями и ролями системы без внедрения runtime orchestration engine.
 
@@ -24,7 +31,7 @@ Orchestration handoff contract описывает нормализованный
   "priority": "high",
   "linked_governance_decision_id": "gov-0001",
   "linked_artifact_id": "artifact-0001",
-  "handoff_note": "Implementation work is approved and ready for developer handoff"
+  "handoff_note": "Historical/planning handoff context only; no implementation-planning or coding is authorized by this example."
 }
 ```
 

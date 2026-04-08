@@ -1,5 +1,18 @@
 # Thin Indexing MVP Plan
 
+## Status Note (Guardrail-Only, Non-Authorizing)
+This roadmap document is historical/planning context. Prior “next step” wording in this document is not the canonical source of current runtime or approval status.
+
+Canonical authority is:
+- `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md`
+- `docs/specs/thin-runtime-mvp-scenario.md`
+
+Current enforced posture:
+- scenario-01 is the only authoritative implemented runtime path
+- scenario-02, bridge, deploy, model-router, Telegram, Web Dashboard, Company Builder, and Paperclip integration remain blocked/parked unless explicitly reopened
+
+This document does not authorize implementation-planning, coding, or execution.
+
 ## 1. Goal
 Deliver the first thin indexing MVP that can:
 

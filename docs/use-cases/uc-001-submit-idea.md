@@ -1,5 +1,18 @@
 # UC-001 — Пользователь отправляет идею на создание проекта
 
+## Status Note (Guardrail-Only, Non-Authorizing)
+This use case is historical/planning context and is not evidence of current availability of Telegram, Dashboard, or Bridge inputs.
+
+Canonical authority is:
+- `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md`
+- `docs/specs/thin-runtime-mvp-scenario.md`
+
+Current enforced posture:
+- scenario-01 is the only authoritative implemented runtime path
+- bridge, Telegram, and Web Dashboard remain blocked/parked unless explicitly reopened
+
+This document does not authorize implementation-planning or coding.
+
 ## Goal
 Пользователь должен иметь возможность отправить идею через Telegram или Dashboard и инициировать создание нового проекта.
 

@@ -1,4 +1,12 @@
 # Planning Artifact Contract
+## Status Note (Guardrail-Only, Non-Authorizing)
+This contract is historical/planning context only and is not evidence of active execution, handoff authorization, or implementation activity.
+
+Canonical authority is:
+- `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md`
+- `docs/specs/thin-runtime-mvp-scenario.md`
+
+This contract does not authorize implementation-planning, coding, deployment, release, or artifact publication.
 
 ## Goal
 Определить отдельный контракт planning artifact без внедрения planning engine, task board, project manager runtime или repository manager.

@@ -1,5 +1,14 @@
 # Release Decision Contract
 
+## Status Note (Guardrail-Only, Non-Authorizing)
+This contract is historical/planning context only and is not evidence of active release, deploy, or artifact publication authorization.
+
+Canonical authority is:
+- `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md`
+- `docs/specs/thin-runtime-mvp-scenario.md`
+
+This contract does not authorize implementation-planning, coding, deployment, or artifact publication.
+
 ## Goal
 Определить отдельный контракт решения о выпуске без внедрения runtime release manager, deployment engine, CI/CD pipeline или environment registry.
 
@@ -14,7 +23,7 @@ Release decision contract описывает решение о выпуске р
 {
   "release_decision_id": "release-0001",
   "decision_name": "release-readiness-decision",
-  "release_status": "approved",
+  "release_status": "historical_planning_trace",
   "created_at": "2026-03-27T11:10:00Z",
   "trace_id": "trace-0001",
   "project_id": "project-001",
@@ -24,7 +33,7 @@ Release decision contract описывает решение о выпуске р
   "linked_evidence_bundle_id": "bundle-0001",
   "linked_governance_decision_id": "gov-0001",
   "release_scope": "artifact",
-  "release_note": "Approved for artifact publication after aligned quality, evidence, and governance review"
+  "release_note": "Historical/planning release context only; no deploy or artifact publication is authorized by this example."
 }
 ```
 

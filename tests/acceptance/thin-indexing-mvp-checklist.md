@@ -25,7 +25,7 @@ Risks are listed.
 Engineering policy is listed.
 
 ## AC-3709
-Next step after MVP is defined.
+Historical/planning trace of a prior MVP next-step definition exists; this item is non-authorizing and does not imply a current next action.
 
 ## AC-3710
 Status section exists.
