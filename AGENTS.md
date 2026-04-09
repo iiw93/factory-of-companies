@@ -48,6 +48,29 @@ Do not use without explicit user approval:
 - destructive delete operations
 - cross-machine recovery rewrites
 
+## Stash Instead Of Risk Rule
+
+If the working tree is not clean and the current material is not ready for a narrow commit, prefer stash before continuing.
+
+Apply this rule when:
+- untracked planning/runtime files accumulate
+- a completed narrow scope is followed by unrelated leftover material
+- switching between Windows and Ubuntu
+- pausing work for later continuation
+
+Preferred commands:
+- `git status --short`
+- `git stash push -u -m "WIP <description>"`
+- `git stash list`
+- `git stash show --stat stash@{0}`
+
+When restoring, prefer:
+- `git stash apply stash@{0}`
+- verify with `git status --short`
+- then `git stash drop stash@{0}`
+
+Do not treat stash as a cross-machine sync mechanism.
+
 ## Scope control rules
 
 Default mode is narrow-scope and non-authorizing.
