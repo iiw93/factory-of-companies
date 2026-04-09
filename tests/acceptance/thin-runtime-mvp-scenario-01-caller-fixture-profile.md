@@ -9,9 +9,8 @@ Provide a small, consistent caller-fixture reference for scenario-01 review and 
 This file is a docs/tests aid only. It does not authorize runtime, bridge, or scenario-02 implementation.
 
 Governing sources:
-- `docs/specs/thin-runtime-mvp-scenario.md`
-  - `### Scenario-01 Downstream Consumption Contract (Narrow)`
-- `docs/handoff/scenario-01-consumer-handoff-pack.md`
+- `docs/handoff/scenario-01-consumer-handoff-pack.md` (authoritative narrow consumer baseline)
+- `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md`
 
 Boundary note:
 - bridge-related, external-caller, and scenario-02 sections are out of scope for this file

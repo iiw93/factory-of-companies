@@ -198,7 +198,7 @@ This completion is documentation-only and does not change runtime/spec behavior 
 
 ## Key Files To Read First
 1. Roadmap:
-   - `docs/roadmap/post-thin-runtime-mvp-narrow-follow-on-options.md`
+   - `docs/roadmap/scenario-01-post-checkpoint-micro-track-candidates.md` (Scenario-01 roadmap context; non-authorizing)
 2. Narrow consumer authority baseline:
    - `docs/handoff/scenario-01-consumer-handoff-pack.md`
 3. Runbook (read this first for review/triage flow):
@@ -344,7 +344,7 @@ Planned/blocked truth:
 - no new scenario-01 implementation/docs/tests line should start without opening a new explicit narrow micro-track
 
 Read first:
-1) docs/roadmap/post-thin-runtime-mvp-narrow-follow-on-options.md
+1) docs/roadmap/scenario-01-post-checkpoint-micro-track-candidates.md (Scenario-01 roadmap context; non-authorizing)
 2) docs/handoff/scenario-01-consumer-handoff-pack.md (authoritative narrow consumer baseline)
 3) docs/runbooks/thin-runtime-inspection-and-failure-reading-guide.md (use Operator Quick-Reference -> Guard-Map Quick Card -> Review-Commands Mini-Profile)
 4) docs/decision/scenario-02-go-no-go-approval-discussion-note.md

@@ -15,8 +15,7 @@ This pack is scenario-01 only.
 ## Source-Of-Truth Alignment
 Examples in this pack are subordinate to:
 
-- `docs/specs/thin-runtime-mvp-scenario.md` (`### Scenario-01 Downstream Consumption Contract (Narrow)`)
-- `docs/handoff/scenario-01-consumer-handoff-pack.md`
+- `docs/handoff/scenario-01-consumer-handoff-pack.md` (authoritative narrow consumer baseline)
 - `tests/acceptance/thin-runtime-mvp-scenario-01-output-consumption-examples-pack.md`
 - `tests/runtime/snapshots/thin_runtime_happy_path.snapshot.json`
 - `tests/runtime/snapshots/thin_runtime_forced_failure.snapshot.json`
