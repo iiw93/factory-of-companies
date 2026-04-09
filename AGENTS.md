@@ -1,37 +1,102 @@
 # AGENTS.md
 
-## Purpose
-Этот репозиторий предназначен для построения Factory of Companies.
+## Project operating mode
 
-## Global Rules
-- Не смешивать runtime, bridge и business logic.
-- Не изменять vendor/paperclip напрямую без отдельного ADR и review.
-- Любая задача должна иметь:
-  - цель
-  - ограничения
-  - критерии приёмки
-  - тестовый план
-- Сначала писать тесты или тестовые сценарии, затем код.
-- Любое изменение должно обновлять документацию.
+This repository is governed by a strict narrow-scope workflow.
 
-## Architecture Boundaries
-- vendor/paperclip = внешний runtime
-- packages/paperclip-adapter = слой интеграции
-- apps/bridge-gateway = вход и выход команд
-- packages/company-builder = логика компании агентов
-- packages/model-router = выбор модели
-- packages/codex-adapter = интеграция с Codex
-- packages/deploy-agent = выкладка на сервер
+Primary goals:
+- preserve parked-state governance unless the user explicitly reopens a blocked track
+- avoid silent scope expansion
+- prefer small, reviewable, low-risk changes
+- keep documentation, contracts, and acceptance materials aligned
 
-## Testing Policy
-- Unit tests for pure logic
-- Integration tests for adapters and bridges
-- System tests for full workflows
-- Acceptance tests for user goals
+## Repository authority and sync rules
 
-## Forbidden Changes
-- Не встраивать Telegram внутрь Paperclip core
-- Не встраивать Dashboard внутрь Paperclip core
-- Не деплоить в production без smoke-test
-- Не принимать upstream updates без compatibility checks
+- Primary authoring copy: Windows
+- Secondary verification copy: Ubuntu
+- Remote synchronization authority: GitHub
+- Never edit the same branch concurrently on Windows and Ubuntu
+- Before editing, always check:
+  - current branch
+  - working tree cleanliness
+  - HEAD vs origin/<branch>
+- After a completed step on Windows:
+  - review
+  - commit
+  - push
+- After push, Ubuntu only:
+  - fetches
+  - checks out the same branch
+  - pulls with --ff-only
+- Do not continue work on a second machine if the first machine has uncommitted changes
 
+## Git safety rules
+
+Always prefer:
+- git fetch origin
+- git status --short
+- git branch --show-current
+- git rev-parse HEAD
+- git rev-parse origin/<branch>
+- fast-forward only pull behavior
+
+Do not use without explicit user approval:
+- git push --force
+- git rebase -i
+- git reset --hard
+- git commit --amend
+- destructive delete operations
+- cross-machine recovery rewrites
+
+## Scope control rules
+
+Default mode is narrow-scope and non-authorizing.
+
+When reviewing or editing:
+- prefer docs-only changes first
+- preserve existing governance wording
+- do not silently reopen blocked tracks
+- do not broaden implementation scope unless explicitly instructed
+- separate guardrail alignment from implementation work
+- treat packages/** and tests/runtime/** as restricted zones unless the user explicitly opens that scope
+
+## Safe zones
+
+Preferred edit zones:
+- docs/adr/
+- docs/roadmap/
+- docs/specs/
+- docs/test-strategy/
+- docs/use-cases/
+- tests/acceptance/
+
+Restricted zones unless explicitly authorized:
+- packages/
+- tests/runtime/
+- deployment/infrastructure scripts
+- anything outside the repository root
+
+## Working style
+
+- Use PowerShell-safe command forms on Windows
+- Keep changes minimal and localized
+- Summarize planned scope before large edits
+- After edits, show verification commands and results
+- Stop before commit unless the user asked for commit
+- Stop before push unless the user asked for push
+
+## Validation discipline
+
+Before claiming sync or completion, verify with commands.
+Before staging, confirm that only intended files are included.
+Before commit, review staged diff.
+Before push, confirm branch and target.
+
+## Output expectations
+
+When asked to perform a task:
+1. State the current stage briefly
+2. State the exact narrow scope you will touch
+3. Perform only the approved changes
+4. Show verification output
+5. Stop at the requested boundary
