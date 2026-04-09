@@ -6,9 +6,10 @@ It separates implemented runtime truth from parked planning tracks (scenario-02,
 
 ## Canonical Global Checkpoint Entry Point
 - Canonical global checkpoint file: `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md` (this file).
+- Authority split note: this file is governance/checkpoint authority; the authoritative narrow consumer baseline is maintained in `docs/handoff/scenario-01-consumer-handoff-pack.md`.
 - Future ChatGPT/Codex sessions that need full-project state should start from this file first.
 - Other handoff/checkpoint documents are scoped companion artifacts and do not replace this global checkpoint authority.
-- Documentation backbone entrypoint (doc-only navigation): `paperclip_factory_architecture_plan.md` → `docs/specs/thin-runtime-mvp-scenario.md`.
+- Documentation backbone entrypoint (doc-only navigation): `paperclip_factory_architecture_plan.md` -> `docs/handoff/scenario-01-consumer-handoff-pack.md` (authoritative narrow consumer baseline).
 - Test strategy entrypoint: `docs/test-strategy/quality-gates.md`.
 
 ## Guardrail Hardening Checkpoint Update
@@ -66,8 +67,8 @@ This completion is documentation-only and does not change runtime/spec behavior 
   - `tests/acceptance/thin-runtime-mvp-scenario-01-output-consumption-examples-pack.md`
   - `tests/acceptance/thin-runtime-mvp-scenario-01-runtime-consumer-decision-examples-pack.md`
   - `tests/acceptance/thin-runtime-mvp-scenario-01-downstream-consumer-validation-examples-pack.md` (includes validation matrix + consistency checklist)
-- Scenario-01 future implementation-planning boundary note exists in:
-  - `docs/specs/thin-runtime-mvp-scenario.md` (`### Scenario-01 Future Implementation-Planning Boundary Note (Guardrail-Only, Non-Authorizing)`)
+- Scenario-01 future implementation-planning boundary is maintained in:
+  - `docs/handoff/scenario-01-consumer-handoff-pack.md` (authoritative narrow consumer baseline; non-authorizing)
 - This boundary note is guardrail-only and non-authorizing:
   - it does not reopen scenario-01 implementation-planning or coding
   - it does not reopen any blocked track or broaden platform/API scope
@@ -198,8 +199,8 @@ This completion is documentation-only and does not change runtime/spec behavior 
 ## Key Files To Read First
 1. Roadmap:
    - `docs/roadmap/post-thin-runtime-mvp-narrow-follow-on-options.md`
-2. Main thin-runtime spec:
-   - `docs/specs/thin-runtime-mvp-scenario.md`
+2. Narrow consumer authority baseline:
+   - `docs/handoff/scenario-01-consumer-handoff-pack.md`
 3. Runbook (read this first for review/triage flow):
    - `docs/runbooks/thin-runtime-inspection-and-failure-reading-guide.md`
    - use order:
@@ -272,6 +273,7 @@ This completion is documentation-only and does not change runtime/spec behavior 
 - Scope reminder: scenario-01 only, review/inspection aid only, no new runtime semantics, no scenario-02 authorization, no new tooling requirement implied.
 
 ## Next Valid Directions
+- This section is historical/planning context only and does not authorize implementation-planning, coding, or execution.
 - Direction A (default): stay at the stable multi-checkpoint state (scenario-01 parked, scenario-02 parked/blocked, bridge parked/blocked, Telegram parked/blocked, Web Dashboard parked/blocked, deploy parked/blocked, model-router parked/blocked, Company Builder parked/blocked, Paperclip integration parked/blocked).
 - Direction B (scenario-01 re-entry): open one new explicit narrow scenario-01 micro-track decision first.
 - Direction C (scenario-02 re-entry): reopen explicit scenario-02 approval discussion first.
@@ -343,7 +345,7 @@ Planned/blocked truth:
 
 Read first:
 1) docs/roadmap/post-thin-runtime-mvp-narrow-follow-on-options.md
-2) docs/specs/thin-runtime-mvp-scenario.md
+2) docs/handoff/scenario-01-consumer-handoff-pack.md (authoritative narrow consumer baseline)
 3) docs/runbooks/thin-runtime-inspection-and-failure-reading-guide.md (use Operator Quick-Reference -> Guard-Map Quick Card -> Review-Commands Mini-Profile)
 4) docs/decision/scenario-02-go-no-go-approval-discussion-note.md
 5) docs/decision/scenario-02-no-go-checkpoint.md

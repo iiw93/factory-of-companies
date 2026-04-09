@@ -2,6 +2,7 @@
 
 ## Scope
 This pack is for scenario-01 consumer review only.
+- Authority split note: this file is the authoritative narrow consumer baseline; `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md` remains governance/checkpoint authority.
 
 - scenario-01 is the only authoritative implemented runtime path
 - this pack does not authorize bridge implementation
@@ -101,13 +102,13 @@ Scope boundary (unchanged):
   - `## Scenario-01 Operator Quick-Reference (Compact)`
   - `## Scenario-01 Guard-Map Quick Card`
   - `## Scenario-01 Review-Commands Mini-Profile`
-- `docs/specs/thin-runtime-mvp-scenario.md`
-  - `### Scenario-01 Downstream Consumption Contract (Narrow)`
-  - `### Scenario-01 Review-Surface Freeze Note (Inspection Baseline, Non-Authorizing)`
+- `docs/handoff/scenario-01-consumer-handoff-pack.md` (this file; authoritative narrow consumer baseline)
 - `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md`
 
 ## Non-Authorization Reminder
 This pack is a compact consumer-facing handoff aid.
+Scenario-01 remains the only authoritative implemented runtime path.
+This document is historical/planning context only and does not authorize implementation-planning, coding, or execution.
 
 - it is not a new API contract
 - it is not bridge implementation-planning authorization
