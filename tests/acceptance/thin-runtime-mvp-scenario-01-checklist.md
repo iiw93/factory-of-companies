@@ -5,7 +5,7 @@ This document is historical/planning context only and does not authorize impleme
 
 ## Acceptance Scope
 
-This checklist defines the acceptance skeleton for the first thin runtime MVP scenario described in `docs/specs/thin-runtime-mvp-scenario.md`.
+This checklist defines the acceptance skeleton for the first thin runtime MVP scenario described in `docs/handoff/scenario-01-consumer-handoff-pack.md` and aligned to `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md`.
 
 Scope is intentionally narrow:
 
@@ -24,7 +24,9 @@ This checklist does not add runtime behavior. It defines and refines acceptance 
 ## Scenario Under Test
 
 - scenario id: `thin-runtime-mvp-scenario-01`
-- governing spec: `docs/specs/thin-runtime-mvp-scenario.md`
+- governing authority pointers:
+  - `docs/handoff/scenario-01-consumer-handoff-pack.md`
+  - `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md`
 - historical traceability note: prior `approved next commit after this refinement` entry (`runtime/tests: tighten contract-shape consistency and fixture discipline`) is historical context only and does not authorize implementation-planning or coding.
 
 - [ ] AC-7100 governing spec exists and explicitly defines `thin-runtime-mvp-scenario-01`

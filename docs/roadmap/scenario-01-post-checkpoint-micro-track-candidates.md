@@ -9,7 +9,7 @@ Define narrow, low-risk follow-on candidates that continue progress on scenario-
 ## Current Baseline
 - scenario-01 (`thin-runtime-mvp-scenario-01`) is implemented and stabilized
 - scenario-01 remains the only authoritative implemented runtime path
-- downstream-consumption contract note exists in `docs/specs/thin-runtime-mvp-scenario.md`
+- downstream-consumption authority baseline exists in `docs/handoff/scenario-01-consumer-handoff-pack.md`
 - operator quick-reference exists in `docs/runbooks/thin-runtime-inspection-and-failure-reading-guide.md`
 - guard-map quick card exists in `docs/runbooks/thin-runtime-inspection-and-failure-reading-guide.md`
 - review-commands mini-profile exists in `docs/runbooks/thin-runtime-inspection-and-failure-reading-guide.md`
