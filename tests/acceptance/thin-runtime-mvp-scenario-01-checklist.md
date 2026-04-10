@@ -174,6 +174,24 @@ This checklist does not add runtime behavior. It defines and refines acceptance 
 - [ ] AC-7215 forced-failure drift test compares normalized runtime output to the approved forced-failure snapshot
 - [ ] AC-7216 normalization behavior is explicitly checked so snapshot comparisons stay deterministic and non-brittle
 
+## Acceptance-to-Guard Crosswalk (Scenario-01, review-only)
+
+This crosswalk is historical/planning context only and does not authorize implementation-planning, coding, or execution.
+It is a documentation traceability aid that maps existing acceptance ranges to existing runbook guard categories and existing runtime test modules.
+It does not modify acceptance assertions, runtime behavior, or pass/fail interpretation.
+
+| AC range(s) | Crosswalk focus | Runbook guard category | Runtime test module pointer(s) |
+| --- | --- | --- | --- |
+| AC-7100, AC-7108, AC-7130-AC-7138 | scenario identity and ordered stage flow | shape consistency; linkage + terminal invariants | `tests/runtime/test_thin_runtime_shape_consistency.py`; `tests/runtime/test_thin_runtime_linkage_invariants.py` |
+| AC-7101-AC-7107, AC-7120-AC-7127 | thin-scope input and fixture boundaries | linkage + terminal invariants; shape consistency | `tests/runtime/test_thin_runtime_linkage_invariants.py`; `tests/runtime/test_thin_runtime_shape_consistency.py` |
+| AC-7110-AC-7119, AC-7140-AC-7149 | happy-path artifact presence and linkage chain | linkage + terminal invariants | `tests/runtime/test_thin_runtime_linkage_invariants.py` |
+| AC-7150-AC-7158 | observability event coverage and source linkage | debug projection guards; linkage + terminal invariants | `tests/runtime/test_thin_runtime_debug_projections.py`; `tests/runtime/test_thin_runtime_linkage_invariants.py` |
+| AC-7160-AC-7168 | ordered trace-step coverage and trace linkage | terminal alignment + parity guard; shape consistency | `tests/runtime/test_thin_runtime_terminal_alignment.py`; `tests/runtime/test_thin_runtime_shape_consistency.py` |
+| AC-7170-AC-7174 | projection derivation eligibility from formal contracts | debug projection guards | `tests/runtime/test_thin_runtime_debug_projections.py` |
+| AC-7180-AC-7189 | deterministic forced-failure terminal behavior | forced-failure guards; terminal alignment + parity guard | `tests/runtime/test_thin_runtime_forced_failure.py`; `tests/runtime/test_thin_runtime_terminal_alignment.py` |
+| AC-7200-AC-7204 | explicit boundary and non-expansion constraints | shape consistency; terminal alignment + parity guard | `tests/runtime/test_thin_runtime_shape_consistency.py`; `tests/runtime/test_thin_runtime_terminal_alignment.py` |
+| AC-7210-AC-7216 | snapshot drift and terminal-surface stability checks | output snapshots + snapshot-boundary `v2`; terminal alignment + parity guard | `tests/runtime/test_thin_runtime_output_snapshots.py`; `tests/runtime/test_thin_runtime_terminal_alignment.py` |
+
 ## Explicit Non-Goals and Deferred Assertions
 
 - [ ] AC-7190 this acceptance skeleton does not require production runtime implementation in this repository
