@@ -1,4 +1,4 @@
-# Acceptance Checklist - Thin Runtime MVP Scenario 01
+﻿# Acceptance Checklist - Thin Runtime MVP Scenario 01
 
 ## Status Note (Guardrail-Only, Non-Authorizing)
 This document is historical/planning context only and does not authorize implementation-planning, coding, or execution.
@@ -209,4 +209,4 @@ It does not modify acceptance assertions, runtime behavior, or pass/fail interpr
 
 - This file is the acceptance skeleton for the approved thin runtime MVP scenario only.
 - Future runtime commits should satisfy these assertions incrementally without expanding the scenario boundary.
-- The next follow-on runtime refinement is contract-shape consistency and fixture-discipline tightening.
+- The next follow-on runtime refinement note is historical/planning context only and does not authorize implementation-planning, coding, or execution.
