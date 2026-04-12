@@ -34,6 +34,7 @@ Scenario-01 remains the only authoritative implemented runtime path unless a sep
 - Mapping Paperclip-like company-scoped control-plane core principles to the project's target core architecture.
 - Defining the core-vs-extension boundary.
 - Recommending the first technical reopen track.
+- Exact files/directories/surfaces: `docs/roadmap/**`, `docs/runbooks/**`, and `docs/handoff/**` limited strictly to Hybrid Path core-mapping planning/governance artifacts for core-principles mapping, core-vs-extension boundary definition, and first technical reopen-track recommendation.
 
 ## 8. Scope Explicitly Not Reopened
 - Runtime implementation.
