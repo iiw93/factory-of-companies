@@ -18,6 +18,16 @@ Define narrow, low-risk follow-on candidates that continue progress on scenario-
 - global checkpoint references scenario-01 review aids (operator quick-reference, guard-map, mini-profile) in `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md`
 - scenario-02 is parked and blocked pending explicit future approval
 
+## Hybrid Path Reopen Prerequisites Note
+- Hybrid Path is accepted as the architecture/governance direction.
+- This roadmap file remains planning-only and non-authorizing.
+- Reopen is still not granted.
+- Any future reopen must be recorded by a separate explicit governance decision and must name the exact scope being reopened.
+- Blocked tracks remain blocked until individually and explicitly reopened.
+- Scenario-01 remains the only authoritative implemented runtime path unless a separate explicit decision changes that authority.
+- Runtime changes, contract changes, acceptance expansion, and blocked-track activation still require separate explicit authorization.
+- The current clean baseline should be preserved before any reopen action begins.
+
 ## Constraints (Must Remain Explicit)
 - scenario-01 runtime truth is the active source of truth
 - scenario-02 remains parked; no implied authorization for scenario-02 runtime work
