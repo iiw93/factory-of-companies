@@ -5,7 +5,8 @@ This contract is historical/planning context and is not evidence of current brid
 
 Canonical authority is:
 - `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md`
-- `docs/specs/thin-runtime-mvp-scenario.md`
+- `docs/handoff/scenario-01-consumer-handoff-pack.md`
+- `tests/acceptance/thin-runtime-mvp-scenario-01-checklist.md`
 
 Current enforced posture:
 - bridge, Telegram, and Web Dashboard remain blocked/parked unless explicitly reopened

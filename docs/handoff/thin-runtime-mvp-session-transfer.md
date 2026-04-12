@@ -130,8 +130,8 @@ Terminal invariant summary:
 ## Key Source-Of-Truth Files (Read In Order)
 1. Roadmap:
    - [thin-runtime-mvp-implementation-plan.md](C:/PAPERCLIP/factory-of-companies/docs/roadmap/thin-runtime-mvp-implementation-plan.md)
-2. Scenario spec:
-   - [thin-runtime-mvp-scenario.md](C:/PAPERCLIP/factory-of-companies/docs/specs/thin-runtime-mvp-scenario.md)
+2. Scenario-01 authority baseline:
+   - [scenario-01-consumer-handoff-pack.md](C:/PAPERCLIP/factory-of-companies/docs/handoff/scenario-01-consumer-handoff-pack.md)
 3. Acceptance checklist:
    - [thin-runtime-mvp-scenario-01-checklist.md](C:/PAPERCLIP/factory-of-companies/tests/acceptance/thin-runtime-mvp-scenario-01-checklist.md)
 4. Runtime implementation:
@@ -233,7 +233,7 @@ Terminal invariants:
 
 Read first:
 1) docs/roadmap/thin-runtime-mvp-implementation-plan.md
-2) docs/specs/thin-runtime-mvp-scenario.md
+2) docs/handoff/scenario-01-consumer-handoff-pack.md
 3) tests/acceptance/thin-runtime-mvp-scenario-01-checklist.md
 4) packages/paperclip-adapter/src/paperclip_adapter/thin_runtime.py
 5) tests/runtime/test_thin_runtime_source_intake.py

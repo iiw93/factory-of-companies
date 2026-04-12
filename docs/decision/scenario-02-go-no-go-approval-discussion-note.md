@@ -13,11 +13,13 @@ The approval discussion must use all of the following inputs:
 1. readiness checklist:
    - `tests/acceptance/thin-runtime-mvp-scenario-02-readiness-checklist.md`
 2. candidate spec shape:
-   - `docs/specs/thin-runtime-mvp-scenario.md` (`Scenario-02 Candidate Shape`)
+   - historical spec reference unavailable (legacy source is missing)
+   - use `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md` for current scenario-02 blocked-state constraints
 3. candidate acceptance outline:
    - `tests/acceptance/thin-runtime-mvp-scenario-02-candidate-acceptance-outline.md`
 4. approval decision gate note:
-   - `docs/specs/thin-runtime-mvp-scenario.md` (`Scenario-02 Approval Decision Gate Note`)
+   - historical spec reference unavailable (legacy source is missing)
+   - use `docs/handoff/scenario-01-consumer-handoff-pack.md` and `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md` for current authority and guardrails
 5. scenario-01 protection rules:
    - scenario-01 remains the only implemented authoritative runtime path
 

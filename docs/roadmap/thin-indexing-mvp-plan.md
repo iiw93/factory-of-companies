@@ -5,7 +5,8 @@ This roadmap document is historical/planning context. Prior “next step” word
 
 Canonical authority is:
 - `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md`
-- `docs/specs/thin-runtime-mvp-scenario.md`
+- `docs/handoff/scenario-01-consumer-handoff-pack.md`
+- `tests/acceptance/thin-runtime-mvp-scenario-01-checklist.md`
 
 Current enforced posture:
 - scenario-01 is the only authoritative implemented runtime path

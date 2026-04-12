@@ -20,10 +20,10 @@ This handoff note is a compact re-entry aid for future bridge approval discussio
 ## 3) Re-Read Before Any Approval Discussion
 Read these artifacts in order before any future bridge go/no-go decision:
 
-1. `docs/specs/thin-runtime-mvp-scenario.md`
-   - `Scenario-01 Bridge-Consumption Boundary for Future External Callers`
-   - `Scenario-01 Bridge-Side Caller Request/Response Outline`
-   - `Scenario-01 Bridge Approval Decision Gate Note`
+1. historical bridge-spec reference unavailable:
+   - historical subsection source is unavailable
+   - use `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md` for current bridge blocked-state constraints
+   - use `docs/handoff/scenario-01-consumer-handoff-pack.md` for current scenario-01 baseline context
 2. `tests/acceptance/thin-runtime-mvp-scenario-01-bridge-side-caller-outline-checklist.md`
 3. `docs/decision/bridge-go-no-go-approval-discussion-note.md`
 4. `docs/decision/bridge-no-go-checkpoint.md`

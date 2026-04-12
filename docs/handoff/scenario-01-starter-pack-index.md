@@ -25,8 +25,8 @@ This is the compact entry index for scenario-01 review, consumption, and handoff
 6. Global checkpoint:
    - `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md`
 7. Tiny reference (only if needed for contract wording):
-   - `docs/specs/thin-runtime-mvp-scenario.md`
-   - `### Scenario-01 Downstream Consumption Contract (Narrow)`
+   - `docs/handoff/scenario-01-consumer-handoff-pack.md`
+   - `## Stable Top-Level Output Expectations`
 
 ## Short Usage Guidance
 - Start with this index when opening a new scenario-01 review/consumption/handoff session.

@@ -147,7 +147,7 @@ Use when: starting review/handoff and re-establishing scenario-01 truth.
 
 ```powershell
 # spec + runbook + checkpoint
-Get-Content docs/specs/thin-runtime-mvp-scenario.md -TotalCount 220
+Get-Content docs/handoff/scenario-01-consumer-handoff-pack.md -TotalCount 220
 Get-Content docs/runbooks/thin-runtime-inspection-and-failure-reading-guide.md -TotalCount 260
 Get-Content docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md -TotalCount 220
 ```

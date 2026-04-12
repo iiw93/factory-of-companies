@@ -11,13 +11,16 @@ This artifact is for bridge go/no-go discussion only.
 The approval discussion must use all of the following inputs:
 
 1. bridge-consumption boundary:
-   - `docs/specs/thin-runtime-mvp-scenario.md` (`Scenario-01 Bridge-Consumption Boundary for Future External Callers`)
+   - historical spec reference unavailable (legacy source is missing)
+   - use `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md` for current authority constraints
 2. bridge-side caller outline:
-   - `docs/specs/thin-runtime-mvp-scenario.md` (`Scenario-01 Bridge-Side Caller Request/Response Outline`)
+   - historical spec reference unavailable (legacy source is missing)
+   - use `docs/handoff/scenario-01-consumer-handoff-pack.md` for current scenario-01 baseline context
 3. bridge-side caller acceptance checklist:
    - `tests/acceptance/thin-runtime-mvp-scenario-01-bridge-side-caller-outline-checklist.md`
 4. bridge approval decision gate note:
-   - `docs/specs/thin-runtime-mvp-scenario.md` (`Scenario-01 Bridge Approval Decision Gate Note`)
+   - historical spec reference unavailable (legacy source is missing)
+   - use `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md` for current go/no-go guardrails
 5. scenario-01 protection rules:
    - scenario-01 remains the only implemented authoritative runtime path
    - scenario-01 runtime/output-contract/snapshot truth remains unchanged unless separately approved

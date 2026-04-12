@@ -5,7 +5,8 @@ This contract is historical/planning context only and does not authorize impleme
 
 Canonical authority is:
 - `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md`
-- `docs/specs/thin-runtime-mvp-scenario.md`
+- `docs/handoff/scenario-01-consumer-handoff-pack.md`
+- `tests/acceptance/thin-runtime-mvp-scenario-01-checklist.md`
 
 ## Goal
 Определить отдельный контракт передачи единицы работы между слоями и ролями системы без внедрения runtime orchestration engine.
