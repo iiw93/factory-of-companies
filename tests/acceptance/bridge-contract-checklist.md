@@ -5,7 +5,7 @@ This checklist is historical/planning context and is not evidence of current bri
 
 Canonical authority is:
 - `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md`
-- `docs/specs/thin-runtime-mvp-scenario.md`
+- historical spec reference unavailable; use current authoritative scenario-01 acceptance and handoff surfaces
 
 Current enforced posture:
 - bridge, Telegram, and Web Dashboard remain blocked/parked unless explicitly reopened

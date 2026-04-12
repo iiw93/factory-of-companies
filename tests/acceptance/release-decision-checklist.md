@@ -4,7 +4,7 @@ This checklist is historical/planning context only and is not evidence of active
 
 Canonical authority is:
 - `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md`
-- `docs/specs/thin-runtime-mvp-scenario.md`
+- historical spec reference unavailable; use current authoritative scenario-01 acceptance and handoff surfaces
 
 This checklist does not authorize implementation-planning, coding, deployment, release, or artifact publication.
 
