@@ -46,6 +46,16 @@ Current state notes:
 
 This completion is documentation-only and does not change runtime/spec behavior or authorize implementation.
 
+## Hybrid Path Governance Direction
+
+Hybrid Path is the accepted architecture/governance direction.
+- Paperclip-like company-scoped control-plane principles are the target core architecture direction.
+- Factory-of-Companies-specific multi-company and shared-infrastructure coordination remains a separate extension layer.
+- This note is governance direction only and does not grant reopen.
+- Parked-state governance remains active.
+- Scenario-01 remains the only authoritative implemented runtime path unless a separate explicit reopen decision is recorded.
+- Blocked tracks remain blocked.
+
 ## Scenario-01 Current Truth (Implemented and Stable)
 - `thin-runtime-mvp-scenario-01` is implemented and stabilized.
 - Output contract freeze and snapshot boundary are in place (`thin-runtime-mvp-output-v2`, snapshots `v2`).

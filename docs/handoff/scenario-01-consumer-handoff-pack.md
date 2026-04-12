@@ -3,11 +3,13 @@
 ## Scope
 This pack is for scenario-01 consumer review only.
 - Authority split note: this file is the authoritative narrow consumer baseline; `docs/handoff/global-project-checkpoint-after-scenario-02-no-go.md` remains governance/checkpoint authority.
+- Hybrid Path note: Hybrid Path is the accepted architecture/governance direction; Paperclip-like company-scoped control-plane principles are the target core architecture direction; Factory-of-Companies-specific multi-company and shared-infrastructure coordination remains a separate extension layer; this is handoff/governance direction only and does not grant reopen.
 
-- scenario-01 is the only authoritative implemented runtime path
 - this pack does not authorize bridge implementation
 - this pack does not authorize scenario-02 implementation
 - this pack does not authorize runtime expansion
+- parked-state governance remains active
+- Scenario-01 remains the only authoritative implemented runtime path unless a separate explicit reopen decision is recorded
 
 ## Canonical Entry Point
 - `from paperclip_adapter import run_thin_runtime_intake_normalization`

@@ -2,13 +2,15 @@
 
 ## Status Note (Guardrail-Only, Non-Authorizing)
 This document is historical/planning context only and does not authorize implementation-planning, coding, or execution.
+- Hybrid Path planning note: Hybrid Path is the accepted architecture/governance direction; Paperclip-like company-scoped control-plane principles are the target core architecture direction; Factory-of-Companies-specific multi-company and shared-infrastructure coordination remains a separate extension layer; this roadmap file remains planning-only/non-authorizing, does not grant reopen, and does not change parked-state governance.
 
 ## Purpose
 Define narrow, low-risk follow-on candidates that continue progress on scenario-01 without reopening scenario-02.
 
 ## Current Baseline
 - scenario-01 (`thin-runtime-mvp-scenario-01`) is implemented and stabilized
-- scenario-01 remains the only authoritative implemented runtime path
+- parked-state governance remains active
+- Scenario-01 remains the only authoritative implemented runtime path unless a separate explicit reopen decision is recorded
 - downstream-consumption authority baseline exists in `docs/handoff/scenario-01-consumer-handoff-pack.md`
 - operator quick-reference exists in `docs/runbooks/thin-runtime-inspection-and-failure-reading-guide.md`
 - guard-map quick card exists in `docs/runbooks/thin-runtime-inspection-and-failure-reading-guide.md`

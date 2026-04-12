@@ -24,6 +24,17 @@ This map is descriptive only and does not change system behavior.
 
 ---
 
+## Hybrid Path Alignment Note
+
+Hybrid Path is the accepted architecture/governance direction.
+- Paperclip-like company-scoped control-plane principles are the target core architecture direction.
+- Factory-of-Companies-specific multi-company and shared-infrastructure coordination remains a separate extension layer.
+- This note is architecture/governance direction only and does not grant reopen.
+- Parked-state governance remains active.
+- Scenario-01 remains the only authoritative implemented runtime path unless a separate explicit reopen decision is recorded.
+
+---
+
 ## Layer 1 — Governance
 
 Files:
