@@ -28,6 +28,15 @@ Define narrow, low-risk follow-on candidates that continue progress on scenario-
 - Runtime changes, contract changes, acceptance expansion, and blocked-track activation still require separate explicit authorization.
 - The current clean baseline should be preserved before any reopen action begins.
 
+## Preferred First Reopen Candidate Note
+- This is a planning-only candidate note and does not grant reopen.
+- The preferred first reopen candidate is an architecture/planning reopen for Hybrid Path core mapping.
+- This preferred first reopen candidate is limited to mapping Paperclip-like company-scoped control-plane core principles to the project's target core architecture, defining the core-vs-extension boundary, and recommending the first technical reopen track.
+- This preferred first reopen candidate does not itself authorize runtime implementation, blocked-track activation, contract changes, or acceptance expansion.
+- Scenario-01 remains the only authoritative implemented runtime path unless a separate explicit decision changes that authority.
+- Blocked tracks remain blocked unless individually and explicitly reopened.
+- Any actual reopen still requires a separate explicit governance decision using the recorded reopen discipline.
+
 ## Constraints (Must Remain Explicit)
 - scenario-01 runtime truth is the active source of truth
 - scenario-02 remains parked; no implied authorization for scenario-02 runtime work
