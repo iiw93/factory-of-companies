@@ -8,9 +8,9 @@
 - core control-plane boundary/interface specification
 
 ## 3. Core Artifacts
-- core-control-plane-boundary-spec.md
-- core-control-plane-interface-contract.md
-- core-control-plane-validation-and-control-protocol.md
+- docs/specs/core-control-plane-boundary-spec.md
+- docs/specs/core-control-plane-interface-contract.md
+- docs/specs/core-control-plane-validation-and-control-protocol.md
 
 ## 4. Posture
 - this checkpoint is a technical-core handoff artifact
