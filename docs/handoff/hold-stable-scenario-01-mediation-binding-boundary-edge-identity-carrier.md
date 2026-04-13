@@ -23,3 +23,17 @@ This note does not authorize runtime reopening, implementation/source discovery,
 
 Status:
 HOLD-STABLE draft (approved content; inserted as documentation artifact only)
+
+## Addendum: Pending Authority Statements
+
+Pending statement A (mediation binding):
+scenario-01.execution-request->boundary-edge.mediation-binding remains a pending authority statement for explicit scenario-01 mediation binding under HOLD-STABLE.
+
+Pending statement B (boundary-edge identity carrier linkage):
+execution-request.mediation-identity+trace.carrier remains a pending authority statement for explicit boundary-edge identity carrier linkage under HOLD-STABLE.
+
+Explicit non-authorization:
+This addendum does not authorize runtime reopening, implementation/source discovery, code edits, package/runtime scope changes, or execution.
+
+Status:
+HOLD-STABLE pending authority statements recorded (docs-only addendum)
