@@ -37,3 +37,20 @@ This addendum does not authorize runtime reopening, implementation/source discov
 
 Status:
 HOLD-STABLE pending authority statements recorded (docs-only addendum)
+
+## Final: Authoritative Boundary Closure
+
+Authoritative statement:
+For scenario-01 under HOLD-STABLE, scenario-01.execution-request->boundary-edge.mediation-binding is the required binding, and execution-request.mediation-identity+trace.carrier is the sole authoritative carrier.
+
+Artifact evidence replacement statement:
+This authority declaration replaces the missing artifact evidence for explicit scenario-01 boundary-edge linkage.
+
+Identity authority exclusivity statement:
+No other identity source is authoritative.
+
+Explicit non-authorization:
+This section does not authorize runtime reopening, implementation/source discovery, code edits, package/runtime scope changes, or execution.
+
+Status:
+Boundary confirmation is full under HOLD-STABLE by authority declaration.
