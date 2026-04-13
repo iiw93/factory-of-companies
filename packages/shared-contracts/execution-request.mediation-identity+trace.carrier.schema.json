@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Execution Request Mediation Identity And Trace Carrier Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "mediation_identity",
+    "trace"
+  ],
+  "properties": {
+    "mediation_identity": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Canonical execution-request mediation identity for scenario-01 boundary-edge decisions. Opaque and stable across the boundary; MUST NOT be re-derived at the edge."
+    },
+    "trace": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Opaque trace-carrying value that MUST be preserved end-to-end across the scenario-01 boundary edge. MUST NOT be truncated, replaced, or regenerated at the edge."
+    }
+  }
+}

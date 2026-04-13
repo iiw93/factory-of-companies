@@ -68,6 +68,9 @@
       "type": "number",
       "minimum": 0
     },
+    "execution-request.mediation-identity+trace.carrier": {
+      "$ref": "./execution-request.mediation-identity+trace.carrier.schema.json"
+    },
     "payload": {
       "type": "object"
     }
