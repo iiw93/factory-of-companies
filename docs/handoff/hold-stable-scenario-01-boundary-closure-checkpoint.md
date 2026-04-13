@@ -1,0 +1,3 @@
+# HOLD-STABLE Checkpoint: Scenario-01 Boundary Closure (Full)
+
+Under HOLD-STABLE, scenario-01 boundary confirmation is recorded as FULL and fixed at the architecture/docs layer. The authoritative boundary contract is closed by declaration: scenario-01.execution-request->boundary-edge.mediation-binding is the required binding and execution-request.mediation-identity+trace.carrier is the sole authoritative carrier for scenario-01 boundary behavior; no other identity source is authoritative. This checkpoint records closure state only, preserves the current governance baseline, and does not authorize any runtime reopening, implementation discovery, package/runtime expansion, or execution activity.
