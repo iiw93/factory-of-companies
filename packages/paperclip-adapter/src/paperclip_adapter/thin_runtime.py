@@ -22,6 +22,7 @@ DEFAULT_ACTION_TYPE = "write_code"
 DEFAULT_PRIORITY = "normal"
 DEFAULT_HANDOFF_STATUS = "prepared"
 DEFAULT_USER_ID = "scenario-01-runtime"
+DEFAULT_BOUNDARY_EDGE_STATUS = "prepared"
 
 
 class SourceIntakeValidationError(ValueError):
@@ -264,6 +265,19 @@ def create_orchestration_handoff(execution_request: dict[str, Any], knowledge_re
     }
 
 
+def create_boundary_edge_mediation_binding(execution_request: dict[str, Any], orchestration_handoff: dict[str, Any], created_at: str) -> dict[str, Any]:
+    return {
+        "boundary_edge_binding_id": stable_id("boundary-edge-binding", orchestration_handoff["handoff_id"], execution_request["execution_request_id"]),
+        "binding_name": MEDIATION_BINDING_NAME,
+        "binding_status": DEFAULT_BOUNDARY_EDGE_STATUS,
+        "created_at": created_at,
+        "trace_id": execution_request["trace_id"],
+        "execution_request_id": execution_request["execution_request_id"],
+        "handoff_id": orchestration_handoff["handoff_id"],
+        EXECUTION_REQUEST_CARRIER_FIELD: execution_request[EXECUTION_REQUEST_CARRIER_FIELD],
+    }
+
+
 def build_observability_events(runtime_status: str, terminal_stage_name: str, trace_id: str, created_at: str) -> list[dict[str, str]]:
     return [{"event_name": "scenario-01.runtime", "runtime_status": runtime_status, "terminal_stage_name": terminal_stage_name, "trace_id": trace_id, "created_at": created_at}]
 
@@ -309,6 +323,7 @@ def run_thin_runtime_intake_normalization(source_input: dict[str, Any], trace_id
     execution_request = create_execution_request(knowledge_retrieval, retrieval_session, created_at)
     retrieval_session["execution_request_id"] = execution_request["execution_request_id"]
     orchestration_handoff = create_orchestration_handoff(execution_request, knowledge_retrieval, created_at)
+    boundary_edge_mediation_binding = create_boundary_edge_mediation_binding(execution_request, orchestration_handoff, created_at)
 
     retrieval_result = None
     runtime_status = "completed"
@@ -343,6 +358,7 @@ def run_thin_runtime_intake_normalization(source_input: dict[str, Any], trace_id
         "execution_request": execution_request,
         "knowledge_retrieval": knowledge_retrieval,
         "orchestration_handoff": orchestration_handoff,
+        "boundary_edge_mediation_binding": boundary_edge_mediation_binding,
         "retrieval_session": retrieval_session,
         "retrieval_result": retrieval_result,
         "observability_events": observability_events,
