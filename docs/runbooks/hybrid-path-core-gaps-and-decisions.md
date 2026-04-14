@@ -14,22 +14,23 @@ Resolved precondition:
 - Governance-to-technical authorization is explicitly approved for `Core Control-Plane Boundary/Interface Specification Track 01` in specification-only form.
 
 Remaining gaps:
-- Core-to-runtime interface completeness gap: interface boundaries are approved in scope but still need complete specification artifacts.
-- Core-to-extension separation completeness gap: separation concerns are approved in scope but still need complete enforceable specification rules.
-- Reopen-governance execution quality gap: checkpoint evidence and rollback-ready specificity must be completed for review closure.
+- Core-to-runtime interface completeness gap: resolved by `hybrid-path-core-boundary-interface-spec-track-01.md` Section 3.
+- Core-to-extension separation completeness gap: resolved by `hybrid-path-core-boundary-interface-spec-track-01.md` Section 4.
+- Reopen-governance execution quality gap: resolved by `hybrid-path-core-boundary-interface-spec-track-01.md` Sections 6-7.
 
 ## 4. Decision Table
 | Gap | Why it matters | Current constraint | Recommended decision |
 | --- | --- | --- | --- |
-| Core-to-runtime interface completeness gap | Without complete interface boundaries, runtime scope can drift later. | Specification-only track is active; runtime expansion remains blocked. | Complete minimal interface-boundary specification artifacts inside this single track. |
-| Core-to-extension separation completeness gap | Blurred separation risks extension leakage into core assumptions. | Extension tracks remain blocked unless explicitly reopened. | Complete explicit separation criteria and technical demarcation rules in specification form. |
-| Reopen-governance execution quality gap | Incomplete checkpoint evidence can allow implicit reopen-by-inertia. | One-track-only discipline and explicit implementation gate remain in force. | Produce review-ready checkpoint evidence and rollback-ready criteria for closure. |
+| Core-to-runtime interface completeness gap | Without complete interface boundaries, runtime scope can drift later. | Specification-only track is active; runtime expansion remains blocked. | Closed by `hybrid-path-core-boundary-interface-spec-track-01.md` Section 3. |
+| Core-to-extension separation completeness gap | Blurred separation risks extension leakage into core assumptions. | Extension tracks remain blocked unless explicitly reopened. | Closed by `hybrid-path-core-boundary-interface-spec-track-01.md` Section 4. |
+| Reopen-governance execution quality gap | Incomplete checkpoint evidence can allow implicit reopen-by-inertia. | One-track-only discipline and explicit implementation gate remain in force. | Closed by `hybrid-path-core-boundary-interface-spec-track-01.md` Sections 6-7. |
 
 ## 5. Non-Gaps
 - Scenario-01 runtime authority is not a gap; authority remains explicit and intact.
 - Parked-state discipline outside reopened scope is not a gap; it remains active and binding.
 - Blocked-track protection is not a gap; blocked tracks remain non-authorized unless individually and explicitly reopened.
 - Governance-to-technical authorization is not a gap; single-track specification authorization is explicit and active.
+- Track 01 boundary/interface specification completeness is not a gap; closure is recorded in `hybrid-path-core-boundary-interface-spec-track-01.md`.
 
 ## 6. Active Track 01 Specification Completion Inputs
 - Draft boundary/interface specification scope candidates derived from core mapping and boundary artifacts.
