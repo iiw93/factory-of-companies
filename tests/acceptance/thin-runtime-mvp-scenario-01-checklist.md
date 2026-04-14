@@ -31,6 +31,12 @@ This checklist does not add runtime behavior. It defines and refines acceptance 
 
 - [ ] AC-7100 governing spec exists and explicitly defines `thin-runtime-mvp-scenario-01`
 
+## Scenario-01 Carrier Authority Alignment
+
+- [ ] AC-7220 authoritative carrier name is fixed as `execution-request.mediation-identity+trace.carrier`
+- [ ] AC-7221 authoritative carrier requires only `mediation_identity` and `trace`
+- [ ] AC-7222 `orchestration-handoff` explicitly aligns by referencing `execution-request.mediation-identity+trace.carrier`
+
 ## Shared Fixture Assumptions
 
 - [ ] AC-7101 one deterministic local `knowledge-source` fixture is used per run
