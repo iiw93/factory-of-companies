@@ -36,6 +36,7 @@ class ThinRuntimeAuthorityChainTest(unittest.TestCase):
         )
 
         execution_request = result["execution_request"]
+        knowledge_retrieval = result["knowledge_retrieval"]
         orchestration_handoff = result["orchestration_handoff"]
         boundary_edge_mediation_binding = result["boundary_edge_mediation_binding"]
 
@@ -57,6 +58,13 @@ class ThinRuntimeAuthorityChainTest(unittest.TestCase):
             orchestration_handoff["execution_request_id"],
             execution_request["execution_request_id"],
         )
+        self.assertEqual(orchestration_handoff["command_id"], execution_request["command_id"])
+        self.assertEqual(orchestration_handoff["trace_id"], execution_request["trace_id"])
+        self.assertEqual(orchestration_handoff["target_role"], execution_request["target_role"])
+        self.assertEqual(orchestration_handoff["action_type"], execution_request["action_type"])
+        self.assertEqual(orchestration_handoff["priority"], execution_request["priority"])
+        self.assertEqual(orchestration_handoff["linked_artifact_id"], knowledge_retrieval["knowledge_retrieval_id"])
+        self.assertEqual(orchestration_handoff["handoff_status"], "prepared")
         self.assertEqual(orchestration_handoff_carrier, execution_request_carrier)
 
         self.assertIn("boundary_edge_mediation_binding", result)
@@ -69,6 +77,7 @@ class ThinRuntimeAuthorityChainTest(unittest.TestCase):
             boundary_edge_mediation_binding["handoff_id"],
             orchestration_handoff["handoff_id"],
         )
+        self.assertEqual(boundary_edge_mediation_binding["trace_id"], orchestration_handoff["trace_id"])
         self.assertEqual(boundary_edge_carrier, execution_request_carrier)
 
         self.assertEqual(
@@ -77,6 +86,52 @@ class ThinRuntimeAuthorityChainTest(unittest.TestCase):
         )
         self.assertNotIn("mediation_identity", orchestration_handoff)
         self.assertNotIn("mediation_identity", boundary_edge_mediation_binding)
+
+
+    def test_scenario_01_forced_failure_orchestration_alignment_is_preserved(self) -> None:
+        runtime_module = load_runtime_module()
+        result = runtime_module.run_thin_runtime_intake_normalization(
+            {
+                "source_type": "document",
+                "source_name": "Scenario 01 source",
+                "source_text": "First line\nSecond line",
+                "source_uri": None,
+            },
+            "trace-authority-chain-failure-001",
+            "2026-04-14T00:00:00Z",
+            "forced_failure",
+        )
+
+        execution_request = result["execution_request"]
+        knowledge_retrieval = result["knowledge_retrieval"]
+        orchestration_handoff = result["orchestration_handoff"]
+        boundary_edge_mediation_binding = result["boundary_edge_mediation_binding"]
+
+        execution_request_carrier = execution_request[CARRIER_FIELD]
+        orchestration_handoff_carrier = orchestration_handoff[CARRIER_FIELD]
+        boundary_edge_carrier = boundary_edge_mediation_binding[CARRIER_FIELD]
+
+        self.assertEqual(result["runtime_status"], "failed")
+        self.assertIsNone(result["retrieval_result"])
+        self.assertEqual(orchestration_handoff["command_id"], execution_request["command_id"])
+        self.assertEqual(orchestration_handoff["trace_id"], execution_request["trace_id"])
+        self.assertEqual(orchestration_handoff["target_role"], execution_request["target_role"])
+        self.assertEqual(orchestration_handoff["action_type"], execution_request["action_type"])
+        self.assertEqual(orchestration_handoff["priority"], execution_request["priority"])
+        self.assertEqual(orchestration_handoff["linked_artifact_id"], knowledge_retrieval["knowledge_retrieval_id"])
+        self.assertEqual(orchestration_handoff["handoff_status"], "prepared")
+        self.assertEqual(orchestration_handoff_carrier, execution_request_carrier)
+        self.assertEqual(
+            boundary_edge_mediation_binding["execution_request_id"],
+            execution_request["execution_request_id"],
+        )
+        self.assertEqual(
+            boundary_edge_mediation_binding["handoff_id"],
+            orchestration_handoff["handoff_id"],
+        )
+        self.assertEqual(boundary_edge_mediation_binding["trace_id"], orchestration_handoff["trace_id"])
+        self.assertEqual(boundary_edge_carrier, execution_request_carrier)
+        self.assertEqual(boundary_edge_mediation_binding["binding_name"], BINDING_NAME)
 
 
 if __name__ == "__main__":

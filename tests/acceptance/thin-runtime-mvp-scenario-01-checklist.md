@@ -37,6 +37,14 @@ This checklist does not add runtime behavior. It defines and refines acceptance 
 - [ ] AC-7221 authoritative carrier requires only `mediation_identity` and `trace`
 - [ ] AC-7222 `orchestration-handoff` explicitly aligns by referencing `execution-request.mediation-identity+trace.carrier`
 
+## Scenario-01 Orchestration Reinforcement
+
+- [ ] AC-7227 `orchestration_handoff.command_id` remains equal to `execution_request.command_id`
+- [ ] AC-7228 `orchestration_handoff.target_role`, `action_type`, and `priority` remain aligned to `execution_request`
+- [ ] AC-7229 `orchestration_handoff.linked_artifact_id` remains equal to `knowledge_retrieval.knowledge_retrieval_id`
+- [ ] AC-7230 `orchestration_handoff.handoff_status` remains `prepared` on both `happy_path` and `forced_failure`
+- [ ] AC-7231 `boundary_edge_mediation_binding` remains bound to the same `handoff_id`, `execution_request_id`, and authoritative carrier emitted by `orchestration_handoff`
+
 ## Shared Fixture Assumptions
 
 - [ ] AC-7101 one deterministic local `knowledge-source` fixture is used per run
