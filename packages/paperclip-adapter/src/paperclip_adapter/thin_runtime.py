@@ -16,6 +16,12 @@ APPROVED_RETRIEVAL_QUERY_TEXT = "Second line"
 EXECUTION_REQUEST_CARRIER_FIELD = "execution-request.mediation-identity+trace.carrier"
 MEDIATION_BINDING_NAME = "scenario-01.execution-request->boundary-edge.mediation-binding"
 ALLOWED_EXECUTION_MODES = {"happy_path", "forced_failure"}
+DEFAULT_SOURCE_ROLE = "planner_agent"
+DEFAULT_TARGET_ROLE = "developer_agent"
+DEFAULT_ACTION_TYPE = "write_code"
+DEFAULT_PRIORITY = "normal"
+DEFAULT_HANDOFF_STATUS = "prepared"
+DEFAULT_USER_ID = "scenario-01-runtime"
 
 
 class SourceIntakeValidationError(ValueError):
@@ -194,9 +200,16 @@ def create_retrieval_session(knowledge_retrieval: dict[str, Any], created_at: st
     return {
         "retrieval_session_id": stable_id("retrieval-session", knowledge_retrieval["knowledge_retrieval_id"]),
         "contract_version": CONTRACT_VERSION,
+        "session_name": "scenario-01 retrieval session",
+        "session_status": "completed",
         "knowledge_retrieval_id": knowledge_retrieval["knowledge_retrieval_id"],
         "created_at": created_at,
         "trace_id": knowledge_retrieval["trace_id"],
+        "context_selection_id": knowledge_retrieval["context_selection_id"],
+        "linked_knowledge_retrieval_id": knowledge_retrieval["knowledge_retrieval_id"],
+        "selected_source_ids": knowledge_retrieval["selected_source_ids"],
+        "retrieval_outcome": "sufficient",
+        "session_note": "Scenario-01 retrieval session stays aligned with orchestration handoff preparation.",
     }
 
 
@@ -209,6 +222,45 @@ def create_retrieval_result(knowledge_retrieval: dict[str, Any], retrieval_sessi
         "created_at": created_at,
         "trace_id": knowledge_retrieval["trace_id"],
         EXECUTION_REQUEST_CARRIER_FIELD: knowledge_retrieval[EXECUTION_REQUEST_CARRIER_FIELD],
+    }
+
+
+def create_execution_request(knowledge_retrieval: dict[str, Any], retrieval_session: dict[str, Any], created_at: str) -> dict[str, Any]:
+    command_id = stable_id("command", knowledge_retrieval["trace_id"], knowledge_retrieval["knowledge_retrieval_id"])
+    return {
+        "execution_request_id": knowledge_retrieval["execution_request_id"],
+        "trace_id": knowledge_retrieval["trace_id"],
+        "command_id": command_id,
+        "session_id": retrieval_session["retrieval_session_id"],
+        "user_id": DEFAULT_USER_ID,
+        "target_role": DEFAULT_TARGET_ROLE,
+        "action_type": DEFAULT_ACTION_TYPE,
+        "priority": DEFAULT_PRIORITY,
+        "created_at": created_at,
+        EXECUTION_REQUEST_CARRIER_FIELD: knowledge_retrieval[EXECUTION_REQUEST_CARRIER_FIELD],
+        "payload": {
+            "mediation_binding_name": MEDIATION_BINDING_NAME,
+            "context_selection_id": knowledge_retrieval["context_selection_id"],
+            "selected_source_ids": knowledge_retrieval["selected_source_ids"],
+        },
+    }
+
+
+def create_orchestration_handoff(execution_request: dict[str, Any], knowledge_retrieval: dict[str, Any], created_at: str) -> dict[str, Any]:
+    return {
+        "handoff_id": stable_id("handoff", execution_request["execution_request_id"], execution_request["command_id"]),
+        "trace_id": execution_request["trace_id"],
+        "command_id": execution_request["command_id"],
+        "execution_request_id": execution_request["execution_request_id"],
+        "source_role": DEFAULT_SOURCE_ROLE,
+        "target_role": execution_request["target_role"],
+        "action_type": execution_request["action_type"],
+        "handoff_status": DEFAULT_HANDOFF_STATUS,
+        "created_at": created_at,
+        "priority": execution_request["priority"],
+        "linked_artifact_id": knowledge_retrieval["knowledge_retrieval_id"],
+        EXECUTION_REQUEST_CARRIER_FIELD: execution_request[EXECUTION_REQUEST_CARRIER_FIELD],
+        "handoff_note": "Scenario-01 runtime seed prepares the mediation-binding handoff surface only.",
     }
 
 
@@ -254,6 +306,9 @@ def run_thin_runtime_intake_normalization(source_input: dict[str, Any], trace_id
     next_retrieval_input = build_next_retrieval_input(knowledge_source, normalized_source, embedding_provider, embedding_job, retrieval_index, trace_id)
     knowledge_retrieval = execute_retrieval_stub(next_retrieval_input, created_at)
     retrieval_session = create_retrieval_session(knowledge_retrieval, created_at)
+    execution_request = create_execution_request(knowledge_retrieval, retrieval_session, created_at)
+    retrieval_session["execution_request_id"] = execution_request["execution_request_id"]
+    orchestration_handoff = create_orchestration_handoff(execution_request, knowledge_retrieval, created_at)
 
     retrieval_result = None
     runtime_status = "completed"
@@ -285,7 +340,9 @@ def run_thin_runtime_intake_normalization(source_input: dict[str, Any], trace_id
         "embedding_job": embedding_job,
         "embedding_output": embedding_output,
         "retrieval_index": retrieval_index,
+        "execution_request": execution_request,
         "knowledge_retrieval": knowledge_retrieval,
+        "orchestration_handoff": orchestration_handoff,
         "retrieval_session": retrieval_session,
         "retrieval_result": retrieval_result,
         "observability_events": observability_events,
