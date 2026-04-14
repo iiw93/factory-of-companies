@@ -74,6 +74,9 @@
       "type": "string",
       "minLength": 1
     },
+    "execution-request.mediation-identity+trace.carrier": {
+      "$ref": "./execution-request.mediation-identity+trace.carrier.schema.json"
+    },
     "handoff_note": {
       "type": "string",
       "minLength": 1
