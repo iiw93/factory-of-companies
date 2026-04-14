@@ -1,0 +1,83 @@
+from __future__ import annotations
+
+import importlib.util
+import sys
+import unittest
+from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+RUNTIME_MODULE_PATH = REPO_ROOT / "packages" / "paperclip-adapter" / "src" / "paperclip_adapter" / "thin_runtime.py"
+CARRIER_FIELD = "execution-request.mediation-identity+trace.carrier"
+BINDING_NAME = "scenario-01.execution-request->boundary-edge.mediation-binding"
+
+
+def load_runtime_module():
+    spec = importlib.util.spec_from_file_location("thin_runtime_authority_chain", RUNTIME_MODULE_PATH)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+class ThinRuntimeAuthorityChainTest(unittest.TestCase):
+    def test_scenario_01_authority_chain_is_aligned_end_to_end(self) -> None:
+        runtime_module = load_runtime_module()
+        result = runtime_module.run_thin_runtime_intake_normalization(
+            {
+                "source_type": "document",
+                "source_name": "Scenario 01 source",
+                "source_text": "First line\nSecond line",
+                "source_uri": None,
+            },
+            "trace-authority-chain-001",
+            "2026-04-14T00:00:00Z",
+            "happy_path",
+        )
+
+        execution_request = result["execution_request"]
+        orchestration_handoff = result["orchestration_handoff"]
+        boundary_edge_mediation_binding = result["boundary_edge_mediation_binding"]
+
+        execution_request_carrier = execution_request[CARRIER_FIELD]
+        orchestration_handoff_carrier = orchestration_handoff[CARRIER_FIELD]
+        boundary_edge_carrier = boundary_edge_mediation_binding[CARRIER_FIELD]
+
+        self.assertEqual(result["runtime_status"], "completed")
+        self.assertIn("execution_request", result)
+        self.assertEqual(sorted(execution_request_carrier.keys()), ["mediation_identity", "trace"])
+        self.assertEqual(
+            execution_request_carrier["mediation_identity"],
+            execution_request["execution_request_id"],
+        )
+        self.assertEqual(execution_request_carrier["trace"], result["trace_id"])
+
+        self.assertIn("orchestration_handoff", result)
+        self.assertEqual(
+            orchestration_handoff["execution_request_id"],
+            execution_request["execution_request_id"],
+        )
+        self.assertEqual(orchestration_handoff_carrier, execution_request_carrier)
+
+        self.assertIn("boundary_edge_mediation_binding", result)
+        self.assertEqual(boundary_edge_mediation_binding["binding_name"], BINDING_NAME)
+        self.assertEqual(
+            boundary_edge_mediation_binding["execution_request_id"],
+            execution_request["execution_request_id"],
+        )
+        self.assertEqual(
+            boundary_edge_mediation_binding["handoff_id"],
+            orchestration_handoff["handoff_id"],
+        )
+        self.assertEqual(boundary_edge_carrier, execution_request_carrier)
+
+        self.assertEqual(
+            execution_request["payload"]["mediation_binding_name"],
+            BINDING_NAME,
+        )
+        self.assertNotIn("mediation_identity", orchestration_handoff)
+        self.assertNotIn("mediation_identity", boundary_edge_mediation_binding)
+
+
+if __name__ == "__main__":
+    unittest.main()
