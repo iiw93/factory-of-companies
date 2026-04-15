@@ -59,6 +59,28 @@ def validate_execution_mode(execution_mode: str) -> str:
     return execution_mode
 
 
+def validate_authoritative_carrier(
+    carrier: dict[str, Any] | None,
+    *,
+    expected_mediation_identity: str,
+    expected_trace: str,
+    context: str,
+) -> dict[str, str]:
+    if not isinstance(carrier, dict):
+        raise SourceIntakeValidationError(f"{context} carrier must be a dictionary")
+    mediation_identity = carrier.get("mediation_identity")
+    if not mediation_identity:
+        raise SourceIntakeValidationError(f"{context} carrier must include mediation_identity")
+    trace = carrier.get("trace")
+    if not trace:
+        raise SourceIntakeValidationError(f"{context} carrier must include trace")
+    if mediation_identity != expected_mediation_identity:
+        raise SourceIntakeValidationError(f"{context} carrier mediation_identity must remain authoritative")
+    if trace != expected_trace:
+        raise SourceIntakeValidationError(f"{context} carrier trace must remain authoritative")
+    return {"mediation_identity": mediation_identity, "trace": trace}
+
+
 def intake_source(source_input: dict[str, Any], trace_id: str, created_at: str) -> dict[str, Any]:
     return {
         "knowledge_source_id": stable_id("knowledge-source", trace_id, source_input.get("source_name"), created_at),
@@ -228,6 +250,12 @@ def create_retrieval_result(knowledge_retrieval: dict[str, Any], retrieval_sessi
 
 def create_execution_request(knowledge_retrieval: dict[str, Any], retrieval_session: dict[str, Any], created_at: str) -> dict[str, Any]:
     command_id = stable_id("command", knowledge_retrieval["trace_id"], knowledge_retrieval["knowledge_retrieval_id"])
+    carrier = validate_authoritative_carrier(
+        knowledge_retrieval.get(EXECUTION_REQUEST_CARRIER_FIELD),
+        expected_mediation_identity=knowledge_retrieval["execution_request_id"],
+        expected_trace=knowledge_retrieval["trace_id"],
+        context="runtime-entry",
+    )
     return {
         "execution_request_id": knowledge_retrieval["execution_request_id"],
         "trace_id": knowledge_retrieval["trace_id"],
@@ -238,7 +266,7 @@ def create_execution_request(knowledge_retrieval: dict[str, Any], retrieval_sess
         "action_type": DEFAULT_ACTION_TYPE,
         "priority": DEFAULT_PRIORITY,
         "created_at": created_at,
-        EXECUTION_REQUEST_CARRIER_FIELD: knowledge_retrieval[EXECUTION_REQUEST_CARRIER_FIELD],
+        EXECUTION_REQUEST_CARRIER_FIELD: carrier,
         "payload": {
             "mediation_binding_name": MEDIATION_BINDING_NAME,
             "context_selection_id": knowledge_retrieval["context_selection_id"],
@@ -248,6 +276,12 @@ def create_execution_request(knowledge_retrieval: dict[str, Any], retrieval_sess
 
 
 def create_orchestration_handoff(execution_request: dict[str, Any], knowledge_retrieval: dict[str, Any], created_at: str) -> dict[str, Any]:
+    carrier = validate_authoritative_carrier(
+        execution_request.get(EXECUTION_REQUEST_CARRIER_FIELD),
+        expected_mediation_identity=execution_request["execution_request_id"],
+        expected_trace=execution_request["trace_id"],
+        context="orchestration-handoff",
+    )
     return {
         "handoff_id": stable_id("handoff", execution_request["execution_request_id"], execution_request["command_id"]),
         "trace_id": execution_request["trace_id"],
@@ -260,12 +294,26 @@ def create_orchestration_handoff(execution_request: dict[str, Any], knowledge_re
         "created_at": created_at,
         "priority": execution_request["priority"],
         "linked_artifact_id": knowledge_retrieval["knowledge_retrieval_id"],
-        EXECUTION_REQUEST_CARRIER_FIELD: execution_request[EXECUTION_REQUEST_CARRIER_FIELD],
+        EXECUTION_REQUEST_CARRIER_FIELD: carrier,
         "handoff_note": "Scenario-01 runtime seed prepares the mediation-binding handoff surface only.",
     }
 
 
 def create_boundary_edge_mediation_binding(execution_request: dict[str, Any], orchestration_handoff: dict[str, Any], created_at: str) -> dict[str, Any]:
+    execution_request_carrier = validate_authoritative_carrier(
+        execution_request.get(EXECUTION_REQUEST_CARRIER_FIELD),
+        expected_mediation_identity=execution_request["execution_request_id"],
+        expected_trace=execution_request["trace_id"],
+        context="boundary-edge",
+    )
+    handoff_carrier = validate_authoritative_carrier(
+        orchestration_handoff.get(EXECUTION_REQUEST_CARRIER_FIELD),
+        expected_mediation_identity=execution_request["execution_request_id"],
+        expected_trace=execution_request["trace_id"],
+        context="boundary-edge handoff",
+    )
+    if handoff_carrier != execution_request_carrier:
+        raise SourceIntakeValidationError("boundary-edge handoff carrier must remain aligned with execution-request carrier")
     return {
         "boundary_edge_binding_id": stable_id("boundary-edge-binding", orchestration_handoff["handoff_id"], execution_request["execution_request_id"]),
         "binding_name": MEDIATION_BINDING_NAME,
@@ -274,7 +322,7 @@ def create_boundary_edge_mediation_binding(execution_request: dict[str, Any], or
         "trace_id": execution_request["trace_id"],
         "execution_request_id": execution_request["execution_request_id"],
         "handoff_id": orchestration_handoff["handoff_id"],
-        EXECUTION_REQUEST_CARRIER_FIELD: execution_request[EXECUTION_REQUEST_CARRIER_FIELD],
+        EXECUTION_REQUEST_CARRIER_FIELD: execution_request_carrier,
     }
 
 

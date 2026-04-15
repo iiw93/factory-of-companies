@@ -133,6 +133,104 @@ class ThinRuntimeAuthorityChainTest(unittest.TestCase):
         self.assertEqual(boundary_edge_carrier, execution_request_carrier)
         self.assertEqual(boundary_edge_mediation_binding["binding_name"], BINDING_NAME)
 
+    def test_runtime_entry_rejects_carrier_missing_mediation_identity(self) -> None:
+        runtime_module = load_runtime_module()
+        result = runtime_module.run_thin_runtime_intake_normalization(
+            {
+                "source_type": "document",
+                "source_name": "Scenario 01 source",
+                "source_text": "First line\nSecond line",
+                "source_uri": None,
+            },
+            "trace-authority-chain-missing-mediation-identity",
+            "2026-04-14T00:00:00Z",
+            "happy_path",
+        )
+        knowledge_retrieval = dict(result["knowledge_retrieval"])
+        knowledge_retrieval[CARRIER_FIELD] = {"trace": result["trace_id"]}
+
+        with self.assertRaisesRegex(runtime_module.SourceIntakeValidationError, "mediation_identity"):
+            runtime_module.create_execution_request(
+                knowledge_retrieval,
+                result["retrieval_session"],
+                "2026-04-14T00:00:01Z",
+            )
+
+    def test_runtime_entry_rejects_carrier_missing_trace(self) -> None:
+        runtime_module = load_runtime_module()
+        result = runtime_module.run_thin_runtime_intake_normalization(
+            {
+                "source_type": "document",
+                "source_name": "Scenario 01 source",
+                "source_text": "First line\nSecond line",
+                "source_uri": None,
+            },
+            "trace-authority-chain-missing-trace",
+            "2026-04-14T00:00:00Z",
+            "happy_path",
+        )
+        knowledge_retrieval = dict(result["knowledge_retrieval"])
+        knowledge_retrieval[CARRIER_FIELD] = {"mediation_identity": knowledge_retrieval["execution_request_id"]}
+
+        with self.assertRaisesRegex(runtime_module.SourceIntakeValidationError, "trace"):
+            runtime_module.create_execution_request(
+                knowledge_retrieval,
+                result["retrieval_session"],
+                "2026-04-14T00:00:01Z",
+            )
+
+    def test_orchestration_handoff_rejects_carrier_mutation(self) -> None:
+        runtime_module = load_runtime_module()
+        result = runtime_module.run_thin_runtime_intake_normalization(
+            {
+                "source_type": "document",
+                "source_name": "Scenario 01 source",
+                "source_text": "First line\nSecond line",
+                "source_uri": None,
+            },
+            "trace-authority-chain-carrier-mutation",
+            "2026-04-14T00:00:00Z",
+            "happy_path",
+        )
+        execution_request = dict(result["execution_request"])
+        execution_request[CARRIER_FIELD] = {
+            "mediation_identity": "execution-request-mutated",
+            "trace": result["trace_id"],
+        }
+
+        with self.assertRaisesRegex(runtime_module.SourceIntakeValidationError, "mediation_identity"):
+            runtime_module.create_orchestration_handoff(
+                execution_request,
+                result["knowledge_retrieval"],
+                "2026-04-14T00:00:01Z",
+            )
+
+    def test_boundary_edge_rejects_handoff_carrier_misalignment(self) -> None:
+        runtime_module = load_runtime_module()
+        result = runtime_module.run_thin_runtime_intake_normalization(
+            {
+                "source_type": "document",
+                "source_name": "Scenario 01 source",
+                "source_text": "First line\nSecond line",
+                "source_uri": None,
+            },
+            "trace-authority-chain-handoff-misalignment",
+            "2026-04-14T00:00:00Z",
+            "happy_path",
+        )
+        orchestration_handoff = dict(result["orchestration_handoff"])
+        orchestration_handoff[CARRIER_FIELD] = {
+            "mediation_identity": result["execution_request"]["execution_request_id"],
+            "trace": "trace-authority-chain-handoff-misalignment-mutated",
+        }
+
+        with self.assertRaisesRegex(runtime_module.SourceIntakeValidationError, "handoff carrier"):
+            runtime_module.create_boundary_edge_mediation_binding(
+                result["execution_request"],
+                orchestration_handoff,
+                "2026-04-14T00:00:01Z",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
