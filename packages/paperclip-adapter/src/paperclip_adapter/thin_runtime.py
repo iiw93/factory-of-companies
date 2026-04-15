@@ -23,10 +23,15 @@ DEFAULT_PRIORITY = "normal"
 DEFAULT_HANDOFF_STATUS = "prepared"
 DEFAULT_USER_ID = "scenario-01-runtime"
 DEFAULT_BOUNDARY_EDGE_STATUS = "prepared"
+BOUNDARY_POINT_RUNTIME_ENTRY = "runtime entry"
+BOUNDARY_POINT_ORCHESTRATION_HANDOFF = "orchestration handoff"
+BOUNDARY_POINT_BOUNDARY_EDGE_BINDING = "boundary-edge binding"
 
 
 class SourceIntakeValidationError(ValueError):
-    pass
+    def __init__(self, message: str, *, boundary_point: str | None = None):
+        super().__init__(message)
+        self.boundary_point = boundary_point
 
 
 @dataclass(frozen=True)
@@ -65,19 +70,20 @@ def validate_authoritative_carrier(
     expected_mediation_identity: str,
     expected_trace: str,
     context: str,
+    boundary_point: str,
 ) -> dict[str, str]:
     if not isinstance(carrier, dict):
-        raise SourceIntakeValidationError(f"{context} carrier must be a dictionary")
+        raise SourceIntakeValidationError(f"{context} carrier must be a dictionary", boundary_point=boundary_point)
     mediation_identity = carrier.get("mediation_identity")
     if not mediation_identity:
-        raise SourceIntakeValidationError(f"{context} carrier must include mediation_identity")
+        raise SourceIntakeValidationError(f"{context} carrier must include mediation_identity", boundary_point=boundary_point)
     trace = carrier.get("trace")
     if not trace:
-        raise SourceIntakeValidationError(f"{context} carrier must include trace")
+        raise SourceIntakeValidationError(f"{context} carrier must include trace", boundary_point=boundary_point)
     if mediation_identity != expected_mediation_identity:
-        raise SourceIntakeValidationError(f"{context} carrier mediation_identity must remain authoritative")
+        raise SourceIntakeValidationError(f"{context} carrier mediation_identity must remain authoritative", boundary_point=boundary_point)
     if trace != expected_trace:
-        raise SourceIntakeValidationError(f"{context} carrier trace must remain authoritative")
+        raise SourceIntakeValidationError(f"{context} carrier trace must remain authoritative", boundary_point=boundary_point)
     return {"mediation_identity": mediation_identity, "trace": trace}
 
 
@@ -255,6 +261,7 @@ def create_execution_request(knowledge_retrieval: dict[str, Any], retrieval_sess
         expected_mediation_identity=knowledge_retrieval["execution_request_id"],
         expected_trace=knowledge_retrieval["trace_id"],
         context="runtime-entry",
+        boundary_point=BOUNDARY_POINT_RUNTIME_ENTRY,
     )
     return {
         "execution_request_id": knowledge_retrieval["execution_request_id"],
@@ -281,6 +288,7 @@ def create_orchestration_handoff(execution_request: dict[str, Any], knowledge_re
         expected_mediation_identity=execution_request["execution_request_id"],
         expected_trace=execution_request["trace_id"],
         context="orchestration-handoff",
+        boundary_point=BOUNDARY_POINT_ORCHESTRATION_HANDOFF,
     )
     return {
         "handoff_id": stable_id("handoff", execution_request["execution_request_id"], execution_request["command_id"]),
@@ -305,15 +313,20 @@ def create_boundary_edge_mediation_binding(execution_request: dict[str, Any], or
         expected_mediation_identity=execution_request["execution_request_id"],
         expected_trace=execution_request["trace_id"],
         context="boundary-edge",
+        boundary_point=BOUNDARY_POINT_BOUNDARY_EDGE_BINDING,
     )
     handoff_carrier = validate_authoritative_carrier(
         orchestration_handoff.get(EXECUTION_REQUEST_CARRIER_FIELD),
         expected_mediation_identity=execution_request["execution_request_id"],
         expected_trace=execution_request["trace_id"],
         context="boundary-edge handoff",
+        boundary_point=BOUNDARY_POINT_BOUNDARY_EDGE_BINDING,
     )
     if handoff_carrier != execution_request_carrier:
-        raise SourceIntakeValidationError("boundary-edge handoff carrier must remain aligned with execution-request carrier")
+        raise SourceIntakeValidationError(
+            "boundary-edge handoff carrier must remain aligned with execution-request carrier",
+            boundary_point=BOUNDARY_POINT_BOUNDARY_EDGE_BINDING,
+        )
     return {
         "boundary_edge_binding_id": stable_id("boundary-edge-binding", orchestration_handoff["handoff_id"], execution_request["execution_request_id"]),
         "binding_name": MEDIATION_BINDING_NAME,
@@ -350,6 +363,60 @@ def build_debug_panel(knowledge_retrieval: dict[str, Any] | None) -> dict[str, A
     return {"authoritative_carrier_present": bool(knowledge_retrieval and knowledge_retrieval.get(EXECUTION_REQUEST_CARRIER_FIELD))}
 
 
+def build_read_only_boundary_observability_surface(
+    *,
+    execution_request: dict[str, Any],
+    orchestration_handoff: dict[str, Any],
+    boundary_edge_mediation_binding: dict[str, Any],
+) -> dict[str, Any]:
+    execution_request_carrier = execution_request[EXECUTION_REQUEST_CARRIER_FIELD]
+    orchestration_handoff_carrier = orchestration_handoff[EXECUTION_REQUEST_CARRIER_FIELD]
+    boundary_edge_carrier = boundary_edge_mediation_binding[EXECUTION_REQUEST_CARRIER_FIELD]
+    carrier_preservation_status = (
+        "preserved"
+        if execution_request_carrier == orchestration_handoff_carrier == boundary_edge_carrier
+        else "mismatch"
+    )
+    handoff_alignment_status = (
+        "aligned"
+        if orchestration_handoff["execution_request_id"] == execution_request["execution_request_id"]
+        and orchestration_handoff["trace_id"] == execution_request["trace_id"]
+        and orchestration_handoff["command_id"] == execution_request["command_id"]
+        else "mismatch"
+    )
+    return {
+        "surface_name": "scenario-01-read-only-boundary-observability",
+        "surface_mode": "read_only",
+        "write_control_semantics": "absent",
+        "execution_trigger_semantics": "absent",
+        "accepted_rejected_status": "accepted",
+        "rejected_boundary_condition_status": "none",
+        "boundary_point_statuses": {
+            BOUNDARY_POINT_RUNTIME_ENTRY: "accepted",
+            BOUNDARY_POINT_ORCHESTRATION_HANDOFF: "accepted",
+            BOUNDARY_POINT_BOUNDARY_EDGE_BINDING: "accepted",
+        },
+        "carrier_preservation_status": carrier_preservation_status,
+        "handoff_alignment_status": handoff_alignment_status,
+    }
+
+
+def build_read_only_rejected_boundary_observability_surface(
+    *,
+    error: SourceIntakeValidationError,
+) -> dict[str, str]:
+    return {
+        "surface_name": "scenario-01-read-only-boundary-observability",
+        "surface_mode": "read_only",
+        "write_control_semantics": "absent",
+        "execution_trigger_semantics": "absent",
+        "accepted_rejected_status": "rejected",
+        "rejected_boundary_condition_status": "present",
+        "boundary_point_id": error.boundary_point or "unknown",
+        "rejection_reason": str(error),
+    }
+
+
 def run_thin_runtime_intake_normalization(source_input: dict[str, Any], trace_id: str, created_at: str, execution_mode: str = "happy_path") -> dict[str, Any]:
     validate_source_input(source_input)
     validate_execution_mode(execution_mode)
@@ -372,6 +439,11 @@ def run_thin_runtime_intake_normalization(source_input: dict[str, Any], trace_id
     retrieval_session["execution_request_id"] = execution_request["execution_request_id"]
     orchestration_handoff = create_orchestration_handoff(execution_request, knowledge_retrieval, created_at)
     boundary_edge_mediation_binding = create_boundary_edge_mediation_binding(execution_request, orchestration_handoff, created_at)
+    read_only_boundary_observability = build_read_only_boundary_observability_surface(
+        execution_request=execution_request,
+        orchestration_handoff=orchestration_handoff,
+        boundary_edge_mediation_binding=boundary_edge_mediation_binding,
+    )
 
     retrieval_result = None
     runtime_status = "completed"
@@ -407,6 +479,7 @@ def run_thin_runtime_intake_normalization(source_input: dict[str, Any], trace_id
         "knowledge_retrieval": knowledge_retrieval,
         "orchestration_handoff": orchestration_handoff,
         "boundary_edge_mediation_binding": boundary_edge_mediation_binding,
+        "read_only_boundary_observability": read_only_boundary_observability,
         "retrieval_session": retrieval_session,
         "retrieval_result": retrieval_result,
         "observability_events": observability_events,

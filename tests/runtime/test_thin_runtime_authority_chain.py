@@ -39,6 +39,7 @@ class ThinRuntimeAuthorityChainTest(unittest.TestCase):
         knowledge_retrieval = result["knowledge_retrieval"]
         orchestration_handoff = result["orchestration_handoff"]
         boundary_edge_mediation_binding = result["boundary_edge_mediation_binding"]
+        read_only_boundary_observability = result["read_only_boundary_observability"]
 
         execution_request_carrier = execution_request[CARRIER_FIELD]
         orchestration_handoff_carrier = orchestration_handoff[CARRIER_FIELD]
@@ -86,6 +87,23 @@ class ThinRuntimeAuthorityChainTest(unittest.TestCase):
         )
         self.assertNotIn("mediation_identity", orchestration_handoff)
         self.assertNotIn("mediation_identity", boundary_edge_mediation_binding)
+        self.assertEqual(read_only_boundary_observability["surface_mode"], "read_only")
+        self.assertEqual(read_only_boundary_observability["accepted_rejected_status"], "accepted")
+        self.assertEqual(read_only_boundary_observability["rejected_boundary_condition_status"], "none")
+        self.assertEqual(read_only_boundary_observability["carrier_preservation_status"], "preserved")
+        self.assertEqual(read_only_boundary_observability["handoff_alignment_status"], "aligned")
+        self.assertEqual(
+            read_only_boundary_observability["boundary_point_statuses"]["runtime entry"],
+            "accepted",
+        )
+        self.assertEqual(
+            read_only_boundary_observability["boundary_point_statuses"]["orchestration handoff"],
+            "accepted",
+        )
+        self.assertEqual(
+            read_only_boundary_observability["boundary_point_statuses"]["boundary-edge binding"],
+            "accepted",
+        )
 
 
     def test_scenario_01_forced_failure_orchestration_alignment_is_preserved(self) -> None:
@@ -230,6 +248,38 @@ class ThinRuntimeAuthorityChainTest(unittest.TestCase):
                 orchestration_handoff,
                 "2026-04-14T00:00:01Z",
             )
+
+    def test_rejected_boundary_condition_is_observable_as_read_only(self) -> None:
+        runtime_module = load_runtime_module()
+        result = runtime_module.run_thin_runtime_intake_normalization(
+            {
+                "source_type": "document",
+                "source_name": "Scenario 01 source",
+                "source_text": "First line\nSecond line",
+                "source_uri": None,
+            },
+            "trace-authority-chain-rejected-observability",
+            "2026-04-14T00:00:00Z",
+            "happy_path",
+        )
+        knowledge_retrieval = dict(result["knowledge_retrieval"])
+        knowledge_retrieval[CARRIER_FIELD] = {"trace": result["trace_id"]}
+
+        with self.assertRaises(runtime_module.SourceIntakeValidationError) as raised_error:
+            runtime_module.create_execution_request(
+                knowledge_retrieval,
+                result["retrieval_session"],
+                "2026-04-14T00:00:01Z",
+            )
+        read_only_rejected_observability = runtime_module.build_read_only_rejected_boundary_observability_surface(
+            error=raised_error.exception
+        )
+        self.assertEqual(read_only_rejected_observability["surface_mode"], "read_only")
+        self.assertEqual(read_only_rejected_observability["accepted_rejected_status"], "rejected")
+        self.assertEqual(read_only_rejected_observability["rejected_boundary_condition_status"], "present")
+        self.assertEqual(read_only_rejected_observability["boundary_point_id"], "runtime entry")
+        self.assertEqual(read_only_rejected_observability["write_control_semantics"], "absent")
+        self.assertEqual(read_only_rejected_observability["execution_trigger_semantics"], "absent")
 
 
 if __name__ == "__main__":
